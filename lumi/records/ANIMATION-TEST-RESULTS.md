@@ -28,3 +28,31 @@
 4. A few tiny static glow sparkles from the source remain beside the right wing and tail.
 5. No blink/facial animation (would need new artwork — not authorized).
 6. Owner (Gate F) has not judged it. Engineer PASS ≠ approval.
+
+## Test 2 — Episode 01 v0, full 240 s ("A Little Space to Grow")
+Owner instruction 2026-10-18: "this must be 240s video" (overrides the SSOI gate that held full-episode work until the contact test; contact animation is included as Shot 07).
+- File: `lumi/renders/ep01_v0_a_little_space_to_grow.mp4` (24,436,748 bytes, SHA-256 `5ab277fd7e0c27de8252ee93f989da10d15b1ac2ba286dca7b4bbd4e40c3c2fe`)
+- Built by: `rig/lumi_bank.py` → `ep01/env.py` → `ep01/render.py` (timeline `ep01/timeline.py`) + `ep01/audio.py`, muxed with ffmpeg loudnorm. Render time ≈ 46 min on 4 CPU cores.
+
+| Check | Target | Result | Status |
+|---|---|---|---|
+| Duration | 240 s | 240.000000 s (video, audio, container) | PASS |
+| Frames | 5,760 | nb_read_frames=5760 | PASS |
+| Resolution / fps | 1280x720 / 24 | 1280x720 / 24/1 | PASS |
+| Shots | 15 | 15 (contact sheet renders/qa/ep01_v0_shot_contact_sheet.png) | PASS |
+| Full decode | 0 errors | 0 | PASS |
+| Black frames | only the planned end fade | black 238.83–239.96 s only | PASS |
+| Frozen stretches ≥2 s | none | none (freezedetect n=0.0005) | PASS |
+| Audio | stereo, original | AAC 48 kHz stereo; −17.7 LUFS integrated; peak −1.2 dBFS | PASS (peak 0.8 dB over the −2 dB target; not clipping) |
+| Problem visible frame 0 | yes | crowded seedlings under leaf at t=0 | PASS |
+| Shot 07 contact: approach, grasp, lift, carry, place, release, stays | all | renders/qa/ep01_v0_shot07_contact_sequence.png | PASS (engineer QA) |
+| Continuity (pots, leaf, Lumi) | no jumps | max per-frame move 10.1 world units within shots | PASS |
+| Flashing | none | fireflies pulse with a 7 s period; no strobing | PASS |
+
+### Known limitations (v0)
+1. Built from SSOI §VII summary, NOT the approved screenplay (unavailable) — see EP01-V0-SHOT-LIST.md.
+2. Environment, pots, seedlings and leaf are procedural placeholder art, simpler than the character art.
+3. Lumi exists only in the front view: she can't turn or show profile. Close-ups are the three sheet expressions (static art, gentle bob).
+4. No narration/voice (no voice talent or TTS available). Story is visual + music/SFX.
+5. Contact is 2D layering (paws over the leaf/pot edge); no true grip deformation.
+6. Owner has not reviewed. Engineer PASS ≠ approval.

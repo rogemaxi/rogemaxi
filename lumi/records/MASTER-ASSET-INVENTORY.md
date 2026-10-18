@@ -22,6 +22,11 @@ Labelled TECHNICAL DERIVATIVE: wing roots hidden behind the body are inpainted (
 |---|---|---|
 | lumi/renders/lumi_wing_test_v1.mp4 | `ab4ed63bad377d61e50c8c91ef0d65668517875a80a9ff534a79f5aaff668c78` | Internal motion test. Technical PASS; owner review pending |
 | lumi/renders/qa/lumi_wing_test_v1_contact_sheet.png | — | QA evidence |
+| lumi/renders/ep01_v0_a_little_space_to_grow.mp4 | see ANIMATION-TEST-RESULTS.md Test 2 | Episode 01 v0, 240 s. Technical PASS; owner review pending |
+| lumi/renders/qa/ep01_v0_*.png | — | QA evidence (shot sheet, Shot 07 sequence) |
+
+## Placeholder environment art (procedural, regenerable via ep01/env.py; NOT approved art)
+Night-garden background, terracotta pots A/B/C, seedlings, fallen leaf. Replace with approved art when available.
 
 ## NOT RECOVERED (blocked — see TECHNICAL-BLOCKERS.md)
 C:\Users\fract\Documents\Codex\LumiStudioGlobal and all items in SSOI §III: Lumi Studio MCP v0.1/v0.2/v1.0, venvs, Windows FFmpeg, Episode 1 screenplay (V2/V3), 15-shot plan, outputs/production-status.md, outputs/visual-handoff/visual-production-report.md, outputs/episode-01-v2-screenplay-owner-review.md, outputs/activation-recheck/report.md. Existence unverified; nothing assumed.

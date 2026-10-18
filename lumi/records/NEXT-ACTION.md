@@ -1,5 +1,7 @@
 # Next Action
-1. OWNER: watch lumi/renders/lumi_wing_test_v1.mp4 → PASS / FAIL with notes (speed, flap amplitude, halo).
-2. OWNER: make the Episode 1 screenplay (latest) + 15-shot plan reachable (push to repo or upload). Required for Shot 07.
-3. ENGINEER (after 1+2): Shot 07 contact test — needs a Lumi pose with reachable forelimbs. Front view's small forelimbs can support a "hug-carry" of a leaf from below; leaf asset to be cut from approved art or drawn as a labelled derivative (requires owner OK).
-4. Optional quality upgrade (no cost): split forewing/hindwing for overlapping action; add owner-approved blink frames.
+1. OWNER: watch lumi/renders/ep01_v0_a_little_space_to_grow.mp4 (240 s). Mark PASS/FAIL per shot, especially the "Interpretations" list in EP01-V0-SHOT-LIST.md (Pot B movement, action order, close-ups, title card, no narration).
+2. OWNER: make the real Episode 1 screenplay + 15-shot plan reachable (push to repo or upload). v1 = re-time ep01/timeline.py to it.
+3. Highest-leverage quality upgrades (all $0):
+   a. Approved environment art (seedlings, pots, leaf, garden) to replace procedural placeholders — biggest visual gap.
+   b. Narration track once voice/language decision is made (blocks localization plan, SSOI §XIII).
+   c. Lumi 3/4 or side-view rig from the turnaround panels so she can face what she works on.
