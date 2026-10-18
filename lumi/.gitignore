@@ -1,2 +1,4 @@
 work/
 __pycache__/
+*.wav
+renders/ep01_v0_picture.mp4
