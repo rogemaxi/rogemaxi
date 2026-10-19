@@ -1,0 +1,3113 @@
+{
+ "source": "ByrdWay_Physics_Video_Link_Library.xlsx",
+ "built": "2026-10-19",
+ "linkKind": "search",
+ "units": [
+  {
+   "num": 1,
+   "title": "Introduction to Physics and Scientific Investigation",
+   "part": "Part I - Foundations of Physics"
+  },
+  {
+   "num": 2,
+   "title": "Mathematical Foundations for Physics",
+   "part": "Part I - Foundations of Physics"
+  },
+  {
+   "num": 3,
+   "title": "One-Dimensional Kinematics",
+   "part": "Part II - Motion and Forces"
+  },
+  {
+   "num": 4,
+   "title": "Two-Dimensional Motion and Projectiles",
+   "part": "Part II - Motion and Forces"
+  },
+  {
+   "num": 5,
+   "title": "Newton's Laws and Force Analysis",
+   "part": "Part II - Motion and Forces"
+  },
+  {
+   "num": 6,
+   "title": "Work, Energy, and Power",
+   "part": "Part II - Motion and Forces"
+  },
+  {
+   "num": 7,
+   "title": "Momentum, Impulse, and Collisions",
+   "part": "Part II - Motion and Forces"
+  },
+  {
+   "num": 8,
+   "title": "Circular Motion and Gravitation",
+   "part": "Part II - Motion and Forces"
+  },
+  {
+   "num": 9,
+   "title": "Rotational Motion and Dynamics",
+   "part": "Part II - Motion and Forces"
+  },
+  {
+   "num": 10,
+   "title": "Oscillations and Simple Harmonic Motion",
+   "part": "Part II - Motion and Forces"
+  },
+  {
+   "num": 11,
+   "title": "Fluid Mechanics",
+   "part": "Part III - Matter, Fluids, and Thermal Physics"
+  },
+  {
+   "num": 12,
+   "title": "Temperature, Heat, and Thermodynamics",
+   "part": "Part III - Matter, Fluids, and Thermal Physics"
+  },
+  {
+   "num": 13,
+   "title": "Mechanical Waves and Sound",
+   "part": "Part IV - Waves, Sound, and Light"
+  },
+  {
+   "num": 14,
+   "title": "Light and Optics",
+   "part": "Part IV - Waves, Sound, and Light"
+  },
+  {
+   "num": 15,
+   "title": "Electrostatics and Electric Fields",
+   "part": "Part V - Electricity and Magnetism"
+  },
+  {
+   "num": 16,
+   "title": "Electric Circuits",
+   "part": "Part V - Electricity and Magnetism"
+  },
+  {
+   "num": 17,
+   "title": "Magnetism and Electromagnetic Induction",
+   "part": "Part V - Electricity and Magnetism"
+  },
+  {
+   "num": 18,
+   "title": "Atomic, Nuclear, and Quantum Physics",
+   "part": "Part VI - Modern and Applied Physics"
+  },
+  {
+   "num": 19,
+   "title": "Relativity, Astrophysics, and Cosmology",
+   "part": "Part VI - Modern and Applied Physics"
+  },
+  {
+   "num": 20,
+   "title": "Applied Physics and Engineering",
+   "part": "Part VI - Modern and Applied Physics"
+  }
+ ],
+ "sections": [
+  {
+   "id": "1.1",
+   "unit": 1,
+   "topic": "Nature and Branches of Physics",
+   "pathway": "Core",
+   "keywords": "branches of physics classical modern physics",
+   "note": "Orientation lesson",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=branches+of+physics+classical+modern+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+branches+of+physics+classical+modern+physics",
+    "yt": "https://www.youtube.com/results?search_query=branches+of+physics+classical+modern+physics"
+   }
+  },
+  {
+   "id": "1.2",
+   "unit": 1,
+   "topic": "Scientific Methods, Models, Theories, and Laws",
+   "pathway": "Core",
+   "keywords": "scientific method hypothesis theory law physics",
+   "note": "Nature of science",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=scientific+method+hypothesis+theory+law+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+scientific+method+hypothesis+theory+law+physics",
+    "yt": "https://www.youtube.com/results?search_query=scientific+method+hypothesis+theory+law+physics"
+   }
+  },
+  {
+   "id": "1.3",
+   "unit": 1,
+   "topic": "Experimental Design and Variables",
+   "pathway": "Core",
+   "keywords": "independent dependent control variables experiment",
+   "note": "Lab design",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=independent+dependent+control+variables+experiment",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+independent+dependent+control+variables+experiment",
+    "yt": "https://www.youtube.com/results?search_query=independent+dependent+control+variables+experiment"
+   }
+  },
+  {
+   "id": "1.4",
+   "unit": 1,
+   "topic": "Measurement, SI Units, and Conversions",
+   "pathway": "Core",
+   "keywords": "SI units metric conversion physics",
+   "note": "Foundational skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=SI+units+metric+conversion+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+SI+units+metric+conversion+physics",
+    "yt": "https://www.youtube.com/results?search_query=SI+units+metric+conversion+physics"
+   }
+  },
+  {
+   "id": "1.5",
+   "unit": 1,
+   "topic": "Accuracy, Precision, and Uncertainty",
+   "pathway": "Core",
+   "keywords": "accuracy precision uncertainty physics",
+   "note": "Lab skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=accuracy+precision+uncertainty+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+accuracy+precision+uncertainty+physics",
+    "yt": "https://www.youtube.com/results?search_query=accuracy+precision+uncertainty+physics"
+   }
+  },
+  {
+   "id": "1.6",
+   "unit": 1,
+   "topic": "Significant Figures and Scientific Notation",
+   "pathway": "Core",
+   "keywords": "significant figures scientific notation physics",
+   "note": "Foundational skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=significant+figures+scientific+notation+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+significant+figures+scientific+notation+physics",
+    "yt": "https://www.youtube.com/results?search_query=significant+figures+scientific+notation+physics"
+   }
+  },
+  {
+   "id": "1.7",
+   "unit": 1,
+   "topic": "Dimensional Analysis and Estimation",
+   "pathway": "Core",
+   "keywords": "dimensional analysis unit conversion physics",
+   "note": "Foundational skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=dimensional+analysis+unit+conversion+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+dimensional+analysis+unit+conversion+physics",
+    "yt": "https://www.youtube.com/results?search_query=dimensional+analysis+unit+conversion+physics"
+   }
+  },
+  {
+   "id": "1.8",
+   "unit": 1,
+   "topic": "Graphing, Data Analysis, and Scientific Communication",
+   "pathway": "Core",
+   "keywords": "graphing data analysis physics slope",
+   "note": "Lab skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=graphing+data+analysis+physics+slope",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+graphing+data+analysis+physics+slope",
+    "yt": "https://www.youtube.com/results?search_query=graphing+data+analysis+physics+slope"
+   }
+  },
+  {
+   "id": "1.9",
+   "unit": 1,
+   "topic": "Experimental Uncertainty and Model Validation",
+   "pathway": "Honors",
+   "keywords": "percent error uncertainty propagation physics",
+   "note": "Honors extension",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=percent+error+uncertainty+propagation+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+percent+error+uncertainty+propagation+physics",
+    "yt": "https://www.youtube.com/results?search_query=percent+error+uncertainty+propagation+physics"
+   }
+  },
+  {
+   "id": "2.1",
+   "unit": 2,
+   "topic": "Algebraic Relationships and Equation Solving",
+   "pathway": "Core",
+   "keywords": "rearranging equations physics formulas solve for variable",
+   "note": "Prerequisite bridge",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=rearranging+equations+physics+formulas+solve+for+variable",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+rearranging+equations+physics+formulas+solve+for+variable",
+    "yt": "https://www.youtube.com/results?search_query=rearranging+equations+physics+formulas+solve+for+variable"
+   }
+  },
+  {
+   "id": "2.2",
+   "unit": 2,
+   "topic": "Ratios, Proportions, and Scaling",
+   "pathway": "Core",
+   "keywords": "ratios proportions scaling physics",
+   "note": "Prerequisite bridge",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=ratios+proportions+scaling+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+ratios+proportions+scaling+physics",
+    "yt": "https://www.youtube.com/results?search_query=ratios+proportions+scaling+physics"
+   }
+  },
+  {
+   "id": "2.3",
+   "unit": 2,
+   "topic": "Geometry and Trigonometry",
+   "pathway": "Core",
+   "keywords": "trigonometry physics sohcahtoa right triangle",
+   "note": "Prerequisite bridge",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=trigonometry+physics+sohcahtoa+right+triangle",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+trigonometry+physics+sohcahtoa+right+triangle",
+    "yt": "https://www.youtube.com/results?search_query=trigonometry+physics+sohcahtoa+right+triangle"
+   }
+  },
+  {
+   "id": "2.4",
+   "unit": 2,
+   "topic": "Scalars and Vectors",
+   "pathway": "Core",
+   "keywords": "scalars and vectors physics difference",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=scalars+and+vectors+physics+difference",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+scalars+and+vectors+physics+difference",
+    "yt": "https://www.youtube.com/results?search_query=scalars+and+vectors+physics+difference"
+   }
+  },
+  {
+   "id": "2.5",
+   "unit": 2,
+   "topic": "Vector Components and Resultants",
+   "pathway": "Core",
+   "keywords": "vector components resultant vector addition physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=vector+components+resultant+vector+addition+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+vector+components+resultant+vector+addition+physics",
+    "yt": "https://www.youtube.com/results?search_query=vector+components+resultant+vector+addition+physics"
+   }
+  },
+  {
+   "id": "2.6",
+   "unit": 2,
+   "topic": "Coordinate Systems and Reference Frames",
+   "pathway": "Core",
+   "keywords": "coordinate systems reference frames physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=coordinate+systems+reference+frames+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+coordinate+systems+reference+frames+physics",
+    "yt": "https://www.youtube.com/results?search_query=coordinate+systems+reference+frames+physics"
+   }
+  },
+  {
+   "id": "2.7",
+   "unit": 2,
+   "topic": "Graph Slopes, Areas, and Mathematical Models",
+   "pathway": "Core",
+   "keywords": "slope area under graph physics meaning",
+   "note": "Graph reasoning",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=slope+area+under+graph+physics+meaning",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+slope+area+under+graph+physics+meaning",
+    "yt": "https://www.youtube.com/results?search_query=slope+area+under+graph+physics+meaning"
+   }
+  },
+  {
+   "id": "2.8",
+   "unit": 2,
+   "topic": "Advanced Vector Analysis and Calculus Connections",
+   "pathway": "Honors",
+   "keywords": "vector dot product cross product calculus physics",
+   "note": "Calc-based extension",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=vector+dot+product+cross+product+calculus+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+vector+dot+product+cross+product+calculus+physics",
+    "yt": "https://www.youtube.com/results?search_query=vector+dot+product+cross+product+calculus+physics"
+   }
+  },
+  {
+   "id": "3.1",
+   "unit": 3,
+   "topic": "Position, Distance, and Displacement",
+   "pathway": "Core",
+   "keywords": "distance and displacement physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=distance+and+displacement+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+distance+and+displacement+physics",
+    "yt": "https://www.youtube.com/results?search_query=distance+and+displacement+physics"
+   }
+  },
+  {
+   "id": "3.2",
+   "unit": 3,
+   "topic": "Speed and Velocity",
+   "pathway": "Core",
+   "keywords": "speed vs velocity physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=speed+vs+velocity+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+speed+vs+velocity+physics",
+    "yt": "https://www.youtube.com/results?search_query=speed+vs+velocity+physics"
+   }
+  },
+  {
+   "id": "3.3",
+   "unit": 3,
+   "topic": "Acceleration",
+   "pathway": "Core",
+   "keywords": "acceleration physics explained",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=acceleration+physics+explained",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+acceleration+physics+explained",
+    "yt": "https://www.youtube.com/results?search_query=acceleration+physics+explained"
+   }
+  },
+  {
+   "id": "3.4",
+   "unit": 3,
+   "topic": "Motion Graphs",
+   "pathway": "Core",
+   "keywords": "position time velocity time graph physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=position+time+velocity+time+graph+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+position+time+velocity+time+graph+physics",
+    "yt": "https://www.youtube.com/results?search_query=position+time+velocity+time+graph+physics"
+   }
+  },
+  {
+   "id": "3.5",
+   "unit": 3,
+   "topic": "Constant-Acceleration Equations",
+   "pathway": "Core",
+   "keywords": "kinematic equations constant acceleration physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=kinematic+equations+constant+acceleration+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+kinematic+equations+constant+acceleration+physics",
+    "yt": "https://www.youtube.com/results?search_query=kinematic+equations+constant+acceleration+physics"
+   }
+  },
+  {
+   "id": "3.6",
+   "unit": 3,
+   "topic": "Free Fall and Vertical Motion",
+   "pathway": "Core",
+   "keywords": "free fall physics acceleration due to gravity",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=free+fall+physics+acceleration+due+to+gravity",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+free+fall+physics+acceleration+due+to+gravity",
+    "yt": "https://www.youtube.com/results?search_query=free+fall+physics+acceleration+due+to+gravity"
+   }
+  },
+  {
+   "id": "3.7",
+   "unit": 3,
+   "topic": "Relative and Multistage Motion",
+   "pathway": "Core",
+   "keywords": "relative motion physics two stage motion",
+   "note": "Application",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=relative+motion+physics+two+stage+motion",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+relative+motion+physics+two+stage+motion",
+    "yt": "https://www.youtube.com/results?search_query=relative+motion+physics+two+stage+motion"
+   }
+  },
+  {
+   "id": "3.8",
+   "unit": 3,
+   "topic": "Nonconstant Acceleration and Advanced Motion Modeling",
+   "pathway": "Honors",
+   "keywords": "non constant acceleration calculus kinematics",
+   "note": "Calc-based extension",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=non+constant+acceleration+calculus+kinematics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+non+constant+acceleration+calculus+kinematics",
+    "yt": "https://www.youtube.com/results?search_query=non+constant+acceleration+calculus+kinematics"
+   }
+  },
+  {
+   "id": "4.1",
+   "unit": 4,
+   "topic": "Independent Components of Motion",
+   "pathway": "Core",
+   "keywords": "independent x and y components projectile motion",
+   "note": "Key insight",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=independent+x+and+y+components+projectile+motion",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+independent+x+and+y+components+projectile+motion",
+    "yt": "https://www.youtube.com/results?search_query=independent+x+and+y+components+projectile+motion"
+   }
+  },
+  {
+   "id": "4.2",
+   "unit": 4,
+   "topic": "Horizontal Projectile Motion",
+   "pathway": "Core",
+   "keywords": "horizontal projectile motion physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=horizontal+projectile+motion+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+horizontal+projectile+motion+physics",
+    "yt": "https://www.youtube.com/results?search_query=horizontal+projectile+motion+physics"
+   }
+  },
+  {
+   "id": "4.3",
+   "unit": 4,
+   "topic": "Angled Projectile Motion",
+   "pathway": "Core",
+   "keywords": "projectile motion launched at an angle physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=projectile+motion+launched+at+an+angle+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+projectile+motion+launched+at+an+angle+physics",
+    "yt": "https://www.youtube.com/results?search_query=projectile+motion+launched+at+an+angle+physics"
+   }
+  },
+  {
+   "id": "4.4",
+   "unit": 4,
+   "topic": "Maximum Height, Range, and Time of Flight",
+   "pathway": "Core",
+   "keywords": "maximum height range time of flight projectile motion",
+   "note": "Formula set",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=maximum+height+range+time+of+flight+projectile+motion",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+maximum+height+range+time+of+flight+projectile+motion",
+    "yt": "https://www.youtube.com/results?search_query=maximum+height+range+time+of+flight+projectile+motion"
+   }
+  },
+  {
+   "id": "4.5",
+   "unit": 4,
+   "topic": "Relative Velocity and Navigation",
+   "pathway": "Core",
+   "keywords": "relative velocity river boat problem physics",
+   "note": "Application",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=relative+velocity+river+boat+problem+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+relative+velocity+river+boat+problem+physics",
+    "yt": "https://www.youtube.com/results?search_query=relative+velocity+river+boat+problem+physics"
+   }
+  },
+  {
+   "id": "4.6",
+   "unit": 4,
+   "topic": "Trajectory Analysis",
+   "pathway": "Core",
+   "keywords": "projectile trajectory equation physics",
+   "note": "Model analysis",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=projectile+trajectory+equation+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+projectile+trajectory+equation+physics",
+    "yt": "https://www.youtube.com/results?search_query=projectile+trajectory+equation+physics"
+   }
+  },
+  {
+   "id": "4.7",
+   "unit": 4,
+   "topic": "Advanced Projectile Modeling and Optimization",
+   "pathway": "Honors",
+   "keywords": "projectile motion optimization calculus physics",
+   "note": "Calc-based extension",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=projectile+motion+optimization+calculus+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+projectile+motion+optimization+calculus+physics",
+    "yt": "https://www.youtube.com/results?search_query=projectile+motion+optimization+calculus+physics"
+   }
+  },
+  {
+   "id": "5.1",
+   "unit": 5,
+   "topic": "Force and Inertia",
+   "pathway": "Core",
+   "keywords": "force and inertia physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=force+and+inertia+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+force+and+inertia+physics",
+    "yt": "https://www.youtube.com/results?search_query=force+and+inertia+physics"
+   }
+  },
+  {
+   "id": "5.2",
+   "unit": 5,
+   "topic": "Newton's First Law",
+   "pathway": "Core",
+   "keywords": "newtons first law of motion",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=newtons+first+law+of+motion",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+newtons+first+law+of+motion",
+    "yt": "https://www.youtube.com/results?search_query=newtons+first+law+of+motion"
+   }
+  },
+  {
+   "id": "5.3",
+   "unit": 5,
+   "topic": "Newton's Second Law",
+   "pathway": "Core",
+   "keywords": "newtons second law f=ma physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=newtons+second+law+f%3Dma+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+newtons+second+law+f%3Dma+physics",
+    "yt": "https://www.youtube.com/results?search_query=newtons+second+law+f%3Dma+physics"
+   }
+  },
+  {
+   "id": "5.4",
+   "unit": 5,
+   "topic": "Newton's Third Law",
+   "pathway": "Core",
+   "keywords": "newtons third law action reaction pairs",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=newtons+third+law+action+reaction+pairs",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+newtons+third+law+action+reaction+pairs",
+    "yt": "https://www.youtube.com/results?search_query=newtons+third+law+action+reaction+pairs"
+   }
+  },
+  {
+   "id": "5.5",
+   "unit": 5,
+   "topic": "Free-Body Diagrams",
+   "pathway": "Core",
+   "keywords": "free body diagram physics forces",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=free+body+diagram+physics+forces",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+free+body+diagram+physics+forces",
+    "yt": "https://www.youtube.com/results?search_query=free+body+diagram+physics+forces"
+   }
+  },
+  {
+   "id": "5.6",
+   "unit": 5,
+   "topic": "Gravity, Normal Force, and Tension",
+   "pathway": "Core",
+   "keywords": "normal force tension weight physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=normal+force+tension+weight+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+normal+force+tension+weight+physics",
+    "yt": "https://www.youtube.com/results?search_query=normal+force+tension+weight+physics"
+   }
+  },
+  {
+   "id": "5.7",
+   "unit": 5,
+   "topic": "Friction and Inclined Planes",
+   "pathway": "Core",
+   "keywords": "friction inclined plane physics problems",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=friction+inclined+plane+physics+problems",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+friction+inclined+plane+physics+problems",
+    "yt": "https://www.youtube.com/results?search_query=friction+inclined+plane+physics+problems"
+   }
+  },
+  {
+   "id": "5.8",
+   "unit": 5,
+   "topic": "Connected Objects, Pulleys, and Elevators",
+   "pathway": "Core",
+   "keywords": "pulley problems tension elevator apparent weight physics",
+   "note": "Application",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=pulley+problems+tension+elevator+apparent+weight+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+pulley+problems+tension+elevator+apparent+weight+physics",
+    "yt": "https://www.youtube.com/results?search_query=pulley+problems+tension+elevator+apparent+weight+physics"
+   }
+  },
+  {
+   "id": "5.9",
+   "unit": 5,
+   "topic": "Complex Multibody Systems",
+   "pathway": "Honors",
+   "keywords": "multibody system physics advanced force problems",
+   "note": "Honors extension",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=multibody+system+physics+advanced+force+problems",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+multibody+system+physics+advanced+force+problems",
+    "yt": "https://www.youtube.com/results?search_query=multibody+system+physics+advanced+force+problems"
+   }
+  },
+  {
+   "id": "6.1",
+   "unit": 6,
+   "topic": "Work and Energy Transfer",
+   "pathway": "Core",
+   "keywords": "work physics energy transfer",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=work+physics+energy+transfer",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+work+physics+energy+transfer",
+    "yt": "https://www.youtube.com/results?search_query=work+physics+energy+transfer"
+   }
+  },
+  {
+   "id": "6.2",
+   "unit": 6,
+   "topic": "Kinetic Energy",
+   "pathway": "Core",
+   "keywords": "kinetic energy physics",
+   "note": "Core formula",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=kinetic+energy+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+kinetic+energy+physics",
+    "yt": "https://www.youtube.com/results?search_query=kinetic+energy+physics"
+   }
+  },
+  {
+   "id": "6.3",
+   "unit": 6,
+   "topic": "Gravitational Potential Energy",
+   "pathway": "Core",
+   "keywords": "gravitational potential energy physics",
+   "note": "Core formula",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=gravitational+potential+energy+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+gravitational+potential+energy+physics",
+    "yt": "https://www.youtube.com/results?search_query=gravitational+potential+energy+physics"
+   }
+  },
+  {
+   "id": "6.4",
+   "unit": 6,
+   "topic": "Elastic Potential Energy",
+   "pathway": "Core",
+   "keywords": "elastic potential energy spring physics",
+   "note": "Core formula",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=elastic+potential+energy+spring+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+elastic+potential+energy+spring+physics",
+    "yt": "https://www.youtube.com/results?search_query=elastic+potential+energy+spring+physics"
+   }
+  },
+  {
+   "id": "6.5",
+   "unit": 6,
+   "topic": "Work-Energy Theorem",
+   "pathway": "Core",
+   "keywords": "work energy theorem physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=work+energy+theorem+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+work+energy+theorem+physics",
+    "yt": "https://www.youtube.com/results?search_query=work+energy+theorem+physics"
+   }
+  },
+  {
+   "id": "6.6",
+   "unit": 6,
+   "topic": "Conservation of Mechanical Energy",
+   "pathway": "Core",
+   "keywords": "conservation of mechanical energy physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=conservation+of+mechanical+energy+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+conservation+of+mechanical+energy+physics",
+    "yt": "https://www.youtube.com/results?search_query=conservation+of+mechanical+energy+physics"
+   }
+  },
+  {
+   "id": "6.7",
+   "unit": 6,
+   "topic": "Nonconservative Forces and Thermal Energy",
+   "pathway": "Core",
+   "keywords": "nonconservative forces friction thermal energy physics",
+   "note": "Application",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=nonconservative+forces+friction+thermal+energy+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+nonconservative+forces+friction+thermal+energy+physics",
+    "yt": "https://www.youtube.com/results?search_query=nonconservative+forces+friction+thermal+energy+physics"
+   }
+  },
+  {
+   "id": "6.8",
+   "unit": 6,
+   "topic": "Power and Efficiency",
+   "pathway": "Core",
+   "keywords": "power and efficiency physics",
+   "note": "Application",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=power+and+efficiency+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+power+and+efficiency+physics",
+    "yt": "https://www.youtube.com/results?search_query=power+and+efficiency+physics"
+   }
+  },
+  {
+   "id": "6.9",
+   "unit": 6,
+   "topic": "Variable Forces and Energy Models",
+   "pathway": "Honors",
+   "keywords": "variable force work integral physics",
+   "note": "Calc-based extension",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=variable+force+work+integral+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+variable+force+work+integral+physics",
+    "yt": "https://www.youtube.com/results?search_query=variable+force+work+integral+physics"
+   }
+  },
+  {
+   "id": "7.1",
+   "unit": 7,
+   "topic": "Linear Momentum",
+   "pathway": "Core",
+   "keywords": "linear momentum physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=linear+momentum+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+linear+momentum+physics",
+    "yt": "https://www.youtube.com/results?search_query=linear+momentum+physics"
+   }
+  },
+  {
+   "id": "7.2",
+   "unit": 7,
+   "topic": "Impulse and Force-Time Graphs",
+   "pathway": "Core",
+   "keywords": "impulse force time graph physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=impulse+force+time+graph+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+impulse+force+time+graph+physics",
+    "yt": "https://www.youtube.com/results?search_query=impulse+force+time+graph+physics"
+   }
+  },
+  {
+   "id": "7.3",
+   "unit": 7,
+   "topic": "Conservation of Momentum",
+   "pathway": "Core",
+   "keywords": "conservation of momentum physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=conservation+of+momentum+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+conservation+of+momentum+physics",
+    "yt": "https://www.youtube.com/results?search_query=conservation+of+momentum+physics"
+   }
+  },
+  {
+   "id": "7.4",
+   "unit": 7,
+   "topic": "Elastic Collisions",
+   "pathway": "Core",
+   "keywords": "elastic collision physics problems",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=elastic+collision+physics+problems",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+elastic+collision+physics+problems",
+    "yt": "https://www.youtube.com/results?search_query=elastic+collision+physics+problems"
+   }
+  },
+  {
+   "id": "7.5",
+   "unit": 7,
+   "topic": "Inelastic Collisions",
+   "pathway": "Core",
+   "keywords": "inelastic collision perfectly inelastic physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=inelastic+collision+perfectly+inelastic+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+inelastic+collision+perfectly+inelastic+physics",
+    "yt": "https://www.youtube.com/results?search_query=inelastic+collision+perfectly+inelastic+physics"
+   }
+  },
+  {
+   "id": "7.6",
+   "unit": 7,
+   "topic": "Explosions, Recoil, and Propulsion",
+   "pathway": "Core",
+   "keywords": "recoil explosion momentum physics",
+   "note": "Application",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=recoil+explosion+momentum+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+recoil+explosion+momentum+physics",
+    "yt": "https://www.youtube.com/results?search_query=recoil+explosion+momentum+physics"
+   }
+  },
+  {
+   "id": "7.7",
+   "unit": 7,
+   "topic": "Two-Dimensional Momentum",
+   "pathway": "Core",
+   "keywords": "two dimensional collision momentum physics",
+   "note": "Application",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=two+dimensional+collision+momentum+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+two+dimensional+collision+momentum+physics",
+    "yt": "https://www.youtube.com/results?search_query=two+dimensional+collision+momentum+physics"
+   }
+  },
+  {
+   "id": "7.8",
+   "unit": 7,
+   "topic": "Center-of-Mass and Advanced Collision Analysis",
+   "pathway": "Honors",
+   "keywords": "center of mass physics collisions",
+   "note": "Honors extension",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=center+of+mass+physics+collisions",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+center+of+mass+physics+collisions",
+    "yt": "https://www.youtube.com/results?search_query=center+of+mass+physics+collisions"
+   }
+  },
+  {
+   "id": "8.1",
+   "unit": 8,
+   "topic": "Uniform Circular Motion",
+   "pathway": "Core",
+   "keywords": "uniform circular motion physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=uniform+circular+motion+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+uniform+circular+motion+physics",
+    "yt": "https://www.youtube.com/results?search_query=uniform+circular+motion+physics"
+   }
+  },
+  {
+   "id": "8.2",
+   "unit": 8,
+   "topic": "Centripetal Acceleration",
+   "pathway": "Core",
+   "keywords": "centripetal acceleration physics",
+   "note": "Core formula",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=centripetal+acceleration+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+centripetal+acceleration+physics",
+    "yt": "https://www.youtube.com/results?search_query=centripetal+acceleration+physics"
+   }
+  },
+  {
+   "id": "8.3",
+   "unit": 8,
+   "topic": "Centripetal Force",
+   "pathway": "Core",
+   "keywords": "centripetal force physics problems",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=centripetal+force+physics+problems",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+centripetal+force+physics+problems",
+    "yt": "https://www.youtube.com/results?search_query=centripetal+force+physics+problems"
+   }
+  },
+  {
+   "id": "8.4",
+   "unit": 8,
+   "topic": "Vertical Circles and Banked Curves",
+   "pathway": "Core",
+   "keywords": "banked curve vertical circle physics",
+   "note": "Application",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=banked+curve+vertical+circle+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+banked+curve+vertical+circle+physics",
+    "yt": "https://www.youtube.com/results?search_query=banked+curve+vertical+circle+physics"
+   }
+  },
+  {
+   "id": "8.5",
+   "unit": 8,
+   "topic": "Universal Gravitation",
+   "pathway": "Core",
+   "keywords": "newtons law of universal gravitation",
+   "note": "Core formula",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=newtons+law+of+universal+gravitation",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+newtons+law+of+universal+gravitation",
+    "yt": "https://www.youtube.com/results?search_query=newtons+law+of+universal+gravitation"
+   }
+  },
+  {
+   "id": "8.6",
+   "unit": 8,
+   "topic": "Gravitational Fields",
+   "pathway": "Core",
+   "keywords": "gravitational field strength physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=gravitational+field+strength+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+gravitational+field+strength+physics",
+    "yt": "https://www.youtube.com/results?search_query=gravitational+field+strength+physics"
+   }
+  },
+  {
+   "id": "8.7",
+   "unit": 8,
+   "topic": "Kepler's Laws",
+   "pathway": "Core",
+   "keywords": "keplers laws of planetary motion",
+   "note": "Application",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=keplers+laws+of+planetary+motion",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+keplers+laws+of+planetary+motion",
+    "yt": "https://www.youtube.com/results?search_query=keplers+laws+of+planetary+motion"
+   }
+  },
+  {
+   "id": "8.8",
+   "unit": 8,
+   "topic": "Satellites, Orbits, and Weightlessness",
+   "pathway": "Core",
+   "keywords": "satellite orbit weightlessness physics",
+   "note": "Application",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=satellite+orbit+weightlessness+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+satellite+orbit+weightlessness+physics",
+    "yt": "https://www.youtube.com/results?search_query=satellite+orbit+weightlessness+physics"
+   }
+  },
+  {
+   "id": "8.9",
+   "unit": 8,
+   "topic": "Orbital Energy and Escape Velocity",
+   "pathway": "Honors",
+   "keywords": "escape velocity orbital energy physics",
+   "note": "Honors extension",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=escape+velocity+orbital+energy+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+escape+velocity+orbital+energy+physics",
+    "yt": "https://www.youtube.com/results?search_query=escape+velocity+orbital+energy+physics"
+   }
+  },
+  {
+   "id": "9.1",
+   "unit": 9,
+   "topic": "Angular Position, Velocity, and Acceleration",
+   "pathway": "Core",
+   "keywords": "angular displacement velocity acceleration physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=angular+displacement+velocity+acceleration+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+angular+displacement+velocity+acceleration+physics",
+    "yt": "https://www.youtube.com/results?search_query=angular+displacement+velocity+acceleration+physics"
+   }
+  },
+  {
+   "id": "9.2",
+   "unit": 9,
+   "topic": "Rotational Kinematics",
+   "pathway": "Core",
+   "keywords": "rotational kinematics equations physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=rotational+kinematics+equations+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+rotational+kinematics+equations+physics",
+    "yt": "https://www.youtube.com/results?search_query=rotational+kinematics+equations+physics"
+   }
+  },
+  {
+   "id": "9.3",
+   "unit": 9,
+   "topic": "Torque and Rotational Equilibrium",
+   "pathway": "Core",
+   "keywords": "torque physics rotational equilibrium",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=torque+physics+rotational+equilibrium",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+torque+physics+rotational+equilibrium",
+    "yt": "https://www.youtube.com/results?search_query=torque+physics+rotational+equilibrium"
+   }
+  },
+  {
+   "id": "9.4",
+   "unit": 9,
+   "topic": "Center of Mass and Stability",
+   "pathway": "Core",
+   "keywords": "center of mass and stability physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=center+of+mass+and+stability+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+center+of+mass+and+stability+physics",
+    "yt": "https://www.youtube.com/results?search_query=center+of+mass+and+stability+physics"
+   }
+  },
+  {
+   "id": "9.5",
+   "unit": 9,
+   "topic": "Moment of Inertia",
+   "pathway": "Core",
+   "keywords": "moment of inertia physics",
+   "note": "Core formula",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=moment+of+inertia+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+moment+of+inertia+physics",
+    "yt": "https://www.youtube.com/results?search_query=moment+of+inertia+physics"
+   }
+  },
+  {
+   "id": "9.6",
+   "unit": 9,
+   "topic": "Rotational Kinetic Energy",
+   "pathway": "Core",
+   "keywords": "rotational kinetic energy physics",
+   "note": "Core formula",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=rotational+kinetic+energy+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+rotational+kinetic+energy+physics",
+    "yt": "https://www.youtube.com/results?search_query=rotational+kinetic+energy+physics"
+   }
+  },
+  {
+   "id": "9.7",
+   "unit": 9,
+   "topic": "Angular Momentum and Conservation",
+   "pathway": "Core",
+   "keywords": "angular momentum conservation physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=angular+momentum+conservation+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+angular+momentum+conservation+physics",
+    "yt": "https://www.youtube.com/results?search_query=angular+momentum+conservation+physics"
+   }
+  },
+  {
+   "id": "9.8",
+   "unit": 9,
+   "topic": "Rolling Motion",
+   "pathway": "Core",
+   "keywords": "rolling without slipping physics",
+   "note": "Application",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=rolling+without+slipping+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+rolling+without+slipping+physics",
+    "yt": "https://www.youtube.com/results?search_query=rolling+without+slipping+physics"
+   }
+  },
+  {
+   "id": "9.9",
+   "unit": 9,
+   "topic": "Advanced Rotational Dynamics",
+   "pathway": "Honors",
+   "keywords": "rotational dynamics advanced physics problems",
+   "note": "Honors extension",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=rotational+dynamics+advanced+physics+problems",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+rotational+dynamics+advanced+physics+problems",
+    "yt": "https://www.youtube.com/results?search_query=rotational+dynamics+advanced+physics+problems"
+   }
+  },
+  {
+   "id": "10.1",
+   "unit": 10,
+   "topic": "Periodic Motion",
+   "pathway": "Core",
+   "keywords": "periodic motion physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=periodic+motion+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+periodic+motion+physics",
+    "yt": "https://www.youtube.com/results?search_query=periodic+motion+physics"
+   }
+  },
+  {
+   "id": "10.2",
+   "unit": 10,
+   "topic": "Restoring Forces and Hooke's Law",
+   "pathway": "Core",
+   "keywords": "hookes law restoring force physics",
+   "note": "Core formula",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=hookes+law+restoring+force+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+hookes+law+restoring+force+physics",
+    "yt": "https://www.youtube.com/results?search_query=hookes+law+restoring+force+physics"
+   }
+  },
+  {
+   "id": "10.3",
+   "unit": 10,
+   "topic": "Spring-Mass Systems",
+   "pathway": "Core",
+   "keywords": "spring mass system period oscillation physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=spring+mass+system+period+oscillation+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+spring+mass+system+period+oscillation+physics",
+    "yt": "https://www.youtube.com/results?search_query=spring+mass+system+period+oscillation+physics"
+   }
+  },
+  {
+   "id": "10.4",
+   "unit": 10,
+   "topic": "Simple Pendulums",
+   "pathway": "Core",
+   "keywords": "simple pendulum period physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=simple+pendulum+period+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+simple+pendulum+period+physics",
+    "yt": "https://www.youtube.com/results?search_query=simple+pendulum+period+physics"
+   }
+  },
+  {
+   "id": "10.5",
+   "unit": 10,
+   "topic": "Period, Frequency, and Amplitude",
+   "pathway": "Core",
+   "keywords": "period frequency amplitude physics",
+   "note": "Core vocabulary",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=period+frequency+amplitude+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+period+frequency+amplitude+physics",
+    "yt": "https://www.youtube.com/results?search_query=period+frequency+amplitude+physics"
+   }
+  },
+  {
+   "id": "10.6",
+   "unit": 10,
+   "topic": "Energy in Oscillations",
+   "pathway": "Core",
+   "keywords": "energy in simple harmonic motion physics",
+   "note": "Application",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=energy+in+simple+harmonic+motion+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+energy+in+simple+harmonic+motion+physics",
+    "yt": "https://www.youtube.com/results?search_query=energy+in+simple+harmonic+motion+physics"
+   }
+  },
+  {
+   "id": "10.7",
+   "unit": 10,
+   "topic": "Damping and Resonance",
+   "pathway": "Core",
+   "keywords": "damping and resonance physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=damping+and+resonance+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+damping+and+resonance+physics",
+    "yt": "https://www.youtube.com/results?search_query=damping+and+resonance+physics"
+   }
+  },
+  {
+   "id": "10.8",
+   "unit": 10,
+   "topic": "Sinusoidal and Differential-Equation Models",
+   "pathway": "Honors",
+   "keywords": "simple harmonic motion differential equation",
+   "note": "Calc-based extension",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=simple+harmonic+motion+differential+equation",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+simple+harmonic+motion+differential+equation",
+    "yt": "https://www.youtube.com/results?search_query=simple+harmonic+motion+differential+equation"
+   }
+  },
+  {
+   "id": "11.1",
+   "unit": 11,
+   "topic": "Density and Pressure",
+   "pathway": "Core",
+   "keywords": "density and pressure physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=density+and+pressure+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+density+and+pressure+physics",
+    "yt": "https://www.youtube.com/results?search_query=density+and+pressure+physics"
+   }
+  },
+  {
+   "id": "11.2",
+   "unit": 11,
+   "topic": "Hydrostatic Pressure",
+   "pathway": "Core",
+   "keywords": "hydrostatic pressure fluid physics",
+   "note": "Core formula",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=hydrostatic+pressure+fluid+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+hydrostatic+pressure+fluid+physics",
+    "yt": "https://www.youtube.com/results?search_query=hydrostatic+pressure+fluid+physics"
+   }
+  },
+  {
+   "id": "11.3",
+   "unit": 11,
+   "topic": "Pascal's Principle",
+   "pathway": "Core",
+   "keywords": "pascals principle hydraulic lift physics",
+   "note": "Application",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=pascals+principle+hydraulic+lift+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+pascals+principle+hydraulic+lift+physics",
+    "yt": "https://www.youtube.com/results?search_query=pascals+principle+hydraulic+lift+physics"
+   }
+  },
+  {
+   "id": "11.4",
+   "unit": 11,
+   "topic": "Buoyancy and Archimedes' Principle",
+   "pathway": "Core",
+   "keywords": "archimedes principle buoyancy physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=archimedes+principle+buoyancy+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+archimedes+principle+buoyancy+physics",
+    "yt": "https://www.youtube.com/results?search_query=archimedes+principle+buoyancy+physics"
+   }
+  },
+  {
+   "id": "11.5",
+   "unit": 11,
+   "topic": "Fluid Flow and Continuity",
+   "pathway": "Core",
+   "keywords": "continuity equation fluid flow physics",
+   "note": "Core formula",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=continuity+equation+fluid+flow+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+continuity+equation+fluid+flow+physics",
+    "yt": "https://www.youtube.com/results?search_query=continuity+equation+fluid+flow+physics"
+   }
+  },
+  {
+   "id": "11.6",
+   "unit": 11,
+   "topic": "Bernoulli's Principle",
+   "pathway": "Core",
+   "keywords": "bernoullis equation fluid dynamics physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=bernoullis+equation+fluid+dynamics+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+bernoullis+equation+fluid+dynamics+physics",
+    "yt": "https://www.youtube.com/results?search_query=bernoullis+equation+fluid+dynamics+physics"
+   }
+  },
+  {
+   "id": "11.7",
+   "unit": 11,
+   "topic": "Viscosity and Fluid Behavior",
+   "pathway": "Core",
+   "keywords": "viscosity fluid physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=viscosity+fluid+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+viscosity+fluid+physics",
+    "yt": "https://www.youtube.com/results?search_query=viscosity+fluid+physics"
+   }
+  },
+  {
+   "id": "11.8",
+   "unit": 11,
+   "topic": "Advanced Fluid Dynamics",
+   "pathway": "Honors",
+   "keywords": "advanced fluid dynamics bernoulli problems",
+   "note": "AP Physics 2 depth",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=advanced+fluid+dynamics+bernoulli+problems",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+advanced+fluid+dynamics+bernoulli+problems",
+    "yt": "https://www.youtube.com/results?search_query=advanced+fluid+dynamics+bernoulli+problems"
+   }
+  },
+  {
+   "id": "12.1",
+   "unit": 12,
+   "topic": "Temperature and Thermal Equilibrium",
+   "pathway": "Core",
+   "keywords": "temperature and thermal equilibrium physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=temperature+and+thermal+equilibrium+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+temperature+and+thermal+equilibrium+physics",
+    "yt": "https://www.youtube.com/results?search_query=temperature+and+thermal+equilibrium+physics"
+   }
+  },
+  {
+   "id": "12.2",
+   "unit": 12,
+   "topic": "Internal Energy and Heat",
+   "pathway": "Core",
+   "keywords": "internal energy and heat physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=internal+energy+and+heat+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+internal+energy+and+heat+physics",
+    "yt": "https://www.youtube.com/results?search_query=internal+energy+and+heat+physics"
+   }
+  },
+  {
+   "id": "12.3",
+   "unit": 12,
+   "topic": "Specific Heat and Calorimetry",
+   "pathway": "Core",
+   "keywords": "specific heat capacity calorimetry physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=specific+heat+capacity+calorimetry+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+specific+heat+capacity+calorimetry+physics",
+    "yt": "https://www.youtube.com/results?search_query=specific+heat+capacity+calorimetry+physics"
+   }
+  },
+  {
+   "id": "12.4",
+   "unit": 12,
+   "topic": "Phase Changes and Latent Heat",
+   "pathway": "Core",
+   "keywords": "latent heat phase change physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=latent+heat+phase+change+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+latent+heat+phase+change+physics",
+    "yt": "https://www.youtube.com/results?search_query=latent+heat+phase+change+physics"
+   }
+  },
+  {
+   "id": "12.5",
+   "unit": 12,
+   "topic": "Conduction, Convection, and Radiation",
+   "pathway": "Core",
+   "keywords": "heat transfer conduction convection radiation",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=heat+transfer+conduction+convection+radiation",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+heat+transfer+conduction+convection+radiation",
+    "yt": "https://www.youtube.com/results?search_query=heat+transfer+conduction+convection+radiation"
+   }
+  },
+  {
+   "id": "12.6",
+   "unit": 12,
+   "topic": "Gas Laws and Kinetic Molecular Theory",
+   "pathway": "Core",
+   "keywords": "ideal gas law kinetic molecular theory physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=ideal+gas+law+kinetic+molecular+theory+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+ideal+gas+law+kinetic+molecular+theory+physics",
+    "yt": "https://www.youtube.com/results?search_query=ideal+gas+law+kinetic+molecular+theory+physics"
+   }
+  },
+  {
+   "id": "12.7",
+   "unit": 12,
+   "topic": "First Law of Thermodynamics",
+   "pathway": "Core",
+   "keywords": "first law of thermodynamics physics",
+   "note": "Core formula",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=first+law+of+thermodynamics+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+first+law+of+thermodynamics+physics",
+    "yt": "https://www.youtube.com/results?search_query=first+law+of+thermodynamics+physics"
+   }
+  },
+  {
+   "id": "12.8",
+   "unit": 12,
+   "topic": "Heat Engines and the Second Law",
+   "pathway": "Core",
+   "keywords": "heat engine second law of thermodynamics",
+   "note": "Application",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=heat+engine+second+law+of+thermodynamics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+heat+engine+second+law+of+thermodynamics",
+    "yt": "https://www.youtube.com/results?search_query=heat+engine+second+law+of+thermodynamics"
+   }
+  },
+  {
+   "id": "12.9",
+   "unit": 12,
+   "topic": "Thermodynamic Processes and Entropy",
+   "pathway": "Honors",
+   "keywords": "entropy thermodynamic processes physics",
+   "note": "AP Physics 2 depth",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=entropy+thermodynamic+processes+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+entropy+thermodynamic+processes+physics",
+    "yt": "https://www.youtube.com/results?search_query=entropy+thermodynamic+processes+physics"
+   }
+  },
+  {
+   "id": "13.1",
+   "unit": 13,
+   "topic": "Properties and Types of Waves",
+   "pathway": "Core",
+   "keywords": "types of waves transverse longitudinal physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=types+of+waves+transverse+longitudinal+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+types+of+waves+transverse+longitudinal+physics",
+    "yt": "https://www.youtube.com/results?search_query=types+of+waves+transverse+longitudinal+physics"
+   }
+  },
+  {
+   "id": "13.2",
+   "unit": 13,
+   "topic": "Wave Speed, Frequency, and Wavelength",
+   "pathway": "Core",
+   "keywords": "wave speed frequency wavelength equation",
+   "note": "Core formula",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=wave+speed+frequency+wavelength+equation",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+wave+speed+frequency+wavelength+equation",
+    "yt": "https://www.youtube.com/results?search_query=wave+speed+frequency+wavelength+equation"
+   }
+  },
+  {
+   "id": "13.3",
+   "unit": 13,
+   "topic": "Superposition and Interference",
+   "pathway": "Core",
+   "keywords": "superposition and interference waves physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=superposition+and+interference+waves+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+superposition+and+interference+waves+physics",
+    "yt": "https://www.youtube.com/results?search_query=superposition+and+interference+waves+physics"
+   }
+  },
+  {
+   "id": "13.4",
+   "unit": 13,
+   "topic": "Reflection, Refraction, and Diffraction",
+   "pathway": "Core",
+   "keywords": "reflection refraction diffraction waves physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=reflection+refraction+diffraction+waves+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+reflection+refraction+diffraction+waves+physics",
+    "yt": "https://www.youtube.com/results?search_query=reflection+refraction+diffraction+waves+physics"
+   }
+  },
+  {
+   "id": "13.5",
+   "unit": 13,
+   "topic": "Standing Waves and Resonance",
+   "pathway": "Core",
+   "keywords": "standing waves harmonics resonance physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=standing+waves+harmonics+resonance+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+standing+waves+harmonics+resonance+physics",
+    "yt": "https://www.youtube.com/results?search_query=standing+waves+harmonics+resonance+physics"
+   }
+  },
+  {
+   "id": "13.6",
+   "unit": 13,
+   "topic": "Sound Waves, Intensity, and Decibels",
+   "pathway": "Core",
+   "keywords": "sound intensity decibels physics",
+   "note": "Application",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=sound+intensity+decibels+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+sound+intensity+decibels+physics",
+    "yt": "https://www.youtube.com/results?search_query=sound+intensity+decibels+physics"
+   }
+  },
+  {
+   "id": "13.7",
+   "unit": 13,
+   "topic": "Beats and Doppler Effect",
+   "pathway": "Core",
+   "keywords": "beat frequency doppler effect physics",
+   "note": "Application",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=beat+frequency+doppler+effect+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+beat+frequency+doppler+effect+physics",
+    "yt": "https://www.youtube.com/results?search_query=beat+frequency+doppler+effect+physics"
+   }
+  },
+  {
+   "id": "13.8",
+   "unit": 13,
+   "topic": "Harmonics and Advanced Wave Modeling",
+   "pathway": "Honors",
+   "keywords": "harmonics advanced wave problems physics",
+   "note": "Honors extension",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=harmonics+advanced+wave+problems+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+harmonics+advanced+wave+problems+physics",
+    "yt": "https://www.youtube.com/results?search_query=harmonics+advanced+wave+problems+physics"
+   }
+  },
+  {
+   "id": "14.1",
+   "unit": 14,
+   "topic": "Nature of Light and Electromagnetic Spectrum",
+   "pathway": "Core",
+   "keywords": "electromagnetic spectrum light physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=electromagnetic+spectrum+light+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+electromagnetic+spectrum+light+physics",
+    "yt": "https://www.youtube.com/results?search_query=electromagnetic+spectrum+light+physics"
+   }
+  },
+  {
+   "id": "14.2",
+   "unit": 14,
+   "topic": "Reflection and Mirrors",
+   "pathway": "Core",
+   "keywords": "concave convex mirror ray diagram physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=concave+convex+mirror+ray+diagram+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+concave+convex+mirror+ray+diagram+physics",
+    "yt": "https://www.youtube.com/results?search_query=concave+convex+mirror+ray+diagram+physics"
+   }
+  },
+  {
+   "id": "14.3",
+   "unit": 14,
+   "topic": "Refraction and Snell's Law",
+   "pathway": "Core",
+   "keywords": "snells law refraction physics",
+   "note": "Core formula",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=snells+law+refraction+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+snells+law+refraction+physics",
+    "yt": "https://www.youtube.com/results?search_query=snells+law+refraction+physics"
+   }
+  },
+  {
+   "id": "14.4",
+   "unit": 14,
+   "topic": "Total Internal Reflection",
+   "pathway": "Core",
+   "keywords": "total internal reflection critical angle physics",
+   "note": "Application",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=total+internal+reflection+critical+angle+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+total+internal+reflection+critical+angle+physics",
+    "yt": "https://www.youtube.com/results?search_query=total+internal+reflection+critical+angle+physics"
+   }
+  },
+  {
+   "id": "14.5",
+   "unit": 14,
+   "topic": "Lenses and Image Formation",
+   "pathway": "Core",
+   "keywords": "converging diverging lens ray diagram physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=converging+diverging+lens+ray+diagram+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+converging+diverging+lens+ray+diagram+physics",
+    "yt": "https://www.youtube.com/results?search_query=converging+diverging+lens+ray+diagram+physics"
+   }
+  },
+  {
+   "id": "14.6",
+   "unit": 14,
+   "topic": "Optical Instruments",
+   "pathway": "Core",
+   "keywords": "optical instruments telescope microscope physics",
+   "note": "Application",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=optical+instruments+telescope+microscope+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+optical+instruments+telescope+microscope+physics",
+    "yt": "https://www.youtube.com/results?search_query=optical+instruments+telescope+microscope+physics"
+   }
+  },
+  {
+   "id": "14.7",
+   "unit": 14,
+   "topic": "Interference, Diffraction, and Polarization",
+   "pathway": "Core",
+   "keywords": "double slit interference diffraction polarization physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=double+slit+interference+diffraction+polarization+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+double+slit+interference+diffraction+polarization+physics",
+    "yt": "https://www.youtube.com/results?search_query=double+slit+interference+diffraction+polarization+physics"
+   }
+  },
+  {
+   "id": "14.8",
+   "unit": 14,
+   "topic": "Advanced Optical Systems",
+   "pathway": "Honors",
+   "keywords": "advanced optics problems physics",
+   "note": "AP Physics 2 depth",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=advanced+optics+problems+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+advanced+optics+problems+physics",
+    "yt": "https://www.youtube.com/results?search_query=advanced+optics+problems+physics"
+   }
+  },
+  {
+   "id": "15.1",
+   "unit": 15,
+   "topic": "Electric Charge and Conservation",
+   "pathway": "Core",
+   "keywords": "electric charge conservation physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=electric+charge+conservation+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+electric+charge+conservation+physics",
+    "yt": "https://www.youtube.com/results?search_query=electric+charge+conservation+physics"
+   }
+  },
+  {
+   "id": "15.2",
+   "unit": 15,
+   "topic": "Charging and Polarization",
+   "pathway": "Core",
+   "keywords": "charging by induction and polarization physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=charging+by+induction+and+polarization+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+charging+by+induction+and+polarization+physics",
+    "yt": "https://www.youtube.com/results?search_query=charging+by+induction+and+polarization+physics"
+   }
+  },
+  {
+   "id": "15.3",
+   "unit": 15,
+   "topic": "Coulomb's Law",
+   "pathway": "Core",
+   "keywords": "coulombs law electric force problems",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=coulombs+law+electric+force+problems",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+coulombs+law+electric+force+problems",
+    "yt": "https://www.youtube.com/results?search_query=coulombs+law+electric+force+problems"
+   }
+  },
+  {
+   "id": "15.4",
+   "unit": 15,
+   "topic": "Electric Fields and Field Lines",
+   "pathway": "Core",
+   "keywords": "electric field and field lines physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=electric+field+and+field+lines+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+electric+field+and+field+lines+physics",
+    "yt": "https://www.youtube.com/results?search_query=electric+field+and+field+lines+physics"
+   }
+  },
+  {
+   "id": "15.5",
+   "unit": 15,
+   "topic": "Electric Potential Energy",
+   "pathway": "Core",
+   "keywords": "electric potential energy physics",
+   "note": "Core formula",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=electric+potential+energy+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+electric+potential+energy+physics",
+    "yt": "https://www.youtube.com/results?search_query=electric+potential+energy+physics"
+   }
+  },
+  {
+   "id": "15.6",
+   "unit": 15,
+   "topic": "Electric Potential and Voltage",
+   "pathway": "Core",
+   "keywords": "electric potential difference voltage physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=electric+potential+difference+voltage+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+electric+potential+difference+voltage+physics",
+    "yt": "https://www.youtube.com/results?search_query=electric+potential+difference+voltage+physics"
+   }
+  },
+  {
+   "id": "15.7",
+   "unit": 15,
+   "topic": "Capacitors and Capacitance",
+   "pathway": "Core",
+   "keywords": "capacitors and capacitance physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=capacitors+and+capacitance+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+capacitors+and+capacitance+physics",
+    "yt": "https://www.youtube.com/results?search_query=capacitors+and+capacitance+physics"
+   }
+  },
+  {
+   "id": "15.8",
+   "unit": 15,
+   "topic": "Multiple-Charge and Field Analysis",
+   "pathway": "Honors",
+   "keywords": "electric field superposition multiple charges",
+   "note": "AP Physics 2 depth",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=electric+field+superposition+multiple+charges",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+electric+field+superposition+multiple+charges",
+    "yt": "https://www.youtube.com/results?search_query=electric+field+superposition+multiple+charges"
+   }
+  },
+  {
+   "id": "16.1",
+   "unit": 16,
+   "topic": "Current, Voltage, and Resistance",
+   "pathway": "Core",
+   "keywords": "current voltage resistance physics explained",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=current+voltage+resistance+physics+explained",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+current+voltage+resistance+physics+explained",
+    "yt": "https://www.youtube.com/results?search_query=current+voltage+resistance+physics+explained"
+   }
+  },
+  {
+   "id": "16.2",
+   "unit": 16,
+   "topic": "Ohm's Law",
+   "pathway": "Core",
+   "keywords": "ohms law physics",
+   "note": "Core formula",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=ohms+law+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+ohms+law+physics",
+    "yt": "https://www.youtube.com/results?search_query=ohms+law+physics"
+   }
+  },
+  {
+   "id": "16.3",
+   "unit": 16,
+   "topic": "Series Circuits",
+   "pathway": "Core",
+   "keywords": "series circuits physics problems",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=series+circuits+physics+problems",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+series+circuits+physics+problems",
+    "yt": "https://www.youtube.com/results?search_query=series+circuits+physics+problems"
+   }
+  },
+  {
+   "id": "16.4",
+   "unit": 16,
+   "topic": "Parallel Circuits",
+   "pathway": "Core",
+   "keywords": "parallel circuits physics problems",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=parallel+circuits+physics+problems",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+parallel+circuits+physics+problems",
+    "yt": "https://www.youtube.com/results?search_query=parallel+circuits+physics+problems"
+   }
+  },
+  {
+   "id": "16.5",
+   "unit": 16,
+   "topic": "Combination Circuits",
+   "pathway": "Core",
+   "keywords": "combination series parallel circuit problems",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=combination+series+parallel+circuit+problems",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+combination+series+parallel+circuit+problems",
+    "yt": "https://www.youtube.com/results?search_query=combination+series+parallel+circuit+problems"
+   }
+  },
+  {
+   "id": "16.6",
+   "unit": 16,
+   "topic": "Kirchhoff's Rules",
+   "pathway": "Core",
+   "keywords": "kirchhoffs laws circuit analysis",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=kirchhoffs+laws+circuit+analysis",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+kirchhoffs+laws+circuit+analysis",
+    "yt": "https://www.youtube.com/results?search_query=kirchhoffs+laws+circuit+analysis"
+   }
+  },
+  {
+   "id": "16.7",
+   "unit": 16,
+   "topic": "Electrical Power and Energy",
+   "pathway": "Core",
+   "keywords": "electrical power and energy physics",
+   "note": "Application",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=electrical+power+and+energy+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+electrical+power+and+energy+physics",
+    "yt": "https://www.youtube.com/results?search_query=electrical+power+and+energy+physics"
+   }
+  },
+  {
+   "id": "16.8",
+   "unit": 16,
+   "topic": "Circuit Measurement and Safety",
+   "pathway": "Core",
+   "keywords": "ammeter voltmeter circuit measurement physics",
+   "note": "Lab safety",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=ammeter+voltmeter+circuit+measurement+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+ammeter+voltmeter+circuit+measurement+physics",
+    "yt": "https://www.youtube.com/results?search_query=ammeter+voltmeter+circuit+measurement+physics"
+   }
+  },
+  {
+   "id": "16.9",
+   "unit": 16,
+   "topic": "RC Circuits and Complex Networks",
+   "pathway": "Honors",
+   "keywords": "rc circuit time constant physics",
+   "note": "AP Physics 2 depth",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=rc+circuit+time+constant+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+rc+circuit+time+constant+physics",
+    "yt": "https://www.youtube.com/results?search_query=rc+circuit+time+constant+physics"
+   }
+  },
+  {
+   "id": "17.1",
+   "unit": 17,
+   "topic": "Magnetic Fields and Forces",
+   "pathway": "Core",
+   "keywords": "magnetic fields and forces physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=magnetic+fields+and+forces+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+magnetic+fields+and+forces+physics",
+    "yt": "https://www.youtube.com/results?search_query=magnetic+fields+and+forces+physics"
+   }
+  },
+  {
+   "id": "17.2",
+   "unit": 17,
+   "topic": "Magnetic Force on Moving Charges",
+   "pathway": "Core",
+   "keywords": "magnetic force on a moving charge physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=magnetic+force+on+a+moving+charge+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+magnetic+force+on+a+moving+charge+physics",
+    "yt": "https://www.youtube.com/results?search_query=magnetic+force+on+a+moving+charge+physics"
+   }
+  },
+  {
+   "id": "17.3",
+   "unit": 17,
+   "topic": "Magnetic Fields of Currents",
+   "pathway": "Core",
+   "keywords": "magnetic field around a current carrying wire",
+   "note": "Core formula",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=magnetic+field+around+a+current+carrying+wire",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+magnetic+field+around+a+current+carrying+wire",
+    "yt": "https://www.youtube.com/results?search_query=magnetic+field+around+a+current+carrying+wire"
+   }
+  },
+  {
+   "id": "17.4",
+   "unit": 17,
+   "topic": "Electromagnets and Solenoids",
+   "pathway": "Core",
+   "keywords": "solenoid electromagnet magnetic field physics",
+   "note": "Application",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=solenoid+electromagnet+magnetic+field+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+solenoid+electromagnet+magnetic+field+physics",
+    "yt": "https://www.youtube.com/results?search_query=solenoid+electromagnet+magnetic+field+physics"
+   }
+  },
+  {
+   "id": "17.5",
+   "unit": 17,
+   "topic": "Magnetic Flux",
+   "pathway": "Core",
+   "keywords": "magnetic flux physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=magnetic+flux+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+magnetic+flux+physics",
+    "yt": "https://www.youtube.com/results?search_query=magnetic+flux+physics"
+   }
+  },
+  {
+   "id": "17.6",
+   "unit": 17,
+   "topic": "Faraday's Law",
+   "pathway": "Core",
+   "keywords": "faradays law of induction physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=faradays+law+of+induction+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+faradays+law+of+induction+physics",
+    "yt": "https://www.youtube.com/results?search_query=faradays+law+of+induction+physics"
+   }
+  },
+  {
+   "id": "17.7",
+   "unit": 17,
+   "topic": "Lenz's Law",
+   "pathway": "Core",
+   "keywords": "lenzs law physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=lenzs+law+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+lenzs+law+physics",
+    "yt": "https://www.youtube.com/results?search_query=lenzs+law+physics"
+   }
+  },
+  {
+   "id": "17.8",
+   "unit": 17,
+   "topic": "Motors, Generators, and Transformers",
+   "pathway": "Core",
+   "keywords": "electric motor generator transformer physics",
+   "note": "Application",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=electric+motor+generator+transformer+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+electric+motor+generator+transformer+physics",
+    "yt": "https://www.youtube.com/results?search_query=electric+motor+generator+transformer+physics"
+   }
+  },
+  {
+   "id": "17.9",
+   "unit": 17,
+   "topic": "Advanced Electromagnetic Induction",
+   "pathway": "Honors",
+   "keywords": "electromagnetic induction advanced problems physics",
+   "note": "AP Physics 2 depth",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=electromagnetic+induction+advanced+problems+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+electromagnetic+induction+advanced+problems+physics",
+    "yt": "https://www.youtube.com/results?search_query=electromagnetic+induction+advanced+problems+physics"
+   }
+  },
+  {
+   "id": "18.1",
+   "unit": 18,
+   "topic": "Atomic Structure and Models",
+   "pathway": "Core",
+   "keywords": "atomic models rutherford bohr physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=atomic+models+rutherford+bohr+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+atomic+models+rutherford+bohr+physics",
+    "yt": "https://www.youtube.com/results?search_query=atomic+models+rutherford+bohr+physics"
+   }
+  },
+  {
+   "id": "18.2",
+   "unit": 18,
+   "topic": "Atomic Spectra and Quantized Energy",
+   "pathway": "Core",
+   "keywords": "atomic spectra and energy levels physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=atomic+spectra+and+energy+levels+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+atomic+spectra+and+energy+levels+physics",
+    "yt": "https://www.youtube.com/results?search_query=atomic+spectra+and+energy+levels+physics"
+   }
+  },
+  {
+   "id": "18.3",
+   "unit": 18,
+   "topic": "Photons and Photoelectric Effect",
+   "pathway": "Core",
+   "keywords": "photoelectric effect and photons physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=photoelectric+effect+and+photons+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+photoelectric+effect+and+photons+physics",
+    "yt": "https://www.youtube.com/results?search_query=photoelectric+effect+and+photons+physics"
+   }
+  },
+  {
+   "id": "18.4",
+   "unit": 18,
+   "topic": "Wave-Particle Duality",
+   "pathway": "Core",
+   "keywords": "wave particle duality physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=wave+particle+duality+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+wave+particle+duality+physics",
+    "yt": "https://www.youtube.com/results?search_query=wave+particle+duality+physics"
+   }
+  },
+  {
+   "id": "18.5",
+   "unit": 18,
+   "topic": "Matter Waves and Uncertainty",
+   "pathway": "Core",
+   "keywords": "de broglie wavelength heisenberg uncertainty principle",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=de+broglie+wavelength+heisenberg+uncertainty+principle",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+de+broglie+wavelength+heisenberg+uncertainty+principle",
+    "yt": "https://www.youtube.com/results?search_query=de+broglie+wavelength+heisenberg+uncertainty+principle"
+   }
+  },
+  {
+   "id": "18.6",
+   "unit": 18,
+   "topic": "Nuclear Structure and Isotopes",
+   "pathway": "Core",
+   "keywords": "nuclear structure isotopes physics",
+   "note": "Conceptual core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=nuclear+structure+isotopes+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+nuclear+structure+isotopes+physics",
+    "yt": "https://www.youtube.com/results?search_query=nuclear+structure+isotopes+physics"
+   }
+  },
+  {
+   "id": "18.7",
+   "unit": 18,
+   "topic": "Radioactivity and Half-Life",
+   "pathway": "Core",
+   "keywords": "radioactive decay half life physics",
+   "note": "High-yield skill",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=radioactive+decay+half+life+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+radioactive+decay+half+life+physics",
+    "yt": "https://www.youtube.com/results?search_query=radioactive+decay+half+life+physics"
+   }
+  },
+  {
+   "id": "18.8",
+   "unit": 18,
+   "topic": "Nuclear Fission and Fusion",
+   "pathway": "Core",
+   "keywords": "nuclear fission and fusion physics",
+   "note": "Application",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=nuclear+fission+and+fusion+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+nuclear+fission+and+fusion+physics",
+    "yt": "https://www.youtube.com/results?search_query=nuclear+fission+and+fusion+physics"
+   }
+  },
+  {
+   "id": "18.9",
+   "unit": 18,
+   "topic": "Quantum Models and Nuclear Energy",
+   "pathway": "Honors",
+   "keywords": "quantum model nuclear energy advanced physics",
+   "note": "Honors extension",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=quantum+model+nuclear+energy+advanced+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+quantum+model+nuclear+energy+advanced+physics",
+    "yt": "https://www.youtube.com/results?search_query=quantum+model+nuclear+energy+advanced+physics"
+   }
+  },
+  {
+   "id": "19.1",
+   "unit": 19,
+   "topic": "Reference Frames and Relativity",
+   "pathway": "Advanced",
+   "keywords": "reference frames and relativity physics",
+   "note": "Beyond Physics I",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=reference+frames+and+relativity+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+reference+frames+and+relativity+physics",
+    "yt": "https://www.youtube.com/results?search_query=reference+frames+and+relativity+physics"
+   }
+  },
+  {
+   "id": "19.2",
+   "unit": 19,
+   "topic": "Einstein's Special Relativity",
+   "pathway": "Advanced",
+   "keywords": "special relativity postulates einstein",
+   "note": "Beyond Physics I",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=special+relativity+postulates+einstein",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+special+relativity+postulates+einstein",
+    "yt": "https://www.youtube.com/results?search_query=special+relativity+postulates+einstein"
+   }
+  },
+  {
+   "id": "19.3",
+   "unit": 19,
+   "topic": "Time Dilation and Length Contraction",
+   "pathway": "Advanced",
+   "keywords": "time dilation and length contraction physics",
+   "note": "Beyond Physics I",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=time+dilation+and+length+contraction+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+time+dilation+and+length+contraction+physics",
+    "yt": "https://www.youtube.com/results?search_query=time+dilation+and+length+contraction+physics"
+   }
+  },
+  {
+   "id": "19.4",
+   "unit": 19,
+   "topic": "Mass-Energy Equivalence",
+   "pathway": "Advanced",
+   "keywords": "e=mc2 mass energy equivalence explained",
+   "note": "Beyond Physics I",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=e%3Dmc2+mass+energy+equivalence+explained",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+e%3Dmc2+mass+energy+equivalence+explained",
+    "yt": "https://www.youtube.com/results?search_query=e%3Dmc2+mass+energy+equivalence+explained"
+   }
+  },
+  {
+   "id": "19.5",
+   "unit": 19,
+   "topic": "Gravity and Spacetime",
+   "pathway": "Advanced",
+   "keywords": "general relativity gravity spacetime curvature",
+   "note": "Beyond Physics I",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=general+relativity+gravity+spacetime+curvature",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+general+relativity+gravity+spacetime+curvature",
+    "yt": "https://www.youtube.com/results?search_query=general+relativity+gravity+spacetime+curvature"
+   }
+  },
+  {
+   "id": "19.6",
+   "unit": 19,
+   "topic": "Stars and Stellar Evolution",
+   "pathway": "Advanced",
+   "keywords": "stellar evolution life cycle of a star",
+   "note": "Astro enrichment",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=stellar+evolution+life+cycle+of+a+star",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+stellar+evolution+life+cycle+of+a+star",
+    "yt": "https://www.youtube.com/results?search_query=stellar+evolution+life+cycle+of+a+star"
+   }
+  },
+  {
+   "id": "19.7",
+   "unit": 19,
+   "topic": "Black Holes and Galaxies",
+   "pathway": "Advanced",
+   "keywords": "black holes and galaxies astrophysics",
+   "note": "Astro enrichment",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=black+holes+and+galaxies+astrophysics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+black+holes+and+galaxies+astrophysics",
+    "yt": "https://www.youtube.com/results?search_query=black+holes+and+galaxies+astrophysics"
+   }
+  },
+  {
+   "id": "19.8",
+   "unit": 19,
+   "topic": "Expansion of the Universe and Cosmology",
+   "pathway": "Advanced",
+   "keywords": "expanding universe big bang cosmology",
+   "note": "Astro enrichment",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=expanding+universe+big+bang+cosmology",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+expanding+universe+big+bang+cosmology",
+    "yt": "https://www.youtube.com/results?search_query=expanding+universe+big+bang+cosmology"
+   }
+  },
+  {
+   "id": "19.9",
+   "unit": 19,
+   "topic": "Relativistic Calculations and Astrophysical Models",
+   "pathway": "Advanced",
+   "keywords": "relativistic calculations astrophysics problems",
+   "note": "Honors capstone depth",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=relativistic+calculations+astrophysics+problems",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+relativistic+calculations+astrophysics+problems",
+    "yt": "https://www.youtube.com/results?search_query=relativistic+calculations+astrophysics+problems"
+   }
+  },
+  {
+   "id": "20.1",
+   "unit": 20,
+   "topic": "Engineering Design and Scientific Modeling",
+   "pathway": "Core",
+   "keywords": "engineering design process physics",
+   "note": "Applied core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=engineering+design+process+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+engineering+design+process+physics",
+    "yt": "https://www.youtube.com/results?search_query=engineering+design+process+physics"
+   }
+  },
+  {
+   "id": "20.2",
+   "unit": 20,
+   "topic": "Experimental Design and Data Collection",
+   "pathway": "Core",
+   "keywords": "experimental design and data collection physics",
+   "note": "Applied core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=experimental+design+and+data+collection+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+experimental+design+and+data+collection+physics",
+    "yt": "https://www.youtube.com/results?search_query=experimental+design+and+data+collection+physics"
+   }
+  },
+  {
+   "id": "20.3",
+   "unit": 20,
+   "topic": "Computational Physics",
+   "pathway": "Advanced",
+   "keywords": "computational physics simulation python",
+   "note": "Enrichment",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=computational+physics+simulation+python",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+computational+physics+simulation+python",
+    "yt": "https://www.youtube.com/results?search_query=computational+physics+simulation+python"
+   }
+  },
+  {
+   "id": "20.4",
+   "unit": 20,
+   "topic": "Mechanical Systems and Structures",
+   "pathway": "Core",
+   "keywords": "mechanical systems and structures physics",
+   "note": "Applied core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=mechanical+systems+and+structures+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+mechanical+systems+and+structures+physics",
+    "yt": "https://www.youtube.com/results?search_query=mechanical+systems+and+structures+physics"
+   }
+  },
+  {
+   "id": "20.5",
+   "unit": 20,
+   "topic": "Energy and Renewable Technologies",
+   "pathway": "Core",
+   "keywords": "renewable energy technology physics",
+   "note": "Applied core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=renewable+energy+technology+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+renewable+energy+technology+physics",
+    "yt": "https://www.youtube.com/results?search_query=renewable+energy+technology+physics"
+   }
+  },
+  {
+   "id": "20.6",
+   "unit": 20,
+   "topic": "Electrical and Electronic Applications",
+   "pathway": "Core",
+   "keywords": "electronics applications physics",
+   "note": "Applied core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=electronics+applications+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+electronics+applications+physics",
+    "yt": "https://www.youtube.com/results?search_query=electronics+applications+physics"
+   }
+  },
+  {
+   "id": "20.7",
+   "unit": 20,
+   "topic": "Transportation and Aerospace Physics",
+   "pathway": "Core",
+   "keywords": "aerospace physics aerodynamics",
+   "note": "Applied core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=aerospace+physics+aerodynamics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+aerospace+physics+aerodynamics",
+    "yt": "https://www.youtube.com/results?search_query=aerospace+physics+aerodynamics"
+   }
+  },
+  {
+   "id": "20.8",
+   "unit": 20,
+   "topic": "Medical, Sports, and Environmental Physics",
+   "pathway": "Core",
+   "keywords": "medical physics sports biomechanics",
+   "note": "Applied core",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=medical+physics+sports+biomechanics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+medical+physics+sports+biomechanics",
+    "yt": "https://www.youtube.com/results?search_query=medical+physics+sports+biomechanics"
+   }
+  },
+  {
+   "id": "20.9",
+   "unit": 20,
+   "topic": "Independent Research and Engineering Capstone",
+   "pathway": "Honors",
+   "keywords": "physics research capstone project ideas",
+   "note": "Honors capstone",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=physics+research+capstone+project+ideas",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+physics+research+capstone+project+ideas",
+    "yt": "https://www.youtube.com/results?search_query=physics+research+capstone+project+ideas"
+   }
+  }
+ ],
+ "labs": [
+  {
+   "num": 1,
+   "title": "Measurement Lab",
+   "focus": "Precision, uncertainty, and measurement",
+   "keywords": "measurement uncertainty lab physics",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=measurement+uncertainty+lab+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+measurement+uncertainty+lab+physics",
+    "yt": "https://www.youtube.com/results?search_query=measurement+uncertainty+lab+physics"
+   }
+  },
+  {
+   "num": 2,
+   "title": "Vector Explorer",
+   "focus": "Magnitudes, components, and resultant vectors",
+   "keywords": "vector addition simulation physics",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=vector+addition+simulation+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+vector+addition+simulation+physics",
+    "yt": "https://www.youtube.com/results?search_query=vector+addition+simulation+physics"
+   }
+  },
+  {
+   "num": 3,
+   "title": "Motion Simulator",
+   "focus": "Position, velocity, and acceleration",
+   "keywords": "motion graphs simulation physics",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=motion+graphs+simulation+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+motion+graphs+simulation+physics",
+    "yt": "https://www.youtube.com/results?search_query=motion+graphs+simulation+physics"
+   }
+  },
+  {
+   "num": 4,
+   "title": "Projectile Launcher",
+   "focus": "Gravity, launch angle, and trajectory",
+   "keywords": "projectile motion simulation physics",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=projectile+motion+simulation+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+projectile+motion+simulation+physics",
+    "yt": "https://www.youtube.com/results?search_query=projectile+motion+simulation+physics"
+   }
+  },
+  {
+   "num": 5,
+   "title": "Newton's Force Lab",
+   "focus": "Mass, net force, and acceleration",
+   "keywords": "newtons second law lab experiment",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=newtons+second+law+lab+experiment",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+newtons+second+law+lab+experiment",
+    "yt": "https://www.youtube.com/results?search_query=newtons+second+law+lab+experiment"
+   }
+  },
+  {
+   "num": 6,
+   "title": "Friction and Incline Lab",
+   "focus": "Force balance and friction",
+   "keywords": "friction inclined plane lab physics",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=friction+inclined+plane+lab+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+friction+inclined+plane+lab+physics",
+    "yt": "https://www.youtube.com/results?search_query=friction+inclined+plane+lab+physics"
+   }
+  },
+  {
+   "num": 7,
+   "title": "Energy Transformation Lab",
+   "focus": "Work, energy, and conservation",
+   "keywords": "conservation of energy lab physics",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=conservation+of+energy+lab+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+conservation+of+energy+lab+physics",
+    "yt": "https://www.youtube.com/results?search_query=conservation+of+energy+lab+physics"
+   }
+  },
+  {
+   "num": 8,
+   "title": "Collision Laboratory",
+   "focus": "Momentum and impact",
+   "keywords": "collision momentum lab physics",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=collision+momentum+lab+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+collision+momentum+lab+physics",
+    "yt": "https://www.youtube.com/results?search_query=collision+momentum+lab+physics"
+   }
+  },
+  {
+   "num": 9,
+   "title": "Orbital Mechanics Lab",
+   "focus": "Gravitation and orbital motion",
+   "keywords": "orbital motion gravity simulation",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=orbital+motion+gravity+simulation",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+orbital+motion+gravity+simulation",
+    "yt": "https://www.youtube.com/results?search_query=orbital+motion+gravity+simulation"
+   }
+  },
+  {
+   "num": 10,
+   "title": "Rotation and Torque Lab",
+   "focus": "Torque, inertia, and angular momentum",
+   "keywords": "torque and rotation lab physics",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=torque+and+rotation+lab+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+torque+and+rotation+lab+physics",
+    "yt": "https://www.youtube.com/results?search_query=torque+and+rotation+lab+physics"
+   }
+  },
+  {
+   "num": 11,
+   "title": "Pendulum and Spring Lab",
+   "focus": "Oscillation and resonance",
+   "keywords": "pendulum and spring oscillation lab",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=pendulum+and+spring+oscillation+lab",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+pendulum+and+spring+oscillation+lab",
+    "yt": "https://www.youtube.com/results?search_query=pendulum+and+spring+oscillation+lab"
+   }
+  },
+  {
+   "num": 12,
+   "title": "Fluid Dynamics Lab",
+   "focus": "Pressure, buoyancy, and fluid flow",
+   "keywords": "fluid pressure buoyancy lab physics",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=fluid+pressure+buoyancy+lab+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+fluid+pressure+buoyancy+lab+physics",
+    "yt": "https://www.youtube.com/results?search_query=fluid+pressure+buoyancy+lab+physics"
+   }
+  },
+  {
+   "num": 13,
+   "title": "Thermal Energy Lab",
+   "focus": "Heat transfer and gas behavior",
+   "keywords": "calorimetry and heat transfer lab",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=calorimetry+and+heat+transfer+lab",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+calorimetry+and+heat+transfer+lab",
+    "yt": "https://www.youtube.com/results?search_query=calorimetry+and+heat+transfer+lab"
+   }
+  },
+  {
+   "num": 14,
+   "title": "Wave Interference Lab",
+   "focus": "Superposition, resonance, and sound",
+   "keywords": "wave interference simulation physics",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=wave+interference+simulation+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+wave+interference+simulation+physics",
+    "yt": "https://www.youtube.com/results?search_query=wave+interference+simulation+physics"
+   }
+  },
+  {
+   "num": 15,
+   "title": "Optics Laboratory",
+   "focus": "Reflection, refraction, and lenses",
+   "keywords": "optics refraction lens lab physics",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=optics+refraction+lens+lab+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+optics+refraction+lens+lab+physics",
+    "yt": "https://www.youtube.com/results?search_query=optics+refraction+lens+lab+physics"
+   }
+  },
+  {
+   "num": 16,
+   "title": "Electric Field Explorer",
+   "focus": "Charge and electric forces",
+   "keywords": "electric field simulation physics",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=electric+field+simulation+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+electric+field+simulation+physics",
+    "yt": "https://www.youtube.com/results?search_query=electric+field+simulation+physics"
+   }
+  },
+  {
+   "num": 17,
+   "title": "Circuit Builder",
+   "focus": "Current, voltage, and resistance",
+   "keywords": "build a circuit simulation physics",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=build+a+circuit+simulation+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+build+a+circuit+simulation+physics",
+    "yt": "https://www.youtube.com/results?search_query=build+a+circuit+simulation+physics"
+   }
+  },
+  {
+   "num": 18,
+   "title": "Magnetic Field Lab",
+   "focus": "Magnetic forces and induction",
+   "keywords": "magnetic field simulation physics",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=magnetic+field+simulation+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+magnetic+field+simulation+physics",
+    "yt": "https://www.youtube.com/results?search_query=magnetic+field+simulation+physics"
+   }
+  },
+  {
+   "num": 19,
+   "title": "Quantum Discovery Lab",
+   "focus": "Photons and quantized energy",
+   "keywords": "photoelectric effect simulation physics",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=photoelectric+effect+simulation+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+photoelectric+effect+simulation+physics",
+    "yt": "https://www.youtube.com/results?search_query=photoelectric+effect+simulation+physics"
+   }
+  },
+  {
+   "num": 20,
+   "title": "Relativity Explorer",
+   "focus": "Time dilation and reference frames",
+   "keywords": "relativity time dilation simulation",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=relativity+time+dilation+simulation",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+relativity+time+dilation+simulation",
+    "yt": "https://www.youtube.com/results?search_query=relativity+time+dilation+simulation"
+   }
+  }
+ ],
+ "orientation": [
+  {
+   "num": 1,
+   "title": "Welcome to ByrdWay Physics I + Honors",
+   "keywords": "how to learn physics from scratch",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=how+to+learn+physics+from+scratch",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+how+to+learn+physics+from+scratch",
+    "yt": "https://www.youtube.com/results?search_query=how+to+learn+physics+from+scratch"
+   }
+  },
+  {
+   "num": 2,
+   "title": "How to Use Your Physics Power Tool",
+   "keywords": "how to study physics effectively",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=how+to+study+physics+effectively",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+how+to+study+physics+effectively",
+    "yt": "https://www.youtube.com/results?search_query=how+to+study+physics+effectively"
+   }
+  },
+  {
+   "num": 3,
+   "title": "Student Dashboard and Mastery Tracker",
+   "keywords": "how to track learning progress mastery",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=how+to+track+learning+progress+mastery",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+how+to+track+learning+progress+mastery",
+    "yt": "https://www.youtube.com/results?search_query=how+to+track+learning+progress+mastery"
+   }
+  },
+  {
+   "num": 4,
+   "title": "Physics Readiness Diagnostic",
+   "keywords": "physics readiness diagnostic test",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=physics+readiness+diagnostic+test",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+physics+readiness+diagnostic+test",
+    "yt": "https://www.youtube.com/results?search_query=physics+readiness+diagnostic+test"
+   }
+  },
+  {
+   "num": 5,
+   "title": "Personalized Physics Learning Plan",
+   "keywords": "how to make a study plan for physics",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=how+to+make+a+study+plan+for+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+how+to+make+a+study+plan+for+physics",
+    "yt": "https://www.youtube.com/results?search_query=how+to+make+a+study+plan+for+physics"
+   }
+  },
+  {
+   "num": 6,
+   "title": "Core Physics I and Honors Learning Pathways",
+   "keywords": "physics 1 vs honors physics difference",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=physics+1+vs+honors+physics+difference",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+physics+1+vs+honors+physics+difference",
+    "yt": "https://www.youtube.com/results?search_query=physics+1+vs+honors+physics+difference"
+   }
+  },
+  {
+   "num": 7,
+   "title": "Mathematics Readiness and Quick Bridges",
+   "keywords": "math you need for physics",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=math+you+need+for+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+math+you+need+for+physics",
+    "yt": "https://www.youtube.com/results?search_query=math+you+need+for+physics"
+   }
+  },
+  {
+   "num": 8,
+   "title": "Physics Reality Lab and Simulation Center",
+   "keywords": "physics simulations for students",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=physics+simulations+for+students",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+physics+simulations+for+students",
+    "yt": "https://www.youtube.com/results?search_query=physics+simulations+for+students"
+   }
+  },
+  {
+   "num": 9,
+   "title": "Feynman Discovery Studio",
+   "keywords": "feynman technique explained study",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=feynman+technique+explained+study",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+feynman+technique+explained+study",
+    "yt": "https://www.youtube.com/results?search_query=feynman+technique+explained+study"
+   }
+  },
+  {
+   "num": 10,
+   "title": "Learning Engines and AI Tutor",
+   "keywords": "how to use ai tutor to study physics",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=how+to+use+ai+tutor+to+study+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+how+to+use+ai+tutor+to+study+physics",
+    "yt": "https://www.youtube.com/results?search_query=how+to+use+ai+tutor+to+study+physics"
+   }
+  },
+  {
+   "num": 11,
+   "title": "Assessment and Mastery Center",
+   "keywords": "mastery based learning explained",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=mastery+based+learning+explained",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+mastery+based+learning+explained",
+    "yt": "https://www.youtube.com/results?search_query=mastery+based+learning+explained"
+   }
+  },
+  {
+   "num": 12,
+   "title": "Progress Reports and Final Certification",
+   "keywords": "physics final exam review",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=physics+final+exam+review",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+physics+final+exam+review",
+    "yt": "https://www.youtube.com/results?search_query=physics+final+exam+review"
+   }
+  }
+ ],
+ "engines": [
+  {
+   "num": 21,
+   "title": "Physics Cheat Sheets",
+   "keywords": "physics formula cheat sheet",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=physics+formula+cheat+sheet",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+physics+formula+cheat+sheet",
+    "yt": "https://www.youtube.com/results?search_query=physics+formula+cheat+sheet"
+   }
+  },
+  {
+   "num": 22,
+   "title": "Physics Blueprints",
+   "keywords": "physics problem solving strategy steps",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=physics+problem+solving+strategy+steps",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+physics+problem+solving+strategy+steps",
+    "yt": "https://www.youtube.com/results?search_query=physics+problem+solving+strategy+steps"
+   }
+  },
+  {
+   "num": 23,
+   "title": "Physics Flashcards",
+   "keywords": "how to use flashcards active recall",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=how+to+use+flashcards+active+recall",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+how+to+use+flashcards+active+recall",
+    "yt": "https://www.youtube.com/results?search_query=how+to+use+flashcards+active+recall"
+   }
+  },
+  {
+   "num": 24,
+   "title": "Physics Test Me",
+   "keywords": "physics practice problems with solutions",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=physics+practice+problems+with+solutions",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+physics+practice+problems+with+solutions",
+    "yt": "https://www.youtube.com/results?search_query=physics+practice+problems+with+solutions"
+   }
+  },
+  {
+   "num": 25,
+   "title": "Physics Reality Labs",
+   "keywords": "physics lab simulation experiment",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=physics+lab+simulation+experiment",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+physics+lab+simulation+experiment",
+    "yt": "https://www.youtube.com/results?search_query=physics+lab+simulation+experiment"
+   }
+  },
+  {
+   "num": 26,
+   "title": "Feynman Discovery Studio",
+   "keywords": "feynman technique physics study",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=feynman+technique+physics+study",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+feynman+technique+physics+study",
+    "yt": "https://www.youtube.com/results?search_query=feynman+technique+physics+study"
+   }
+  },
+  {
+   "num": 27,
+   "title": "Interactive Support",
+   "keywords": "math remediation for physics students",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=math+remediation+for+physics+students",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+math+remediation+for+physics+students",
+    "yt": "https://www.youtube.com/results?search_query=math+remediation+for+physics+students"
+   }
+  },
+  {
+   "num": 28,
+   "title": "AI Physics Tutor",
+   "keywords": "socratic questioning method learning",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=socratic+questioning+method+learning",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+socratic+questioning+method+learning",
+    "yt": "https://www.youtube.com/results?search_query=socratic+questioning+method+learning"
+   }
+  },
+  {
+   "num": 29,
+   "title": "Physics Formula Laboratory",
+   "keywords": "deriving physics formulas and unit analysis",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=deriving+physics+formulas+and+unit+analysis",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+deriving+physics+formulas+and+unit+analysis",
+    "yt": "https://www.youtube.com/results?search_query=deriving+physics+formulas+and+unit+analysis"
+   }
+  },
+  {
+   "num": 30,
+   "title": "Physics Error Detective",
+   "keywords": "common physics mistakes and misconceptions",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=common+physics+mistakes+and+misconceptions",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+common+physics+mistakes+and+misconceptions",
+    "yt": "https://www.youtube.com/results?search_query=common+physics+mistakes+and+misconceptions"
+   }
+  }
+ ],
+ "assessment": [
+  {
+   "num": 31,
+   "title": "Physics Readiness Diagnostic: 250-Item Bank",
+   "keywords": "physics diagnostic test 250 questions",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=physics+diagnostic+test+250+questions",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+physics+diagnostic+test+250+questions",
+    "yt": "https://www.youtube.com/results?search_query=physics+diagnostic+test+250+questions"
+   }
+  },
+  {
+   "num": 32,
+   "title": "Adaptive 20-Question Diagnostic",
+   "keywords": "adaptive physics practice test",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=adaptive+physics+practice+test",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+adaptive+physics+practice+test",
+    "yt": "https://www.youtube.com/results?search_query=adaptive+physics+practice+test"
+   }
+  },
+  {
+   "num": 33,
+   "title": "Personalized Remediation and Recovery",
+   "keywords": "how to fix gaps in physics understanding",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=how+to+fix+gaps+in+physics+understanding",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+how+to+fix+gaps+in+physics+understanding",
+    "yt": "https://www.youtube.com/results?search_query=how+to+fix+gaps+in+physics+understanding"
+   }
+  },
+  {
+   "num": 34,
+   "title": "Unit-Level Core Assessments",
+   "keywords": "physics unit test practice problems",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=physics+unit+test+practice+problems",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+physics+unit+test+practice+problems",
+    "yt": "https://www.youtube.com/results?search_query=physics+unit+test+practice+problems"
+   }
+  },
+  {
+   "num": 35,
+   "title": "Unit-Level Honors Assessments",
+   "keywords": "honors physics test practice problems",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=honors+physics+test+practice+problems",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+honors+physics+test+practice+problems",
+    "yt": "https://www.youtube.com/results?search_query=honors+physics+test+practice+problems"
+   }
+  },
+  {
+   "num": 36,
+   "title": "Laboratory Performance Assessments",
+   "keywords": "how to write a physics lab report",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=how+to+write+a+physics+lab+report",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+how+to+write+a+physics+lab+report",
+    "yt": "https://www.youtube.com/results?search_query=how+to+write+a+physics+lab+report"
+   }
+  },
+  {
+   "num": 37,
+   "title": "Graph and Diagram Interpretation",
+   "keywords": "interpreting motion graphs and diagrams physics",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=interpreting+motion+graphs+and+diagrams+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+interpreting+motion+graphs+and+diagrams+physics",
+    "yt": "https://www.youtube.com/results?search_query=interpreting+motion+graphs+and+diagrams+physics"
+   }
+  },
+  {
+   "num": 38,
+   "title": "Scientific Explanation and Evidence",
+   "keywords": "claim evidence reasoning science writing",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=claim+evidence+reasoning+science+writing",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+claim+evidence+reasoning+science+writing",
+    "yt": "https://www.youtube.com/results?search_query=claim+evidence+reasoning+science+writing"
+   }
+  },
+  {
+   "num": 39,
+   "title": "Mathematical Reasoning and Unit Analysis",
+   "keywords": "unit analysis in physics problems",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=unit+analysis+in+physics+problems",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+unit+analysis+in+physics+problems",
+    "yt": "https://www.youtube.com/results?search_query=unit+analysis+in+physics+problems"
+   }
+  },
+  {
+   "num": 40,
+   "title": "EOC Level 1: Foundational Mastery",
+   "keywords": "physics eoc practice test",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=physics+eoc+practice+test",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+physics+eoc+practice+test",
+    "yt": "https://www.youtube.com/results?search_query=physics+eoc+practice+test"
+   }
+  },
+  {
+   "num": 41,
+   "title": "EOC Level 2: Developing Proficiency",
+   "keywords": "physics eoc review questions",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=physics+eoc+review+questions",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+physics+eoc+review+questions",
+    "yt": "https://www.youtube.com/results?search_query=physics+eoc+review+questions"
+   }
+  },
+  {
+   "num": 42,
+   "title": "EOC Level 3: Independent Application",
+   "keywords": "physics application problems practice",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=physics+application+problems+practice",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+physics+application+problems+practice",
+    "yt": "https://www.youtube.com/results?search_query=physics+application+problems+practice"
+   }
+  },
+  {
+   "num": 43,
+   "title": "EOC Level 4: Extended Reasoning and DOK 4",
+   "keywords": "physics extended response questions",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=physics+extended+response+questions",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+physics+extended+response+questions",
+    "yt": "https://www.youtube.com/results?search_query=physics+extended+response+questions"
+   }
+  },
+  {
+   "num": 44,
+   "title": "EOC Level 5: Advanced Honors Challenges",
+   "keywords": "honors physics challenge problems",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=honors+physics+challenge+problems",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+honors+physics+challenge+problems",
+    "yt": "https://www.youtube.com/results?search_query=honors+physics+challenge+problems"
+   }
+  },
+  {
+   "num": 45,
+   "title": "Comprehensive Physics I Final",
+   "keywords": "physics 1 final exam review",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=physics+1+final+exam+review",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+physics+1+final+exam+review",
+    "yt": "https://www.youtube.com/results?search_query=physics+1+final+exam+review"
+   }
+  },
+  {
+   "num": 46,
+   "title": "Comprehensive Physics I Honors Final",
+   "keywords": "honors physics final exam review",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=honors+physics+final+exam+review",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+honors+physics+final+exam+review",
+    "yt": "https://www.youtube.com/results?search_query=honors+physics+final+exam+review"
+   }
+  },
+  {
+   "num": 47,
+   "title": "Mastery Dashboard and Performance Report",
+   "keywords": "standards based grading explained",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=standards+based+grading+explained",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+standards+based+grading+explained",
+    "yt": "https://www.youtube.com/results?search_query=standards+based+grading+explained"
+   }
+  }
+ ],
+ "reference": [
+  {
+   "num": 48,
+   "title": "Complete Physics Formula Reference",
+   "keywords": "physics formula sheet all formulas",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=physics+formula+sheet+all+formulas",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+physics+formula+sheet+all+formulas",
+    "yt": "https://www.youtube.com/results?search_query=physics+formula+sheet+all+formulas"
+   }
+  },
+  {
+   "num": 49,
+   "title": "SI Units and Conversion Tables",
+   "keywords": "si units and unit conversion table",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=si+units+and+unit+conversion+table",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+si+units+and+unit+conversion+table",
+    "yt": "https://www.youtube.com/results?search_query=si+units+and+unit+conversion+table"
+   }
+  },
+  {
+   "num": 50,
+   "title": "Physical Constants Reference",
+   "keywords": "list of physical constants physics",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=list+of+physical+constants+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+list+of+physical+constants+physics",
+    "yt": "https://www.youtube.com/results?search_query=list+of+physical+constants+physics"
+   }
+  },
+  {
+   "num": 51,
+   "title": "Mathematics and Trigonometry Quick Reference",
+   "keywords": "trigonometry review for physics",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=trigonometry+review+for+physics",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+trigonometry+review+for+physics",
+    "yt": "https://www.youtube.com/results?search_query=trigonometry+review+for+physics"
+   }
+  },
+  {
+   "num": 52,
+   "title": "Scientific Graphing and Data Interpretation",
+   "keywords": "how to graph scientific data error bars",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=how+to+graph+scientific+data+error+bars",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+how+to+graph+scientific+data+error+bars",
+    "yt": "https://www.youtube.com/results?search_query=how+to+graph+scientific+data+error+bars"
+   }
+  },
+  {
+   "num": 53,
+   "title": "Laboratory Safety and Investigation Procedures",
+   "keywords": "lab safety rules science class",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=lab+safety+rules+science+class",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+lab+safety+rules+science+class",
+    "yt": "https://www.youtube.com/results?search_query=lab+safety+rules+science+class"
+   }
+  },
+  {
+   "num": 54,
+   "title": "Common Physics Misconceptions",
+   "keywords": "physics misconceptions students have",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=physics+misconceptions+students+have",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+physics+misconceptions+students+have",
+    "yt": "https://www.youtube.com/results?search_query=physics+misconceptions+students+have"
+   }
+  },
+  {
+   "num": 55,
+   "title": "Glossary of Physics Terminology",
+   "keywords": "physics vocabulary glossary",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=physics+vocabulary+glossary",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+physics+vocabulary+glossary",
+    "yt": "https://www.youtube.com/results?search_query=physics+vocabulary+glossary"
+   }
+  },
+  {
+   "num": 56,
+   "title": "Multilingual Learning Support",
+   "keywords": "physics vocabulary for english learners",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=physics+vocabulary+for+english+learners",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+physics+vocabulary+for+english+learners",
+    "yt": "https://www.youtube.com/results?search_query=physics+vocabulary+for+english+learners"
+   }
+  },
+  {
+   "num": 57,
+   "title": "Standards Alignment and Course Crosswalk",
+   "keywords": "ngss physics standards explained",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=ngss+physics+standards+explained",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+ngss+physics+standards+explained",
+    "yt": "https://www.youtube.com/results?search_query=ngss+physics+standards+explained"
+   }
+  },
+  {
+   "num": 58,
+   "title": "Student Progress and Study Recommendations",
+   "keywords": "study strategies for science exams",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=study+strategies+for+science+exams",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+study+strategies+for+science+exams",
+    "yt": "https://www.youtube.com/results?search_query=study+strategies+for+science+exams"
+   }
+  },
+  {
+   "num": 59,
+   "title": "Capstone Projects and Real-World Investigations",
+   "keywords": "physics project ideas high school",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=physics+project+ideas+high+school",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+physics+project+ideas+high+school",
+    "yt": "https://www.youtube.com/results?search_query=physics+project+ideas+high+school"
+   }
+  },
+  {
+   "num": 60,
+   "title": "Credits, References, and Scientific Sources",
+   "keywords": "best physics textbooks reference",
+   "links": {
+    "khan": "https://www.khanacademy.org/search?page_search_query=best+physics+textbooks+reference",
+    "oct": "https://www.youtube.com/results?search_query=organic+chemistry+tutor+best+physics+textbooks+reference",
+    "yt": "https://www.youtube.com/results?search_query=best+physics+textbooks+reference"
+   }
+  }
+ ],
+ "anchors": [
+  {
+   "title": "Khan Academy - Physics (full course)",
+   "url": "https://www.khanacademy.org/science/physics",
+   "use": "The default spine for Units 1-17. Bookmark once, browse by unit."
+  },
+  {
+   "title": "Khan Academy - AP Physics 1",
+   "url": "https://www.khanacademy.org/science/ap-physics-1",
+   "use": "Honors pathway: kinematics, forces, energy, momentum, rotation, SHM."
+  },
+  {
+   "title": "Khan Academy - AP Physics 2",
+   "url": "https://www.khanacademy.org/science/ap-physics-2",
+   "use": "Honors/advanced: fluids, thermodynamics, circuits, optics, modern physics."
+  },
+  {
+   "title": "The Organic Chemistry Tutor - channel",
+   "url": "https://www.youtube.com/@TheOrganicChemistryTutor",
+   "use": "Worked-problem reference channel for the whole course."
+  },
+  {
+   "title": "OCT - channel search (fallback)",
+   "url": "https://www.youtube.com/results?search_query=organic+chemistry+tutor",
+   "use": "Use if the channel handle above has changed; same result set."
+  },
+  {
+   "title": "YouTube - topic search pattern",
+   "url": "https://www.youtube.com/results?search_query=physics+topic+here",
+   "use": "Replace the query to build your own link for any section."
+  },
+  {
+   "title": "Khan Academy - topic search pattern",
+   "url": "https://www.khanacademy.org/search?page_search_query=topic+here",
+   "use": "How every Khan link in this workbook is constructed."
+  }
+ ],
+ "counts": {
+  "units": 20,
+  "sections": 170,
+  "rows": 242,
+  "links": 726,
+  "anchors": 7
+ }
+}
