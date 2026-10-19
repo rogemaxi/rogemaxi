@@ -30,7 +30,7 @@ export function renderSection(root, id) {
 
   root.innerHTML = `
   <article class="page lesson" aria-labelledby="sttl">
-    <p class="crumb"><a href="#/unit/${unit.num}">${tt('unit.title', { n: unit.num })} · ${esc(unit.title)}</a></p>
+    <p class="crumb"><a href="#/unit/${unit.num}">${tt('unit.title', { n: unit.num })} · ${L(localize('unit.' + unit.num, { x: unit.title }).value.x)}</a></p>
     <header class="lesson-head">
       <h1 id="sttl"><span class="secnum">${esc(sec.id)}</span> ${L(c.title)}</h1>
       <div class="lesson-meta">${pathwayBadge(sec.pathway)} ${speakButton('#lessonbody')}</div>

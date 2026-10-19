@@ -1,0 +1,119 @@
+{
+ "file": "dist/ByrdWay_Physics_I_Honors.html",
+ "at": "2026-10-19T18:29:24.707Z",
+ "browser": "Chromium (Playwright 1.56.1, SwiftShader WebGL)",
+ "results": [
+  {
+   "name": "shell: cover, dashboard, navigation",
+   "status": "pass",
+   "ms": 3618,
+   "checks": 9,
+   "error": null
+  },
+  {
+   "name": "slice: section 5.3 full learning flow + progress persists",
+   "status": "pass",
+   "ms": 2875,
+   "checks": 12,
+   "error": null
+  },
+  {
+   "name": "slice: Lab 5 3D experiment, predict gate, run, challenge, evaluation",
+   "status": "pass",
+   "ms": 10369,
+   "checks": 20,
+   "error": null
+  },
+  {
+   "name": "slice: Lab 5 2D fallback (low graphics) has identical physics",
+   "status": "pass",
+   "ms": 2565,
+   "checks": 2,
+   "error": null
+  },
+  {
+   "name": "i18n[en]: 5.3 + Lab 5 fully localized",
+   "status": "pass",
+   "ms": 1521,
+   "checks": 4,
+   "error": null
+  },
+  {
+   "name": "i18n[es]: 5.3 + Lab 5 fully localized",
+   "status": "pass",
+   "ms": 1655,
+   "checks": 4,
+   "error": null
+  },
+  {
+   "name": "i18n[fr]: 5.3 + Lab 5 fully localized",
+   "status": "pass",
+   "ms": 1596,
+   "checks": 4,
+   "error": null
+  },
+  {
+   "name": "i18n[ht]: 5.3 + Lab 5 fully localized",
+   "status": "pass",
+   "ms": 1608,
+   "checks": 4,
+   "error": null
+  },
+  {
+   "name": "i18n[pt]: 5.3 + Lab 5 fully localized",
+   "status": "pass",
+   "ms": 1555,
+   "checks": 4,
+   "error": null
+  },
+  {
+   "name": "i18n[ar]: 5.3 + Lab 5 fully localized",
+   "status": "pass",
+   "ms": 1715,
+   "checks": 4,
+   "error": null
+  },
+  {
+   "name": "i18n[zh]: 5.3 + Lab 5 fully localized",
+   "status": "pass",
+   "ms": 1667,
+   "checks": 4,
+   "error": null
+  },
+  {
+   "name": "i18n[hi]: 5.3 + Lab 5 fully localized",
+   "status": "pass",
+   "ms": 1642,
+   "checks": 4,
+   "error": null
+  },
+  {
+   "name": "i18n[bn]: 5.3 + Lab 5 fully localized",
+   "status": "pass",
+   "ms": 1701,
+   "checks": 4,
+   "error": null
+  },
+  {
+   "name": "i18n[vi]: 5.3 + Lab 5 fully localized",
+   "status": "pass",
+   "ms": 1542,
+   "checks": 4,
+   "error": null
+  },
+  {
+   "name": "i18n[ko]: 5.3 + Lab 5 fully localized",
+   "status": "pass",
+   "ms": 1593,
+   "checks": 4,
+   "error": null
+  },
+  {
+   "name": "i18n[ja]: 5.3 + Lab 5 fully localized",
+   "status": "pass",
+   "ms": 1696,
+   "checks": 4,
+   "error": null
+  }
+ ]
+}

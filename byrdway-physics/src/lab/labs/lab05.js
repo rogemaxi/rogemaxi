@@ -10,6 +10,8 @@ export default {
     title: 'Newton’s Force Lab',
     question: 'How does a cart’s acceleration depend on the net force acting on it and on its mass?',
     params: { m: 'Cart mass', F: 'Applied force', mu: 'Kinetic friction coefficient μk' },
+    graph: ['velocity v (m/s)', 'position x (m)', 'acceleration a (m/s²)', 'forces (N)'],
+    series: { applied: 'applied', friction: 'friction', net: 'net' },
     measures: { t: 'Time', x: 'Position', v: 'Velocity', a: 'Acceleration', Fnet: 'Net force', f: 'Friction force', N: 'Normal force' },
     predict: {
       prompt: 'You will double the cart’s mass while keeping the applied force the same (no friction). What will happen to the acceleration?',
@@ -121,7 +123,7 @@ export default {
     const m = Object.fromEntries(model.measures().map(x => [x.id, x.value]));
     return [
       'ΣF = F − f = m·a',
-      `f = μk·m·g = ${p.mu} × ${p.m} × 9.8 = ${(p.mu * p.m * 9.8).toFixed(2)} N  (if moving)`,
+      `f = μk·m·g = ${p.mu} × ${p.m} × 9.8 = ${(p.mu * p.m * 9.8).toFixed(2)} N`,
       `ΣF = ${p.F} − ${Math.abs(m.f).toFixed(2)} = ${m.Fnet.toFixed(2)} N`,
       `a = ΣF/m = ${m.Fnet.toFixed(2)} / ${p.m} = ${m.a.toFixed(3)} m/s²`,
     ];

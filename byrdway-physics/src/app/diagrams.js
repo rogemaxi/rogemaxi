@@ -6,14 +6,20 @@ const COLORS = { good: '#4ade80', bad: '#f87171', blue: '#7dd3fc', gold: '#fbbf2
 const C = c => COLORS[c] || c || COLORS.gold;
 const svg = (w, h, body, title) => `<svg viewBox="0 0 ${w} ${h}" class="diagram" role="img" aria-label="${esc(title || 'diagram')}"><title>${esc(title || '')}</title><defs>${['good', 'bad', 'blue', 'gold', 'purple', 'pink', 'dim', 'txt', 'orange', 'cyan'].map(k => `<marker id="ah-${k}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="${COLORS[k]}"/></marker>`).join('')}</defs>${body}</svg>`;
 const arrow = (x1, y1, x2, y2, c = 'gold', w = 3) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${C(c)}" stroke-width="${w}" marker-end="url(#ah-${COLORS[c] ? c : 'gold'})"/>`;
-const text = (x, y, s, c = 'txt', size = 13, anchor = 'middle') => `<text x="${x}" y="${y}" fill="${C(c)}" font-size="${size}" text-anchor="${anchor}" font-family="system-ui,sans-serif">${esc(s)}</text>`;
+// Right-to-left labels (Arabic) get an RTL base direction; text-anchor start/end then refer to the RTL edges, so flip them
+// to keep the label on the same side of its arrow.
+const text = (x, y, s, c = 'txt', size = 13, anchor = 'middle') => {
+  const rtl = /[\u0600-\u06FF]/.test(String(s));
+  const a = rtl ? ({ start: 'end', end: 'start' }[anchor] || anchor) : anchor;
+  return `<text x="${x}" y="${y}" fill="${C(c)}" font-size="${size}" text-anchor="${a}" ${rtl ? 'direction="rtl" unicode-bidi="embed"' : ''} font-family="system-ui,sans-serif">${esc(s)}</text>`;
+};
 
 const KINDS = {
   // Free-body diagram: forces [{label, dir (deg), mag, color}] on a box; arrow length ∝ magnitude.
   fbd(d) {
-    const W = 360, H = 280, cx = 180, cy = 140, max = Math.max(...d.forces.map(f => f.mag)), Lmax = 100;
+    const W = 480, H = 330, cx = 240, cy = 165, max = Math.max(...d.forces.map(f => f.mag)), Lmax = 80;
     let b = `<rect x="${cx - 32}" y="${cy - 26}" width="64" height="52" rx="6" fill="#334155" stroke="#94a3b8"/>`;
-    if (d.surface !== false) b += `<line x1="40" y1="${cy + 26}" x2="320" y2="${cy + 26}" stroke="#475569" stroke-width="2" stroke-dasharray="${d.surface === 'none' ? '0' : '6 4'}"/>`;
+    if (d.surface !== false) b += `<line x1="90" y1="${cy + 26}" x2="390" y2="${cy + 26}" stroke="#475569" stroke-width="2" stroke-dasharray="${d.surface === 'none' ? '0' : '6 4'}"/>`;
     for (const f of d.forces) {
       const L = 28 + Lmax * f.mag / max, r = f.dir * Math.PI / 180;
       const x2 = cx + Math.cos(r) * (L + 32), y2 = cy - Math.sin(r) * (L + 26);
@@ -21,7 +27,7 @@ const KINDS = {
       b += arrow(x1, y1, x2, y2, f.color || 'gold');
       b += text(x2 + Math.cos(r) * 14, y2 - Math.sin(r) * 14 + 4, f.label, f.color || 'gold', 12, Math.cos(r) > 0.3 ? 'start' : Math.cos(r) < -0.3 ? 'end' : 'middle');
     }
-    if (d.net) b += text(cx, 24, d.net, 'good', 14);
+    if (d.net) b += text(14, 22, d.net, 'good', 14, 'start');
     return svg(W, H, b, d.title);
   },
   // Function / data plot: series [{fn: (x)=>y as string expression in x, or pts:[[x,y]]}], axes labels.

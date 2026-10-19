@@ -66,26 +66,15 @@ export function tcRaw(key, en) {
 
 export const missingReport = () => ({ ui: [...missing.ui], content: [...missing.content] });
 
-/**
- * Enumerate every translatable string of a content object as [key, englishText] pairs.
- * Keys are "<scope>|<path>", e.g. "5.3|guided.0.q". Numbers, ids and formula source are not translatable.
- */
-const SKIP = new Set(['id', 'eq', 'answer', 'unit', 'tol', 'calc', 'lab', 'visual', 'type', 'pathway', 'level', 'difficulty', 'tags', 'prereqTags', 'unitNum', 'choices_raw', 'sym', 'dims', 'fn', 'num', 'correct', 'section', 'src', 'dok']);
-export function contentKeys(scope, obj, path = '', out = []) {
-  if (typeof obj === 'string') { if (/[A-Za-z]{2}/.test(obj)) out.push([`${scope}|${path}`, obj]); return out; }
-  if (Array.isArray(obj)) { obj.forEach((v, i) => contentKeys(scope, v, path ? `${path}.${i}` : `${i}`, out)); return out; }
-  if (obj && typeof obj === 'object') {
-    for (const [k, v] of Object.entries(obj)) if (!SKIP.has(k) && typeof v !== 'function') contentKeys(scope, v, path ? `${path}.${k}` : k, out);
-  }
-  return out;
-}
+export { contentKeys, SKIP, isText } from './i18nkeys.js';
+import { SKIP, SKIP_PATH, isText } from './i18nkeys.js';
 
 /** Return a deep copy of obj with all translatable strings localized; collects untranslated count. */
 export function localize(scope, obj) {
   const stats = { total: 0, translated: 0 };
   const walk = (v, path) => {
     if (typeof v === 'string') {
-      if (!/[A-Za-z]{2}/.test(v)) return v;
+      if (!isText(v) || SKIP_PATH.test(path)) return v;
       stats.total++;
       const r = tcRaw(`${scope}|${path}`, v);
       if (r.translated) { stats.translated++; return r.text; }

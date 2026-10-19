@@ -68,7 +68,7 @@ export function mountLab(root, lab, opts = {}) {
     </div>
     <div class="lab-data">
       <div class="card"><h2>${tt('lab.graph')}</h2>
-        ${lab.graph.choices ? `<label class="sel">y: <select id="gsel">${lab.graph.choices.map((c, i) => `<option value="${i}">${esc(c.label)}</option>`).join('')}</select></label>` : ''}
+        ${lab.graph.choices ? `<label class="sel">y: <select id="gsel">${lab.graph.choices.map((c, i) => `<option value="${i}">${esc(T.graph?.[i] ? plain(T.graph[i]) : c.label)}</option>`).join('')}</select></label>` : ''}
         <canvas id="graph" class="graph" role="img" aria-label="${tt('lab.graph')}"></canvas></div>
       <div class="card"><h2>${tt('lab.data')}</h2>
         <div class="row"><button class="btn" id="rec">● ${tt('lab.record')}</button><button class="btn ghost" id="clr">${tt('lab.clear')}</button><button class="btn ghost" id="csv">${tt('lab.export')}</button></div>
@@ -187,8 +187,9 @@ export function mountLab(root, lab, opts = {}) {
   function drawGraph() {
     const G = lab.graph.choices ? lab.graph.choices[gsel] : lab.graph;
     const xk = G.x || 't';
-    const cur = (G.y).map((k, i) => ({ label: G.labels?.[i] ?? k, color: seriesColor(i), pts: series.map(s => [s[xk], s[k]]) }));
-    const old = runs.flatMap((r, ri) => G.y.map((k, i) => ({ label: `${t('lab.run.n', { n: ri + 1 })}${G.y.length > 1 ? ' ' + (G.labels?.[i] ?? k) : ''}`, color: seriesColor(ri + G.y.length + i), dashed: true, pts: r.series.map(s => [s[xk], s[k]]) })));
+    const lab_ = i => { const l = G.labels?.[i] ?? G.y[i]; return T.series?.[l] ? plain(T.series[l]) : l; };
+    const cur = (G.y).map((k, i) => ({ label: lab_(i), color: seriesColor(i), pts: series.map(s => [s[xk], s[k]]) }));
+    const old = runs.flatMap((r, ri) => G.y.map((k, i) => ({ label: `${t('lab.run.n', { n: ri + 1 })}${G.y.length > 1 ? ' ' + lab_(i) : ''}`, color: seriesColor(ri + G.y.length + i), dashed: true, pts: r.series.map(s => [s[xk], s[k]]) })));
     graph.set([...cur, ...old], { xLabel: G.xLabel || 't (s)', yLabel: G.yLabel || '' });
   }
   let gTimer = 0;

@@ -14,7 +14,18 @@ export const P = v => (v && typeof v === 'object' && '__untr' in v ? v.__untr : 
 // Escape, then apply light formatting: superscripts typed as ^2 and subscripts typed as _x are left as-is
 // (authors write Unicode ² and ₓ directly); **bold** is supported.
 export function rich(s) {
-  return esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  let out = esc(s);
+  // In right-to-left languages, isolate embedded formulas and units (runs without Arabic letters that contain
+  // Latin letters or digits) so the bidirectional algorithm cannot reorder "N = 1 kg·m/s²".
+  if (typeof document !== 'undefined' && document.documentElement.dir === 'rtl') {
+    out = out.replace(/[^\u0600-\u06FF\u0750-\u077F،؛؟«»]+/g, run => {
+      if (!/[A-Za-z0-9]/.test(run)) return run;
+      const lead = run.match(/^\s*/)[0], trail = run.match(/\s*$/)[0];
+      const core = run.slice(lead.length, run.length - trail.length);
+      return core ? `${lead}<bdi dir="ltr">${core}</bdi>${trail}` : run;
+    });
+  }
+  return out.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 }
 
 export const tt = (key, params) => esc(t(key, params));

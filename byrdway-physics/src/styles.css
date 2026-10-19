@@ -196,7 +196,7 @@ textarea { width: 100%; background: #0b1220; color: var(--txt); border: 1.5px so
 .vbtn.khan { background: #7dd3fc; } .vbtn.oct { background: #fbbf24; } .vbtn.yt { background: #fca5a5; }
 .vbtn:hover { filter: brightness(1.1); color: #111; }
 .fig { margin: 0; text-align: center; }
-.diagram { width: 100%; max-width: 460px; height: auto; background: #0b1220; border-radius: 10px; }
+.diagram { direction: ltr; width: 100%; max-width: 460px; height: auto; background: #0b1220; border-radius: 10px; }
 figcaption { color: var(--dim); font-size: .85rem; }
 
 /* Lab */
