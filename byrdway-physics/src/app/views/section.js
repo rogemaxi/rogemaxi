@@ -8,6 +8,17 @@ import { SECTIONS, findSection, findUnit, sectionIndex } from '../../data/curric
 import { findLab } from '../../lab/labs/index.js';
 import { diagnose } from '../../engines/errors.js';
 import { speakButton } from '../narration.js';
+import * as PHYS from '../../physics/index.js';
+
+// Grade against the exact value from the item's calc restatement (verified by tests to match the displayed answer),
+// so a student who keeps more digits than the rounded key is not marked wrong.
+const calcCache = new Map();
+export function exactAnswer(q) {
+  if (!q.calc) return q.answer;
+  if (!calcCache.has(q.calc)) { try { calcCache.set(q.calc, Function('P', 'Math', `"use strict"; return (${q.calc});`)(PHYS, Math)); } catch { calcCache.set(q.calc, q.answer); } }
+  const v = calcCache.get(q.calc);
+  return Number.isFinite(v) ? v : q.answer;
+}
 
 export function sectionDone(id) { return !!store.get().sections[id]?.done; }
 
@@ -132,11 +143,12 @@ export function wireQuestions(root, sid, raw, c, onChange = () => {}) {
     if (q.kind === 'num') {
       const inp = root.querySelector(`[data-q="${key}"]`), v = parseNumber(inp.value);
       if (!inp.value.trim()) { fb.textContent = t('q.empty'); return; }
-      const g = gradeNumber(v, q.answer, q.tol ?? 0.02);
+      const exact = exactAnswer(q);
+      const g = gradeNumber(v, exact, q.tol ?? 0.025);
       if (g === 'nan') { fb.textContent = t('q.nan'); return; }
       ok = g === 'ok';
       msg = ok ? `<span class="good">✓ ${tt('q.correct')}</span>` : g === 'close' ? `<span class="warn">${tt('q.close')}</span>` : `<span class="bad">${tt('q.wrong')}</span>`;
-      if (g === 'wrong') { const d = diagnose(q.answer, v); if (d.length) msg += `<p class="detective">🔎 <strong>${tt('q.diagnose')}:</strong> ${d.map(k => tt('err.' + k)).join(' ')}</p>`; }
+      if (g === 'wrong') { const d = diagnose(exact, v); if (d.length) msg += `<p class="detective">🔎 <strong>${tt('q.diagnose')}:</strong> ${d.map(k => tt('err.' + k)).join(' ')}</p>`; }
     } else if (q.kind === 'mc') {
       const sel = root.querySelector(`input[name="${sid}-${key}"]:checked`);
       if (!sel) { fb.textContent = t('q.choose'); return; }
