@@ -27,7 +27,7 @@ export function runQuiz(root, { title, total, next, onDone, intro = '' }) {
     </div>`;
     const fb = root.querySelector('#qfb'), sub = root.querySelector('#qs');
     root.querySelector('#qa')?.focus();
-    root.querySelector('#qa')?.addEventListener('keydown', e => { if (e.key === 'Enter') sub.click(); });
+    root.querySelector('#qa')?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sub.click(); } });
     sub.onclick = () => {
       if (sub.dataset.done) { item = next(history); return show(); }
       let ok, value, msg = '';

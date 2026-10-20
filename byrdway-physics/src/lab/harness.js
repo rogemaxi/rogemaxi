@@ -108,7 +108,7 @@ export function mountLab(root, lab, opts = {}) {
     const lbl = L(T.params[p.id] ?? p.id);
     if (p.options) return `<label class="param"><span>${lbl}</span><select data-p="${p.id}">${p.options.map(o => `<option value="${o.value}" ${o.value === p.value ? 'selected' : ''}>${esc(T.options?.[o.value] ? plain(T.options[o.value]) : o.label)}</option>`).join('')}</select></label>`;
     return `<label class="param"><span>${lbl} <output data-o="${p.id}">${fmt(p.value, 4)}</output> ${esc(p.unit || '')}</span>
-      <input type="range" min="${p.min}" max="${p.max}" step="${p.step}" value="${p.value}" data-p="${p.id}" aria-valuetext="${p.value} ${esc(p.unit || '')}"></label>`;
+      <input type="range" min="${p.min}" max="${p.max}" step="${p.step}" value="${p.value}" data-p="${p.id}" aria-label="${esc(plain(T.params[p.id] ?? p.id))}" aria-valuetext="${p.value} ${esc(p.unit || '')}"></label>`;
   }).join('');
   pbox.addEventListener('input', e => {
     const id = e.target.dataset.p; if (!id) return;

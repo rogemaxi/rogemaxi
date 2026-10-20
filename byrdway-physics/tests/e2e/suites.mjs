@@ -107,6 +107,37 @@ export const SUITES = {
     }
   },
 
+  async 'accessibility: keyboard-only use (skip link, nav, flashcard, quiz, lab controls), reduced motion'({ page, expect, goto }) {
+    await goto('#/home');
+    await page.keyboard.press('Tab');
+    expect(await page.evaluate(() => document.activeElement?.classList.contains('skip')), 'first Tab on page load reaches the skip link');
+    await page.keyboard.press('Enter');
+    expect(await page.evaluate(() => document.activeElement?.tagName === 'MAIN' && location.hash === '#/home'), 'skip link focuses main without changing the route');
+    await page.evaluate(() => (location.hash = '#/engine/flash/2')); await page.waitForTimeout(250);
+    expect(await page.evaluate(() => document.activeElement?.tagName === 'MAIN'), 'in-app navigation moves focus to the new page');
+    await page.focus('#fc'); await page.keyboard.press('Enter'); await page.waitForTimeout(100);
+    expect(await page.evaluate(() => document.querySelector('#fc').classList.contains('flipped')), 'flashcard flips with Enter');
+    await page.evaluate(() => (location.hash = '#/assess/unit/3')); await page.waitForTimeout(250);
+    const num = await page.locator('#qa').count();
+    if (num) { await page.focus('#qa'); await page.keyboard.type('1'); await page.keyboard.press('Enter'); }
+    else { await page.focus('input[name=qa]'); await page.keyboard.press('Space'); await page.focus('#qs'); await page.keyboard.press('Enter'); }
+    expect((await page.locator('#qfb').innerText()).length > 0, 'quiz answer submitted from keyboard');
+    await page.evaluate(() => (location.hash = '#/lab/5')); await page.waitForTimeout(500);
+    await page.focus('input[name=lpred]'); await page.keyboard.press('Space'); await page.focus('#lplock'); await page.keyboard.press('Enter');
+    await page.focus('#run'); await page.keyboard.press('Enter'); await page.waitForTimeout(800);
+    expect((await page.locator('#run').innerText()).includes('⏸'), 'lab runs from keyboard');
+    const slider = page.locator('input[type=range]').first(); await slider.focus(); const v0 = await slider.inputValue(); await page.keyboard.press('ArrowRight');
+    expect(await slider.inputValue() !== v0, 'parameter slider adjusts with arrow keys');
+    const unlabeled = await page.evaluate(() => [...document.querySelectorAll('button, input, select, textarea')].filter(e => !e.labels?.length && !e.getAttribute('aria-label') && !e.innerText?.trim() && e.type !== 'hidden' && !e.closest('[hidden]')).length);
+    expect(unlabeled === 0, `every lab control has an accessible name (${unlabeled} unlabeled)`);
+  },
+
+  async 'accessibility: reduced-motion preference disables cinematic effects'({ page, expect, goto }) {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await goto('#/lab/8');
+    expect(await page.evaluate(() => !document.querySelector('#tfx')?.checked), 'cinematic effects default off under prefers-reduced-motion');
+  },
+
   async 'curriculum: all 170 sections render every component without errors'({ page, expect, goto }) {
     await goto('#/home');
     const all = await page.evaluate(async () => { const out = []; for (let u = 1; u <= 20; u++) { location.hash = '#/unit/' + u; await new Promise(r => setTimeout(r, 60)); out.push(...[...document.querySelectorAll('.seclist a')].map(a => a.getAttribute('href').split('/').pop())); } return out; });

@@ -36,6 +36,7 @@ function shell(route) {
   <footer class="foot">${tt('footer')}</footer>`;
 }
 
+let routed = false;
 function route() {
   current?.destroy?.(); current = null;
   if ('speechSynthesis' in window) speechSynthesis.cancel();
@@ -55,11 +56,16 @@ function route() {
   }
   wireNarration(main);
   window.scrollTo(0, 0);
-  if (!history.state?.noFocus) main.focus({ preventScroll: true });
+  // On in-app navigation move focus to the new page (screen readers announce it); on first load leave focus at the
+  // top so the first Tab reaches the skip link and the navigation.
+  if (routed && !history.state?.noFocus) main.focus({ preventScroll: true });
+  routed = true;
   document.title = `${t('brand')} ${t('product')}`;
 }
 
 function wireShell(app) {
+  // The skip link must not change location.hash (that is the router); it only moves focus to the main region.
+  app.querySelector('.skip').onclick = e => { e.preventDefault(); app.querySelector('#main').focus(); };
   app.querySelector('#langsel').onchange = e => { store.update(s => { s.settings.lang = e.target.value; }); route(); };
   const mb = app.querySelector('.menu-btn');
   mb.onclick = () => { const nl = app.querySelector('.navlinks'); const open = nl.classList.toggle('open'); mb.setAttribute('aria-expanded', open); };
