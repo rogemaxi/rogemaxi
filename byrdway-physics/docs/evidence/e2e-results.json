@@ -1,152 +1,166 @@
 {
  "file": "dist/ByrdWay_Physics_I_Honors.html",
- "at": "2026-10-20T13:38:22.265Z",
+ "at": "2026-10-20T18:27:16.272Z",
  "browser": "Chromium (Playwright 1.56.1, SwiftShader WebGL)",
  "results": [
   {
    "name": "shell: cover, dashboard, navigation",
    "status": "pass",
-   "ms": 3583,
+   "ms": 3622,
    "checks": 9,
    "error": null
   },
   {
    "name": "slice: section 5.3 full learning flow + progress persists",
    "status": "pass",
-   "ms": 2864,
+   "ms": 3118,
    "checks": 12,
    "error": null
   },
   {
    "name": "slice: Lab 5 3D experiment, predict gate, run, challenge, evaluation",
    "status": "pass",
-   "ms": 7331,
+   "ms": 7545,
    "checks": 20,
    "error": null
   },
   {
    "name": "slice: Lab 5 2D fallback (low graphics) has identical physics",
    "status": "pass",
-   "ms": 2514,
+   "ms": 2611,
    "checks": 2,
    "error": null
   },
   {
    "name": "labs: every registered lab runs in 3D and 2D, measures update, a run is recorded",
    "status": "pass",
-   "ms": 210761,
+   "ms": 241698,
    "checks": 120,
+   "error": null
+  },
+  {
+   "name": "accessibility: keyboard-only use (skip link, nav, flashcard, quiz, lab controls), reduced motion",
+   "status": "pass",
+   "ms": 3120,
+   "checks": 8,
+   "error": null
+  },
+  {
+   "name": "accessibility: reduced-motion preference disables cinematic effects",
+   "status": "pass",
+   "ms": 1175,
+   "checks": 1,
    "error": null
   },
   {
    "name": "curriculum: all 170 sections render every component without errors",
    "status": "pass",
-   "ms": 12321,
+   "ms": 12086,
    "checks": 511,
    "error": null
   },
   {
    "name": "engines: all ten engines render and respond",
    "status": "pass",
-   "ms": 5442,
+   "ms": 5454,
    "checks": 16,
    "error": null
   },
   {
    "name": "assessment: full adaptive diagnostic builds a plan; levels, task rubric, finals",
    "status": "pass",
-   "ms": 6653,
+   "ms": 6736,
    "checks": 16,
    "error": null
   },
   {
    "name": "reference: every tab renders, standards marked verified/provisional",
    "status": "pass",
-   "ms": 3389,
+   "ms": 3423,
    "checks": 12,
    "error": null
   },
   {
    "name": "i18n[en]: 5.3 + Lab 5 fully localized",
    "status": "pass",
-   "ms": 1596,
+   "ms": 1672,
    "checks": 4,
    "error": null
   },
   {
    "name": "i18n[es]: 5.3 + Lab 5 fully localized",
    "status": "pass",
-   "ms": 1599,
+   "ms": 1687,
    "checks": 4,
    "error": null
   },
   {
    "name": "i18n[fr]: 5.3 + Lab 5 fully localized",
    "status": "pass",
-   "ms": 1658,
+   "ms": 1652,
    "checks": 4,
    "error": null
   },
   {
    "name": "i18n[ht]: 5.3 + Lab 5 fully localized",
    "status": "pass",
-   "ms": 1594,
+   "ms": 1682,
    "checks": 4,
    "error": null
   },
   {
    "name": "i18n[pt]: 5.3 + Lab 5 fully localized",
    "status": "pass",
-   "ms": 1586,
+   "ms": 1678,
    "checks": 4,
    "error": null
   },
   {
    "name": "i18n[ar]: 5.3 + Lab 5 fully localized",
    "status": "pass",
-   "ms": 1655,
+   "ms": 1698,
    "checks": 4,
    "error": null
   },
   {
    "name": "i18n[zh]: 5.3 + Lab 5 fully localized",
    "status": "pass",
-   "ms": 1770,
+   "ms": 1823,
    "checks": 4,
    "error": null
   },
   {
    "name": "i18n[hi]: 5.3 + Lab 5 fully localized",
    "status": "pass",
-   "ms": 1822,
+   "ms": 1758,
    "checks": 4,
    "error": null
   },
   {
    "name": "i18n[bn]: 5.3 + Lab 5 fully localized",
    "status": "pass",
-   "ms": 1843,
+   "ms": 1765,
    "checks": 4,
    "error": null
   },
   {
    "name": "i18n[vi]: 5.3 + Lab 5 fully localized",
    "status": "pass",
-   "ms": 1653,
+   "ms": 1663,
    "checks": 4,
    "error": null
   },
   {
    "name": "i18n[ko]: 5.3 + Lab 5 fully localized",
    "status": "pass",
-   "ms": 1720,
+   "ms": 1754,
    "checks": 4,
    "error": null
   },
   {
    "name": "i18n[ja]: 5.3 + Lab 5 fully localized",
    "status": "pass",
-   "ms": 1724,
+   "ms": 1855,
    "checks": 4,
    "error": null
   }

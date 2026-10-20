@@ -35,6 +35,7 @@ for (const [name, fn] of Object.entries(SUITES)) {
 }
 await browser.close();
 mkdirSync(new URL('docs/evidence/', root), { recursive: true });
-writeFileSync(new URL('docs/evidence/e2e-results.json', root), JSON.stringify({ file: 'dist/ByrdWay_Physics_I_Honors.html', at: new Date().toISOString(), browser: 'Chromium (Playwright 1.56.1, SwiftShader WebGL)', results }, null, 1));
+// Only a full run is recorded as evidence; filtered runs write e2e-partial.json.
+writeFileSync(new URL(only.length ? 'docs/evidence/e2e-partial.json' : 'docs/evidence/e2e-results.json', root), JSON.stringify({ file: 'dist/ByrdWay_Physics_I_Honors.html', at: new Date().toISOString(), browser: 'Chromium (Playwright 1.56.1, SwiftShader WebGL)', results }, null, 1));
 console.log(`\n${results.length - failed}/${results.length} suites passed`);
 process.exit(failed ? 1 : 0);
