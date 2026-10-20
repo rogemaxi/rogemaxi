@@ -1,13 +1,153 @@
 {
  "file": "dist/ByrdWay_Physics_I_Honors.html",
- "at": "2026-10-20T13:31:51.226Z",
+ "at": "2026-10-20T13:38:22.265Z",
  "browser": "Chromium (Playwright 1.56.1, SwiftShader WebGL)",
  "results": [
   {
+   "name": "shell: cover, dashboard, navigation",
+   "status": "pass",
+   "ms": 3583,
+   "checks": 9,
+   "error": null
+  },
+  {
+   "name": "slice: section 5.3 full learning flow + progress persists",
+   "status": "pass",
+   "ms": 2864,
+   "checks": 12,
+   "error": null
+  },
+  {
+   "name": "slice: Lab 5 3D experiment, predict gate, run, challenge, evaluation",
+   "status": "pass",
+   "ms": 7331,
+   "checks": 20,
+   "error": null
+  },
+  {
+   "name": "slice: Lab 5 2D fallback (low graphics) has identical physics",
+   "status": "pass",
+   "ms": 2514,
+   "checks": 2,
+   "error": null
+  },
+  {
    "name": "labs: every registered lab runs in 3D and 2D, measures update, a run is recorded",
    "status": "pass",
-   "ms": 43402,
-   "checks": 24,
+   "ms": 210761,
+   "checks": 120,
+   "error": null
+  },
+  {
+   "name": "curriculum: all 170 sections render every component without errors",
+   "status": "pass",
+   "ms": 12321,
+   "checks": 511,
+   "error": null
+  },
+  {
+   "name": "engines: all ten engines render and respond",
+   "status": "pass",
+   "ms": 5442,
+   "checks": 16,
+   "error": null
+  },
+  {
+   "name": "assessment: full adaptive diagnostic builds a plan; levels, task rubric, finals",
+   "status": "pass",
+   "ms": 6653,
+   "checks": 16,
+   "error": null
+  },
+  {
+   "name": "reference: every tab renders, standards marked verified/provisional",
+   "status": "pass",
+   "ms": 3389,
+   "checks": 12,
+   "error": null
+  },
+  {
+   "name": "i18n[en]: 5.3 + Lab 5 fully localized",
+   "status": "pass",
+   "ms": 1596,
+   "checks": 4,
+   "error": null
+  },
+  {
+   "name": "i18n[es]: 5.3 + Lab 5 fully localized",
+   "status": "pass",
+   "ms": 1599,
+   "checks": 4,
+   "error": null
+  },
+  {
+   "name": "i18n[fr]: 5.3 + Lab 5 fully localized",
+   "status": "pass",
+   "ms": 1658,
+   "checks": 4,
+   "error": null
+  },
+  {
+   "name": "i18n[ht]: 5.3 + Lab 5 fully localized",
+   "status": "pass",
+   "ms": 1594,
+   "checks": 4,
+   "error": null
+  },
+  {
+   "name": "i18n[pt]: 5.3 + Lab 5 fully localized",
+   "status": "pass",
+   "ms": 1586,
+   "checks": 4,
+   "error": null
+  },
+  {
+   "name": "i18n[ar]: 5.3 + Lab 5 fully localized",
+   "status": "pass",
+   "ms": 1655,
+   "checks": 4,
+   "error": null
+  },
+  {
+   "name": "i18n[zh]: 5.3 + Lab 5 fully localized",
+   "status": "pass",
+   "ms": 1770,
+   "checks": 4,
+   "error": null
+  },
+  {
+   "name": "i18n[hi]: 5.3 + Lab 5 fully localized",
+   "status": "pass",
+   "ms": 1822,
+   "checks": 4,
+   "error": null
+  },
+  {
+   "name": "i18n[bn]: 5.3 + Lab 5 fully localized",
+   "status": "pass",
+   "ms": 1843,
+   "checks": 4,
+   "error": null
+  },
+  {
+   "name": "i18n[vi]: 5.3 + Lab 5 fully localized",
+   "status": "pass",
+   "ms": 1653,
+   "checks": 4,
+   "error": null
+  },
+  {
+   "name": "i18n[ko]: 5.3 + Lab 5 fully localized",
+   "status": "pass",
+   "ms": 1720,
+   "checks": 4,
+   "error": null
+  },
+  {
+   "name": "i18n[ja]: 5.3 + Lab 5 fully localized",
+   "status": "pass",
+   "ms": 1724,
+   "checks": 4,
    "error": null
   }
  ]
