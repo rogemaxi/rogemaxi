@@ -293,6 +293,9 @@ legend { color: var(--gold); padding: 0 6px; }
 .task .rubric td label { display: flex; gap: 6px; align-items: flex-start; font-size: .9rem; cursor: pointer; }
 .rubric th { width: 18%; color: #fff; }
 /* Reference */
+.reftable tr.gap td { background: rgba(251, 191, 36, .06); }
+.align { margin: 6px 0 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.align .chip { font-size: .8rem; }
 .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 16px; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
 .tab { padding: 6px 12px; border-radius: 999px; text-decoration: none; color: var(--txt); background: var(--card); border: 1px solid var(--line); font-size: .9rem; }
 .tab.on, .tab:hover { border-color: var(--gold); color: var(--gold); }

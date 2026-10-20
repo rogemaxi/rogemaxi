@@ -9,6 +9,13 @@ import { findLab } from '../../lab/labs/index.js';
 import { diagnose } from '../../engines/errors.js';
 import { speakButton } from '../narration.js';
 import * as PHYS from '../../physics/index.js';
+import { lessonAlignment } from '../../data/standards/index.js';
+
+// Curriculum layers this lesson supports (provisional mapping; official topic titles in the tooltip).
+function alignBadges(id) {
+  const a = lessonAlignment(id);
+  return `<p class="align"><span class="hint">${tt('sec.align')}:</span> ${a.length ? a.map(({ fw, codes }) => `<a class="chip" href="#/reference/standards/${fw.id}" title="${esc(codes.map(c => c.code + ' ' + c.text).join(' · '))}">${esc(fw.short)} ${codes.map(c => esc(c.code)).join(', ')}</a>`).join(' ') : `<span class="hint">${tt('sec.align.none')}</span>`}</p>`;
+}
 
 // Grade against the exact value from the item's calc restatement (verified by tests to match the displayed answer),
 // so a student who keeps more digits than the rounded key is not marked wrong.
@@ -45,6 +52,7 @@ export function renderSection(root, id) {
     <header class="lesson-head">
       <h1 id="sttl"><span class="secnum">${esc(sec.id)}</span> ${L(c.title)}</h1>
       <div class="lesson-meta">${pathwayBadge(sec.pathway)} ${speakButton('#lessonbody')}</div>
+      ${alignBadges(sec.id)}
       ${sec.pathway === 'Advanced' ? `<p class="pw-note">${tt('path.advanced.note')}</p>` : ''}
       ${untr ? `<p class="untr-note">${tt('untr.note')} (${stats.translated}/${stats.total})</p>` : ''}
       ${!untr && store.get().settings.lang !== 'en' ? `<p class="mt-note">${tt('mt.note')}</p>` : ''}

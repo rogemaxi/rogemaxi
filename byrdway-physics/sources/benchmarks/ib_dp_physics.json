@@ -1,0 +1,271 @@
+{
+ "framework": "IB Diploma Programme Physics",
+ "firstAssessment": 2025,
+ "source": "https://ibo.org/globalassets/new-structure/recognition/pdfs/dp_sciences_physics_subject-brief_jan_2022_e.pdf",
+ "sourceType": "primary",
+ "sources": [
+  {
+   "url": "https://ibo.org/globalassets/new-structure/recognition/pdfs/dp_sciences_physics_subject-brief_jan_2022_e.pdf",
+   "title": "International Baccalaureate Diploma Programme Subject Brief, Sciences: Physics, First assessment 2025",
+   "sourceType": "primary (IBO)",
+   "usedFor": "theme/topic codes and titles, SL/HL key markers, IA description"
+  },
+  {
+   "url": "https://www.ibo.org/programmes/diploma-programme/curriculum/sciences/physics/",
+   "title": "Physics in the DP - International Baccalaureate",
+   "sourceType": "primary (IBO)",
+   "usedFor": "three concepts statement"
+  },
+  {
+   "url": "https://peda.net/kuopio/lukiot/lyseonlukio/ib/syllabukset/group-4-sciences/physics-2025.pdf:file/download/c56a8c8592e847bbb555540b087b0990d1ade5b0/Physics%2C%202025.pdf",
+   "title": "Diploma Programme Physics guide, First assessment 2025, Published February 2023 (IBO document hosted on a school site)",
+   "sourceType": "secondary host of the official IBO guide",
+   "usedFor": "per-topic SL/AHL status, concepts and IA wording cross-check"
+  }
+ ],
+ "retrieved": "2026-10-20",
+ "concepts": {
+  "items": [
+   "energy",
+   "particles",
+   "forces"
+  ],
+  "ibo_page": "Each of these themes is explored using the three concepts which permeate the course: forces, energy and particles, ensuring a more holistic understanding of the subject.",
+  "guide": "The structure of this physics syllabus is intended to promote concept-based learning and teaching that can be connected through three concepts: energy, particles and forces. These three concepts appear throughout the physics syllabus in each of the themes."
+ },
+ "internalAssessment": {
+  "task": "Scientific investigation",
+  "weighting": "20%",
+  "teachingHours": 10,
+  "subjectBrief": "The scientific investigation is an open-ended task in which the student gathers and analyses data in order to answer their own formulated research question. The outcome of the scientific investigation will be assessed through the form of a written report. The maximum overall word count for the report is 3,000 words.",
+  "guide": "The IA requirement is the same for biology, chemistry and physics. The IA, worth 20% of the final assessment, consists of one task—the scientific investigation.",
+  "guideMarks": "This component is internally assessed by the teacher and externally moderated by the IB at the end of the course. (Total 24 marks)",
+  "slHl": "The internal assessment requirements at SL and at HL are the same."
+ },
+ "levelKey": {
+  "source": "Subject brief \"Key to table\"",
+  "•": "Topics with content that should be taught to all students",
+  "••": "Topics with content that should be taught to all students plus additional HL content",
+  "•••": "Topics with content that should only be taught to HL students",
+  "note": "The PDF-to-text conversion rendered the multi-dot markers ambiguously (\"...\"), so per-topic levels were taken from the guide sections."
+ },
+ "items": [
+  {
+   "code": "A",
+   "text": "A. Space, time and motion",
+   "type": "theme"
+  },
+  {
+   "code": "A.1",
+   "text": "A.1 Kinematics",
+   "type": "topic",
+   "theme": "A",
+   "level": "SL and HL",
+   "levelEvidence": "Guide: \"There is no additional higher level content in A.1.\" (E.5: guide shows only a \"Standard level and higher level: 6 hours\" section)"
+  },
+  {
+   "code": "A.2",
+   "text": "A.2 Forces and momentum",
+   "type": "topic",
+   "theme": "A",
+   "level": "SL and HL",
+   "levelEvidence": "Guide: \"There is no additional higher level content in A.2.\" (E.5: guide shows only a \"Standard level and higher level: 6 hours\" section)"
+  },
+  {
+   "code": "A.3",
+   "text": "A.3 Work, energy and power",
+   "type": "topic",
+   "theme": "A",
+   "level": "SL and HL",
+   "levelEvidence": "Guide: \"There is no additional higher level content in A.3.\" (E.5: guide shows only a \"Standard level and higher level: 6 hours\" section)"
+  },
+  {
+   "code": "A.4",
+   "text": "A.4 Rigid body mechanics",
+   "type": "topic",
+   "theme": "A",
+   "level": "HL only",
+   "levelEvidence": "Guide: \"There is no standard level content in A.4.\" plus \"Additional higher level: N hours\""
+  },
+  {
+   "code": "A.5",
+   "text": "A.5 Galilean and special relativity",
+   "type": "topic",
+   "theme": "A",
+   "level": "HL only",
+   "levelEvidence": "Guide: \"There is no standard level content in A.5.\" plus \"Additional higher level: N hours\""
+  },
+  {
+   "code": "B",
+   "text": "B. The particulate nature of matter",
+   "type": "theme"
+  },
+  {
+   "code": "B.1",
+   "text": "B.1 Thermal energy transfers",
+   "type": "topic",
+   "theme": "B",
+   "level": "SL and HL",
+   "levelEvidence": "Guide: \"There is no additional higher level content in B.1.\" (E.5: guide shows only a \"Standard level and higher level: 6 hours\" section)"
+  },
+  {
+   "code": "B.2",
+   "text": "B.2 Greenhouse effect",
+   "type": "topic",
+   "theme": "B",
+   "level": "SL and HL",
+   "levelEvidence": "Guide: \"There is no additional higher level content in B.2.\" (E.5: guide shows only a \"Standard level and higher level: 6 hours\" section)"
+  },
+  {
+   "code": "B.3",
+   "text": "B.3 Gas laws",
+   "type": "topic",
+   "theme": "B",
+   "level": "SL and HL",
+   "levelEvidence": "Guide: \"There is no additional higher level content in B.3.\" (E.5: guide shows only a \"Standard level and higher level: 6 hours\" section)"
+  },
+  {
+   "code": "B.4",
+   "text": "B.4 Thermodynamics",
+   "type": "topic",
+   "theme": "B",
+   "level": "HL only",
+   "levelEvidence": "Guide: \"There is no standard level content in B.4.\" plus \"Additional higher level: N hours\""
+  },
+  {
+   "code": "B.5",
+   "text": "B.5 Current and circuits",
+   "type": "topic",
+   "theme": "B",
+   "level": "SL and HL",
+   "levelEvidence": "Guide: \"There is no additional higher level content in B.5.\" (E.5: guide shows only a \"Standard level and higher level: 6 hours\" section)"
+  },
+  {
+   "code": "C",
+   "text": "C. Wave behaviour",
+   "type": "theme"
+  },
+  {
+   "code": "C.1",
+   "text": "C.1 Simple harmonic motion",
+   "type": "topic",
+   "theme": "C",
+   "level": "SL and HL (some AHL content)",
+   "levelEvidence": "Guide: \"Standard level and higher level: N hours\" plus \"Additional higher level: N hours\""
+  },
+  {
+   "code": "C.2",
+   "text": "C.2 Wave model",
+   "type": "topic",
+   "theme": "C",
+   "level": "SL and HL",
+   "levelEvidence": "Guide: \"There is no additional higher level content in C.2.\" (E.5: guide shows only a \"Standard level and higher level: 6 hours\" section)"
+  },
+  {
+   "code": "C.3",
+   "text": "C.3 Wave phenomena",
+   "type": "topic",
+   "theme": "C",
+   "level": "SL and HL (some AHL content)",
+   "levelEvidence": "Guide: \"Standard level and higher level: N hours\" plus \"Additional higher level: N hours\""
+  },
+  {
+   "code": "C.4",
+   "text": "C.4 Standing waves and resonance",
+   "type": "topic",
+   "theme": "C",
+   "level": "SL and HL",
+   "levelEvidence": "Guide: \"There is no additional higher level content in C.4.\" (E.5: guide shows only a \"Standard level and higher level: 6 hours\" section)"
+  },
+  {
+   "code": "C.5",
+   "text": "C.5 Doppler effect",
+   "type": "topic",
+   "theme": "C",
+   "level": "SL and HL (some AHL content)",
+   "levelEvidence": "Guide: \"Standard level and higher level: N hours\" plus \"Additional higher level: N hours\""
+  },
+  {
+   "code": "D",
+   "text": "D. Fields",
+   "type": "theme"
+  },
+  {
+   "code": "D.1",
+   "text": "D.1 Gravitational fields",
+   "type": "topic",
+   "theme": "D",
+   "level": "SL and HL (some AHL content)",
+   "levelEvidence": "Guide: \"Standard level and higher level: N hours\" plus \"Additional higher level: N hours\""
+  },
+  {
+   "code": "D.2",
+   "text": "D.2 Electric and magnetic fields",
+   "type": "topic",
+   "theme": "D",
+   "level": "SL and HL (some AHL content)",
+   "levelEvidence": "Guide: \"Standard level and higher level: N hours\" plus \"Additional higher level: N hours\""
+  },
+  {
+   "code": "D.3",
+   "text": "D.3 Motion in electromagnetic fields",
+   "type": "topic",
+   "theme": "D",
+   "level": "SL and HL",
+   "levelEvidence": "Guide: \"There is no additional higher level content in D.3.\" (E.5: guide shows only a \"Standard level and higher level: 6 hours\" section)"
+  },
+  {
+   "code": "D.4",
+   "text": "D.4 Induction",
+   "type": "topic",
+   "theme": "D",
+   "level": "HL only",
+   "levelEvidence": "Guide: \"There is no standard level content in D.4.\" plus \"Additional higher level: N hours\""
+  },
+  {
+   "code": "E",
+   "text": "E. Nuclear and quantum physics",
+   "type": "theme"
+  },
+  {
+   "code": "E.1",
+   "text": "E.1 Structure of the atom",
+   "type": "topic",
+   "theme": "E",
+   "level": "SL and HL (some AHL content)",
+   "levelEvidence": "Guide: \"Standard level and higher level: N hours\" plus \"Additional higher level: N hours\""
+  },
+  {
+   "code": "E.2",
+   "text": "E.2 Quantum physics",
+   "type": "topic",
+   "theme": "E",
+   "level": "HL only",
+   "levelEvidence": "Guide: \"There is no standard level content in E.2.\" plus \"Additional higher level: N hours\""
+  },
+  {
+   "code": "E.3",
+   "text": "E.3 Radioactive decay",
+   "type": "topic",
+   "theme": "E",
+   "level": "SL and HL (some AHL content)",
+   "levelEvidence": "Guide: \"Standard level and higher level: N hours\" plus \"Additional higher level: N hours\""
+  },
+  {
+   "code": "E.4",
+   "text": "E.4 Fission",
+   "type": "topic",
+   "theme": "E",
+   "level": "SL and HL",
+   "levelEvidence": "Guide: \"There is no additional higher level content in E.4.\" (E.5: guide shows only a \"Standard level and higher level: 6 hours\" section)"
+  },
+  {
+   "code": "E.5",
+   "text": "E.5 Fusion and stars",
+   "type": "topic",
+   "theme": "E",
+   "level": "SL and HL",
+   "levelEvidence": "Guide: \"There is no additional higher level content in E.5.\" (E.5: guide shows only a \"Standard level and higher level: 6 hours\" section)"
+  }
+ ]
+}

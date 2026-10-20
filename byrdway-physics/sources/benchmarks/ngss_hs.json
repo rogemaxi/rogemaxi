@@ -1,0 +1,147 @@
+{
+ "framework": "NGSS",
+ "source": "https://www.nextgenscience.org/",
+ "sourcePages": [
+  "https://www.nextgenscience.org/dci-arrangement/hs-ps1-matter-and-its-interactions",
+  "https://www.nextgenscience.org/dci-arrangement/hs-ps2-motion-and-stability-forces-and-interactions",
+  "https://www.nextgenscience.org/dci-arrangement/hs-ps3-energy",
+  "https://www.nextgenscience.org/dci-arrangement/hs-ps4-waves-and-their-applications-technologies-information-transfer",
+  "https://www.nextgenscience.org/dci-arrangement/hs-ess1-earths-place-universe",
+  "https://www.nextgenscience.org/dci-arrangement/hs-ets1-engineering-design"
+ ],
+ "retrieved": "2026-10-20",
+ "notes": "PE statements copied verbatim from the PE cell of each DCI arrangement page (the text of the PE spans only; clarification statements, assessment boundaries and the science-practice popup text excluded). A trailing asterisk is part of the source text and marks PEs that integrate engineering. HS-ESS1-5 (plate tectonics) omitted as not physics-relevant.",
+ "items": [
+  {
+   "code": "HS-PS1-8",
+   "text": "Develop models to illustrate the changes in the composition of the nucleus of the atom and the energy released during the processes of fission, fusion, and radioactive decay.",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ps1-matter-and-its-interactions"
+  },
+  {
+   "code": "HS-PS2-1",
+   "text": "Analyze data to support the claim that Newton’s second law of motion describes the mathematical relationship among the net force on a macroscopic object, its mass, and its acceleration.",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ps2-motion-and-stability-forces-and-interactions"
+  },
+  {
+   "code": "HS-PS2-2",
+   "text": "Use mathematical representations to support the claim that the total momentum of a system of objects is conserved when there is no net force on the system.",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ps2-motion-and-stability-forces-and-interactions"
+  },
+  {
+   "code": "HS-PS2-3",
+   "text": "Apply science and engineering ideas to design, evaluate, and refine a device that minimizes the force on a macroscopic object during a collision.*",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ps2-motion-and-stability-forces-and-interactions"
+  },
+  {
+   "code": "HS-PS2-4",
+   "text": "Use mathematical representations of Newton’s Law of Gravitation and Coulomb’s Law to describe and predict the gravitational and electrostatic forces between objects.",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ps2-motion-and-stability-forces-and-interactions"
+  },
+  {
+   "code": "HS-PS2-5",
+   "text": "Plan and conduct an investigation to provide evidence that an electric current can produce a magnetic field and that a changing magnetic field can produce an electric current.",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ps2-motion-and-stability-forces-and-interactions"
+  },
+  {
+   "code": "HS-PS2-6",
+   "text": "Communicate scientific and technical information about why the molecular-level structure is important in the functioning of designed materials.*",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ps2-motion-and-stability-forces-and-interactions"
+  },
+  {
+   "code": "HS-PS3-1",
+   "text": "Create a computational model to calculate the change in the energy of one component in a system when the change in energy of the other component(s) and energy flows in and out of the system are known.",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ps3-energy"
+  },
+  {
+   "code": "HS-PS3-2",
+   "text": "Develop and use models to illustrate that energy at the macroscopic scale can be accounted for as a combination of energy associated with the motion of particles (objects) and energy associated with the relative positions of particles (objects).",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ps3-energy"
+  },
+  {
+   "code": "HS-PS3-3",
+   "text": "Design, build, and refine a device that works within given constraints to convert one form of energy into another form of energy.*",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ps3-energy"
+  },
+  {
+   "code": "HS-PS3-4",
+   "text": "Plan and conduct an investigation to provide evidence that the transfer of thermal energy when two components of different temperature are combined within a closed system results in a more uniform energy distribution among the components in the system (second law of thermodynamics).",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ps3-energy"
+  },
+  {
+   "code": "HS-PS3-5",
+   "text": "Develop and use a model of two objects interacting through electric or magnetic fields to illustrate the forces between objects and the changes in energy of the objects due to the interaction.",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ps3-energy"
+  },
+  {
+   "code": "HS-PS4-1",
+   "text": "Use mathematical representations to support a claim regarding relationships among the frequency, wavelength, and speed of waves traveling in various media.",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ps4-waves-and-their-applications-technologies-information-transfer"
+  },
+  {
+   "code": "HS-PS4-2",
+   "text": "Evaluate questions about the advantages of using digital transmission and storage of information.",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ps4-waves-and-their-applications-technologies-information-transfer"
+  },
+  {
+   "code": "HS-PS4-3",
+   "text": "Evaluate the claims, evidence, and reasoning behind the idea that electromagnetic radiation can be described either by a wave model or a particle model, and that for some situations one model is more useful than the other.",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ps4-waves-and-their-applications-technologies-information-transfer"
+  },
+  {
+   "code": "HS-PS4-4",
+   "text": "Evaluate the validity and reliability of claims in published materials of the effects that different frequencies of electromagnetic radiation have when absorbed by matter.",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ps4-waves-and-their-applications-technologies-information-transfer"
+  },
+  {
+   "code": "HS-PS4-5",
+   "text": "Communicate technical information about how some technological devices use the principles of wave behavior and wave interactions with matter to transmit and capture information and energy.*",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ps4-waves-and-their-applications-technologies-information-transfer"
+  },
+  {
+   "code": "HS-ESS1-1",
+   "text": "Develop a model based on evidence to illustrate the life span of the sun and the role of nuclear fusion in the sun’s core to release energy that eventually reaches Earth in the form of radiation.",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ess1-earths-place-universe"
+  },
+  {
+   "code": "HS-ESS1-2",
+   "text": "Construct an explanation of the Big Bang theory based on astronomical evidence of light spectra, motion of distant galaxies, and composition of matter in the universe.",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ess1-earths-place-universe"
+  },
+  {
+   "code": "HS-ESS1-3",
+   "text": "Communicate scientific ideas about the way stars, over their life cycle, produce elements.",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ess1-earths-place-universe"
+  },
+  {
+   "code": "HS-ESS1-4",
+   "text": "Use mathematical or computational representations to predict the motion of orbiting objects in the solar system.",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ess1-earths-place-universe"
+  },
+  {
+   "code": "HS-ESS1-6",
+   "text": "Apply scientific reasoning and evidence from ancient Earth materials, meteorites, and other planetary surfaces to construct an account of Earth’s formation and early history.",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ess1-earths-place-universe",
+   "note": "Included as marginally physics-relevant (Earth formation/early history; evidence includes ancient Earth materials and meteorites)."
+  },
+  {
+   "code": "HS-ETS1-1",
+   "text": "Analyze a major global challenge to specify qualitative and quantitative criteria and constraints for solutions that account for societal needs and wants.",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ets1-engineering-design"
+  },
+  {
+   "code": "HS-ETS1-2",
+   "text": "Design a solution to a complex real-world problem by breaking it down into smaller, more manageable problems that can be solved through engineering.",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ets1-engineering-design"
+  },
+  {
+   "code": "HS-ETS1-3",
+   "text": "Evaluate a solution to a complex real-world problem based on prioritized criteria and trade-offs that account for a range of constraints, including cost, safety, reliability, and aesthetics as well as possible social, cultural, and environmental impacts.",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ets1-engineering-design"
+  },
+  {
+   "code": "HS-ETS1-4",
+   "text": "Use a computer simulation to model the impact of proposed solutions to a complex real-world problem with numerous criteria and constraints on interactions within and between systems relevant to the problem.",
+   "url": "https://www.nextgenscience.org/dci-arrangement/hs-ets1-engineering-design"
+  }
+ ]
+}

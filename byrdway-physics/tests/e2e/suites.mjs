@@ -216,9 +216,16 @@ export const SUITES = {
       await page.evaluate(h => (location.hash = h), '#/reference/' + k); await page.waitForTimeout(200);
       expect((await page.locator('#refbody').innerText()).length > 150, `reference ${k}`);
     }
-    await page.evaluate(() => (location.hash = '#/reference/standards')); await page.waitForTimeout(200);
-    expect(await page.locator('#refbody tbody tr').count() === 37, 'all 37 retrieved content benchmarks listed');
-    expect((await page.locator('#refbody').innerText()).includes('Alignment provisional'), 'alignment honestly provisional');
+    for (const [fw, n] of [['AP1', 43], ['AP2', 46], ['APCM', 41], ['APCE', 31], ['FL', 37]]) {
+      await page.evaluate(h => (location.hash = h), '#/reference/standards/' + fw); await page.waitForTimeout(200);
+      expect(await page.locator('#refbody tbody tr').count() === n, `${fw}: all ${n} official topics listed`);
+      expect((await page.locator('#refbody .notice').innerText()).includes('Provisional'), `${fw}: alignment labeled provisional`);
+    }
+    expect(await page.locator('#refbody tr.gap').count() === 0, 'Florida layer shows no false gaps');
+    await page.evaluate(() => (location.hash = '#/reference/standards/APCE')); await page.waitForTimeout(200);
+    expect(await page.locator('#refbody tr.gap').count() === 5, 'AP C: E&M gaps (Gauss, flux, distributions, Ampère, LC) shown honestly');
+    await page.evaluate(() => (location.hash = '#/section/9.3')); await page.waitForTimeout(200);
+    expect((await page.locator('.align').innerText()).includes('AP 1 5.3'), 'lesson 9.3 shows its AP 1 torque alignment');
   },
 
   ...Object.fromEntries(LANGS.map(l => [`i18n[${l}]: 5.3 + Lab 5 fully localized`, async ({ page, expect, goto }) => {

@@ -300,7 +300,7 @@
  "ref.si": "SI units and conversions",
  "ref.glossary": "Glossary",
  "ref.misconceptions": "Common misconceptions",
- "ref.standards": "Standards crosswalk",
+ "ref.standards": "Curriculum alignment",
  "ref.safety": "Laboratory safety",
  "ref.math": "Math and trig quick reference",
  "ref.translations": "Translation completeness report",
@@ -451,5 +451,15 @@
  "ref.about.h2": "Assessment scores are practice estimates; they are not a validated or standardized test score.",
  "ref.about.h3": "Video links open searches on Khan Academy, YouTube, and The Organic Chemistry Tutor; individual videos were not reviewed.",
  "ref.about.h4": "The offline tutor uses written hints, not artificial intelligence. Cloud AI is used only if a school connects its own service.",
- "ref.about.h5": "Translations are AI-drafted and unreviewed; standards alignment is provisional until reviewed by a certified teacher."
+ "ref.about.h5": "Translations are AI-drafted and unreviewed; standards alignment is provisional until reviewed by a certified teacher.",
+ "ref.cw.d": "ByrdWay Physics follows its own 20-unit sequence. Each curriculum below is an optional alignment layer: choose one to see which lessons teach each of its topics.",
+ "ref.cw.pick": "Curriculum",
+ "ref.cw.source": "Official source:",
+ "ref.cw.verified": "topic codes and titles are copied exactly from the official document (shown in English as published).",
+ "ref.cw.provisional": "which lessons teach each topic is the author’s mapping and has not yet been reviewed by a teacher of this curriculum.",
+ "ref.cw.coverage": "Topics with at least one lesson: {n} of {total}",
+ "ref.cw.gaps": "not taught in this course",
+ "ref.cw.gap": "Not taught",
+ "sec.align": "Curriculum alignment (provisional)",
+ "sec.align.none": "Enrichment beyond the mapped curricula"
 }

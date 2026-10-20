@@ -25,7 +25,7 @@ export function dispatch(name, rest, main) {
     case 'engine': return renderEngine(main, rest[0], rest.slice(1));
     case 'assess': case 'diagnostic': case 'mastery': case 'final': return renderAssess(main, name, rest);
     case 'videos': return videosView(main, rest[0]);
-    case 'reference': return renderReference(main, rest[0]);
+    case 'reference': return renderReference(main, rest[0], rest[1]);
     case 'settings': return settings(main);
     default: main.innerHTML = `<div class="page"><h1>${tt('notfound')}</h1><a class="btn" href="#/home">${tt('gohome')}</a></div>`;
   }

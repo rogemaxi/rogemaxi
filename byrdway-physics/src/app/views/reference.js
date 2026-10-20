@@ -7,18 +7,19 @@ import { C } from '../../physics/constants.js';
 import * as R from '../../data/reference/index.js';
 import { ITEMS } from '../../data/bank/index.js';
 import { LABS } from '../../lab/labs/index.js';
+import { FRAMEWORKS, findFramework, gaps } from '../../data/standards/index.js';
 
 const TABS = ['formulas', 'constants', 'si', 'glossary', 'misconceptions', 'standards', 'safety', 'math', 'translations', 'about'];
 const ref = localize('ref', R.TRANSLATABLE).value;
 const secLink = id => { const s = findSection(id); return s ? `<a href="#/section/${id}" title="${esc(s.title)}">${esc(id)}</a>` : esc(id); };
 
-export function renderReference(main, tab = 'formulas') {
+export function renderReference(main, tab = 'formulas', sub) {
   if (!TABS.includes(tab)) tab = 'formulas';
   main.innerHTML = `<div class="page"><h1>${tt('ref.title')}</h1>
     <nav class="tabs" role="tablist">${TABS.map(k => `<a role="tab" aria-selected="${k === tab}" class="tab ${k === tab ? 'on' : ''}" href="#/reference/${k}">${tt('ref.' + k)}</a>`).join('')}</nav>
     <div id="refbody" class="refbody"></div></div>`;
   const body = main.querySelector('#refbody');
-  ({ formulas, constants, si, glossary, misconceptions, standards, safety, math, translations, about })[tab](body);
+  ({ formulas, constants, si, glossary, misconceptions, standards, safety, math, translations, about })[tab](body, sub);
 }
 
 function formulas(b) {
@@ -60,13 +61,26 @@ function misconceptions(b) {
   }).join('');
 }
 
-function standards(b) {
-  const S = R.STANDARDS_SOURCE;
-  b.innerHTML = `<div class="notice"><p>${tt('ref.std.source', { course: S.course, date: S.retrieved })} ${extLink(S.url, 'CPALMS')}</p>
-    <p><strong>${tt('ref.std.verified')}</strong> ${tt('ref.std.verified.d')}</p><p><strong>${tt('ref.std.provisional')}</strong> ${tt('ref.std.provisional.d')}</p><p class="hint">${tt('ref.std.honors')}</p></div>
-    <div class="tablewrap"><table class="reftable"><thead><tr><th>${tt('ref.std.code')}</th><th>${tt('ref.std.text')}</th><th>${tt('ref.std.sections')}</th><th>${tt('ref.std.status')}</th></tr></thead><tbody>
-    ${R.STANDARDS.map((s, i) => `<tr><td><code>${esc(s.code)}</code></td><td>${L(ref.standards[i].text)}</td><td>${s.sections.map(secLink).join(' ')}</td><td><span class="good">${tt('ref.std.text.ok')}</span><br><span class="warn">${tt('ref.std.align.prov')}</span></td></tr>`).join('')}</tbody></table></div>
-    <p class="hint">${tt('ref.std.cross')}: ${R.CROSS_COURSE.map(esc).join(' · ')}</p>`;
+// Curriculum alignment: every framework is an optional layer over ByrdWay's own sequence. Official topic wording is
+// shown in English exactly as published; the lesson mapping is provisional until reviewed (docs/HUMAN_REVIEW_REGISTER.md).
+function standards(b, fwId = 'AP1') {
+  const fw = findFramework(fwId) || FRAMEWORKS[0];
+  const byGroup = [...new Set(FRAMEWORKS.map(f => f.group))];
+  const lessonsFor = code => Object.entries(fw.map).filter(([, cs]) => cs.includes(code)).map(([id]) => id).sort((x, y) => SECTIONS.findIndex(s => s.id === x) - SECTIONS.findIndex(s => s.id === y));
+  const gap = gaps(fw);
+  const rows = fw.id === 'FL'
+    ? R.STANDARDS.map((s, i) => `<tr><td><code>${esc(s.code)}</code></td><td>${L(ref.standards[i].text)}</td><td>${s.sections.map(secLink).join(' ')}</td></tr>`).join('')
+    : fw.items.map(i => { const ls = lessonsFor(i.code); return `<tr class="${ls.length ? '' : 'gap'}"><td><code>${esc(i.code)}</code></td><td lang="en">${esc(i.text)}${i.level ? ` <span class="pw pw-honors">${esc(i.level)}</span>` : ''}</td><td>${ls.length ? ls.map(secLink).join(' ') : `<span class="warn">${tt('ref.cw.gap')}</span>`}</td></tr>`; }).join('');
+  b.innerHTML = `<p class="lead">${tt('ref.cw.d')}</p>
+    <label class="sel">${tt('ref.cw.pick')} <select id="fwsel">${byGroup.map(g => `<optgroup label="${esc(g)}">${FRAMEWORKS.filter(f => f.group === g).map(f => `<option value="${f.id}" ${f.id === fw.id ? 'selected' : ''}>${esc(f.name)}</option>`).join('')}</optgroup>`).join('')}</select></label>
+    <div class="notice"><p><strong>${esc(fw.name)}</strong>${fw.level ? ' · ' + esc(fw.level) : ''}</p>
+      <p>${tt('ref.cw.source')} ${extLink(fw.source, esc(new URL(fw.source).hostname))} (${esc(fw.retrieved)}).</p>
+      <p><strong>${tt('ref.std.verified')}</strong> ${tt('ref.cw.verified')} <strong>${tt('ref.std.provisional')}</strong> ${tt('ref.cw.provisional')}</p>
+      ${fw.id === 'FL' ? `<p class="hint">${tt('ref.std.honors')}</p>` : ''}
+      <p>${tt('ref.cw.coverage', { n: fw.items.length - gap.length, total: fw.items.length })}${gap.length ? ` — ${tt('ref.cw.gaps')}: ${gap.map(g => `<code>${esc(g.code)}</code>`).join(' ')}` : ''}</p></div>
+    <div class="tablewrap"><table class="reftable"><thead><tr><th>${tt('ref.std.code')}</th><th>${tt('ref.std.text')}</th><th>${tt('ref.std.sections')}</th></tr></thead><tbody>${rows}</tbody></table></div>
+    ${fw.id === 'FL' ? `<p class="hint">${tt('ref.std.cross')}: ${R.CROSS_COURSE.map(esc).join(' · ')}</p>` : ''}`;
+  b.querySelector('#fwsel').onchange = e => { location.hash = '#/reference/standards/' + e.target.value; };
 }
 
 function safety(b) { b.innerHTML = ref.safety.map(g => `<div class="card"><h2>${L(g.title)}</h2><ul>${g.items.map(x => `<li>${L(x)}</li>`).join('')}</ul></div>`).join('') + `<p class="hint">${tt('ref.safety.d')}</p>`; }
