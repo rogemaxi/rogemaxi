@@ -66,7 +66,7 @@ export default {
     { id: 'f2', min: 0.5, max: 3, step: 0.05, value: 2.5, unit: 'Hz' },
   ],
   sampleEvery: 1 / 60,
-  camera: { target: [0, 1.2, 0], dist: 6, free: [0.15, 0.25, 1] },
+  camera: { target: [2, 1.1, 0], dist: 4.6, free: [0.12, 0.22, 1] },
   view2d: { span: 5, cx: 0, cy: 1.2 },
   graph: {
     choices: [

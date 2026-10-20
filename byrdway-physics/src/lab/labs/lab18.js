@@ -71,7 +71,7 @@ export default {
     { id: 'N', min: 10, max: 1000, step: 10, value: 200, unit: 'turns' },
     { id: 'R', min: 0.5, max: 20, step: 0.1, value: 2, unit: 'Ω' },
   ],
-  camera: { target: [0, 1, 0], dist: 12, free: [0.45, 0.55, 1] },
+  camera: { target: [0, 1, 0], dist: 7.5, free: [0.25, 0.8, 0.7] },
   view2d: { plane: 'xz', span: 10, cx: 0, cy: 0 },
   graph: {
     choices: [

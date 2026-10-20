@@ -98,7 +98,7 @@ export default {
     { id: 'do', min: 5, max: 100, step: 1, value: 15, unit: 'cm' },
     { id: 'ho', min: 1, max: 10, step: 0.5, value: 4, unit: 'cm' },
   ],
-  camera: { target: [0, 1.5, 0], dist: 24, free: [0.12, 0.2, 1] },
+  camera: { target: [0, 1.3, 0], dist: 13, free: [0.12, 0.2, 1] },
   view2d: { span: 26, cx: 0, cy: 1.5 },
   graph: {
     choices: [
