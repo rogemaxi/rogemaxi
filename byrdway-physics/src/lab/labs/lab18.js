@@ -111,7 +111,7 @@ export default {
   create(p) {
     const mode = p.mode;
     const s = { t: 0, done: false, events: [], emf: 0, I: 0, Phi: 0, emfPk: 0, Eth: 0, tHalf: NaN };
-    const base = { get t() { return s.t; }, get done() { return s.done; }, events: s.events };
+    const mk = o => Object.defineProperties(o, { t: { get: () => s.t, enumerable: true }, done: { get: () => s.done, enumerable: true }, events: { value: s.events, enumerable: true } });
     const zero = { x: 0, y: 0, z: 0, spd: 0, F: 0, rTh: 0, rMeas: 0, Tth: 0, Tmeas: 0, pitch: 0, KE: 0, Phi: 0, emf: 0, emfPk: 0, I: 0, Fdrag: 0, Eth: 0, tHalf: 0, pos: 0 };
     const list = (vals, show) => {
       const meta = { t: ['Time', 's', 20], x: ['x', 'm', 8], y: ['Height y', 'm', 6], z: ['z', 'm', 8], spd: ['Speed', 'm/s', 5], F: ['Magnetic force', 'N', 0.05], rTh: ['Radius from m·v⊥/(|q|B)', 'm', 5], rMeas: ['Measured radius', 'm', 5], Tth: ['Period from 2πm/(|q|B)', 's', 20], Tmeas: ['Measured period', 's', 20], pitch: ['Helix pitch (rise per turn)', 'm', 6], KE: ['Kinetic energy', 'J', 1], Phi: ['Magnetic flux Φ (per turn × N for coil)', 'Wb', 0.01], emf: ['EMF ε = −dΦ/dt', 'V', 0.2], emfPk: ['Peak |EMF|', 'V', 0.2], I: ['Induced current', 'A', 1], Fdrag: ['Magnetic drag force (opposes motion)', 'N', 2], Eth: ['Thermal energy in circuit', 'J', 2], tHalf: ['Time to halve the rod speed', 's', 4], pos: ['Magnet / rod position', 'm', 6] };
@@ -131,8 +131,7 @@ export default {
         const sp = Math.hypot(y[3], y[4], y[5]), F = Math.abs(q) * Math.hypot(...cross3([y[3], y[4], y[5]], Bv));
         return { x: y[0], y: y[1], z: y[2], spd: sp, F, rTh, rMeas: rMax / 2, Tth, Tmeas, pitch, KE: 0.5 * m * sp * sp };
       };
-      return {
-        ...base,
+      return mk({
         step(dt) {
           const h = dt / SUB;
           for (let i = 0; i < SUB; i++) {
@@ -162,15 +161,14 @@ export default {
             ],
           };
         },
-      };
+      });
     }
 
     if (mode === 'magnet') {
       const N = p.N, R = p.R;
       let x = X_START; s.Phi = N * dipoleFlux(MD, A_COIL, x);
       const vals = () => ({ x, y: COIL_Y, z: 0, spd: p.v, Phi: s.Phi, emf: s.emf, emfPk: s.emfPk, I: s.I, Fdrag: s.emf * s.I / p.v, Eth: s.Eth, pos: x });
-      return {
-        ...base,
+      return mk({
         step(dt) {
           let h = dt; if (x + p.v * h > X_END) h = (X_END - x) / p.v;
           if (h <= 0) { s.done = true; return; }
@@ -199,7 +197,7 @@ export default {
             ],
           };
         },
-      };
+      });
     }
 
     // rails
@@ -209,8 +207,7 @@ export default {
     const deriv = Y => { const I = Bf * L_RAIL * Y[1] / R; return [Y[1], -I * L_RAIL * Bf / M_ROD, I * I * R]; };
     const KE0 = 0.5 * M_ROD * p.v * p.v;
     const vals = () => ({ x: y[0], y: 0, z: 0, spd: y[1], Phi: s.Phi, emf: s.emf, emfPk: s.emfPk, I: s.I, Fdrag: Math.abs(s.I) * L_RAIL * Bf, Eth: y[2], KE: 0.5 * M_ROD * y[1] * y[1], tHalf: Number.isNaN(s.tHalf) ? 0 : s.tHalf, pos: y[0] });
-    return {
-      ...base,
+    return mk({
       step(dt) {
         const prev = y, tPrev = s.t;
         y = rk4Step(deriv, y, dt); s.t += dt;
@@ -241,7 +238,7 @@ export default {
           ],
         };
       },
-    };
+    });
   },
   equations(p, model) {
     const m = Object.fromEntries(model.measures().map(x => [x.id, x.value]));

@@ -48,7 +48,7 @@ export default {
     challenges: [
       'Using two different materials, make the bodies settle at 40.0 °C (±0.5 °C). Run until they reach equilibrium.',
       'Choose masses, materials and the conductance so that the temperature difference halves in 60 s (±3 s). Run it.',
-      'Compress 1 mol of gas isothermally so that it gives out 1000 J (±30 J) of heat to the surroundings.',
+      'Compress the gas isothermally (choose n, V₁ and the ratio) so that it gives out 1000 J (±30 J) of heat to the surroundings.',
     ],
     evaluate: 'Before you run: a {m1} kg body with specific heat {c1} J/(kg·K) at {T1} °C touches a {m2} kg body with specific heat {c2} J/(kg·K) at {T2} °C inside an insulated box. Calculate their final common temperature.',
     honors: {
@@ -247,7 +247,7 @@ export default {
   challenges: [
     ({ runs }) => runs.some(r => r.params.mode === 'contact' && r.params.mat1 !== r.params.mat2 && Math.abs(r.final.T1 - 40) <= 0.5 && Math.abs(r.final.T2 - 40) <= 0.5 && Math.abs(r.final.T1 - r.final.T2) < 0.1),
     ({ runs }) => runs.some(r => r.params.mode === 'contact' && Math.abs(r.final.tHalf - 60) <= 3),
-    ({ runs }) => runs.some(r => r.params.mode === 'gas' && r.params.proc === 'isothermal' && r.params.n === 1 && r.params.ratio < 1 && Math.abs(r.final.Q + 1000) <= 30 && r.t >= TAU),
+    ({ runs }) => runs.some(r => r.params.mode === 'gas' && r.params.proc === 'isothermal' && r.params.ratio < 1 && Math.abs(r.final.Q + 1000) <= 30 && r.t >= TAU),
   ],
   evaluate(p) {
     const c1 = MATS[p.mat1].c, c2 = MATS[p.mat2].c;

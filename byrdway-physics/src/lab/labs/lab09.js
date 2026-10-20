@@ -66,7 +66,7 @@ export default {
     { id: 'phi', min: -30, max: 30, step: 1, value: 0, unit: '°' },
     { id: 'M', min: 0.5, max: 4, step: 0.5, value: 1, unit: '' },
   ],
-  camera: { target: [0, 0, 0], dist: 62, free: [0.25, 1, 0.75], followId: null },
+  camera: { target: [0, 0, 0], dist: 30, free: [0.25, 1, 0.75], followId: null },
   view2d: { plane: 'xz', span: 6e7, cx: 0, cy: 0 },
   graph: {
     choices: [

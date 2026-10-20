@@ -63,7 +63,7 @@ export default {
     { id: 'F0', min: 0, max: 5, step: 0.1, value: 0, unit: 'N' },
     { id: 'wd', min: 0.5, max: 15, step: 0.05, value: 4.5, unit: 'rad/s' },
   ],
-  camera: { target: [0, 1.4, 0], dist: 5.8, free: [0.3, 0.25, 1] },
+  camera: { target: [0, 1.5, 0], dist: 4.8, free: [0.3, 0.25, 1] },
   view2d: { span: 5.6, cx: 0, cy: 1.4 },
   graph: {
     choices: [

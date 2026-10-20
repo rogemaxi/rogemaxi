@@ -53,7 +53,7 @@ export default {
     { id: 'k', min: 0, max: 0.05, step: 0.005, value: 0, unit: '1/m' },
     { id: 'xT', min: 5, max: 150, step: 1, value: 30, unit: 'm' },
   ],
-  camera: { target: [32, 10, 0], dist: 85, free: [0.15, 0.25, 1], followId: 'ball' },
+  camera: { target: [20, 5, 0], dist: 52, free: [0.15, 0.25, 1], followId: 'ball' },
   view2d: { span: 100, cx: 40, cy: 18 },
   graph: {
     choices: [

@@ -77,7 +77,7 @@ export default {
     { id: 'xc', min: 0.05, max: 0.5, step: 0.01, value: 0.05, unit: 'm' },
     { id: 'mu', min: 0, max: 0.3, step: 0.01, value: 0, unit: '' },
   ],
-  camera: { target: [12.5, 2.6, 0], dist: 25, free: [0.12, 0.25, 1], followId: 'car' },
+  camera: { target: [12.5, 2.6, 0], dist: 19, free: [0.12, 0.25, 1], followId: 'car' },
   view2d: { span: 30, cx: 12.5, cy: 3 },
   graph: {
     choices: [
