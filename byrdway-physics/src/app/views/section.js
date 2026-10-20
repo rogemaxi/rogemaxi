@@ -69,7 +69,7 @@ export function renderSection(root, id) {
       <section class="card"><h2>📖 ${tt('sec.vocab')}</h2><dl class="vocab">${c.vocab.map(v => `<dt>${L(v[0])}</dt><dd>${L(v[1])}</dd>`).join('')}</dl></section>
       <section class="card"><h2>∑ ${tt('sec.formulas')}</h2>${c.formulas.map((f, k) => `<div class="formula"><div class="feq">${esc(raw.formulas[k].eq)}</div><table class="fvars">${f.vars.map((v, j) => `<tr><td>${esc(raw.formulas[k].vars[j][0])}</td><td>${L(v[1])}</td><td>${esc(raw.formulas[k].vars[j][2])}</td></tr>`).join('')}</table><p class="when">${L(f.when)}</p>${raw.formulas[k].id ? `<a class="small" href="#/engine/formula/${esc(raw.formulas[k].id)}">${tt('engine.formula')} →</a>` : ''}</div>`).join('')}</section>
     </div>
-    ${c.derivation ? `<section class="card"><h2>🧩 ${tt('sec.derivation')}</h2><ol>${c.derivation.map(s => `<li>${L(s)}</li>`).join('')}</ol></section>` : ''}
+    ${c.derivation ? `<section class="card"><h2>🧩 ${tt('sec.derivation')}</h2><ol>${[].concat(c.derivation).map(s => `<li>${L(s)}</li>`).join('')}</ol></section>` : ''}
     <section class="card"><h2>📏 ${tt('sec.units')}</h2><p>${L(c.units)}</p></section>
     <section class="card example"><h2>✍️ ${tt('sec.example')}</h2><p><strong>${L(c.example.problem)}</strong></p><ol class="steps">${c.example.steps.map(s => `<li>${L(s)}</li>`).join('')}</ol><p class="answer">✓ ${L(c.example.answer)}</p></section>
     <section class="card"><h2>🤝 ${tt('sec.guided')}</h2><div class="qs">${c.guided.map((q, k) => question(id, 'g', raw.guided[k], q)).join('')}</div></section>

@@ -3,9 +3,8 @@
 import a from './b01_10.js';
 import b from './b11_20.js';
 
-// The two source files spell the answer's unit differently (`units`, or a string `unit` that shadows the unit
-// number); normalize to `unit` = unit number (from the id, e.g. B14-07 → 14) and `ansUnit` = answer unit.
-const norm = x => ({ ...x, unit: +x.id.slice(1, 3), ansUnit: x.units ?? (typeof x.unit === 'string' ? x.unit : ''), units: undefined });
+// `unit` is the unit number (checked against the id, e.g. B14-07 → 14); `ansUnit` is the answer's unit.
+const norm = x => { if (x.unit !== +x.id.slice(1, 3)) throw new Error(`${x.id}: unit ${x.unit}`); return { ansUnit: '', ...x }; };
 export const ITEMS = [...a.ITEMS, ...b.ITEMS].map(norm);
 export const TASKS = [...a.TASKS, ...b.TASKS];
 export const TRANSLATABLE = Object.fromEntries([...ITEMS, ...TASKS].map(x => [x.id, x]));

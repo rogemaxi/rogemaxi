@@ -4,7 +4,7 @@
 import { t, localize } from '../i18n.js';
 import { esc, L, P, tt, fmt, parseNumber, toast, extLink } from '../ui.js';
 import * as store from '../store.js';
-import { UNITS, SECTIONS, findUnit, findSection } from '../../data/curriculum/index.js';
+import { UNITS, SECTIONS, findUnit, findSection, RESOURCES } from '../../data/curriculum/index.js';
 import { LABS, findLab } from '../../lab/labs/index.js';
 import { FORMULAS, findFormula } from '../../data/formulas.js';
 import { solve, checkDimensions, dimString } from '../../engines/formula.js';
@@ -160,7 +160,7 @@ function test(root, n = defaultUnit()) {
 
 // ---------- 5. Reality Labs ----------
 function labs(root) {
-  root.innerHTML = `<div class="labchips">${LABS.map(l => `<a class="chip" href="#/lab/${l.num}">${l.num}. ${L(localize('lab.' + l.num, { x: l.text.title }).value.x)}</a>`).join('')}</div>
+  root.innerHTML = `<div class="labgrid">${RESOURCES.labs.map(r => { const l = findLab(r.num); return `<a class="labtile" href="#/lab/${r.num}"><span class="labnum">${r.num}</span><span class="labname">${l ? L(localize('lab.' + r.num, { x: l.text.title }).value.x) : esc(r.title)}</span><span class="hint">${esc(r.focus)}</span></a>`; }).join('')}</div>
     <p><a class="btn gold" href="#/labs">${tt('labs.title')} →</a></p>`;
 }
 
