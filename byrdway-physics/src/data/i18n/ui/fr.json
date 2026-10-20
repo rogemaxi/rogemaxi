@@ -300,7 +300,7 @@
  "ref.si": "Unités SI et conversions",
  "ref.glossary": "Glossaire",
  "ref.misconceptions": "Idées fausses courantes",
- "ref.standards": "Correspondance avec les normes",
+ "ref.standards": "Alignement sur les programmes",
  "ref.safety": "Sécurité au laboratoire",
  "ref.math": "Aide-mémoire de mathématiques et de trigonométrie",
  "ref.translations": "Rapport d’exhaustivité des traductions",
@@ -451,5 +451,15 @@
  "ref.about.h2": "Les scores d’évaluation sont des estimations d’entraînement ; ce ne sont pas des scores de test validé ou standardisé.",
  "ref.about.h3": "Les liens vidéo ouvrent des recherches sur Khan Academy, YouTube et The Organic Chemistry Tutor ; les vidéos individuelles n’ont pas été vérifiées.",
  "ref.about.h4": "Le tuteur hors ligne utilise des indices rédigés, pas d’intelligence artificielle. L’IA en ligne n’est utilisée que si une école connecte son propre service.",
- "ref.about.h5": "Les traductions sont rédigées par IA et non relues ; l’alignement sur les standards reste provisoire jusqu’à sa vérification par un enseignant certifié."
+ "ref.about.h5": "Les traductions sont rédigées par IA et non relues ; l’alignement sur les standards reste provisoire jusqu’à sa vérification par un enseignant certifié.",
+ "ref.cw.d": "ByrdWay Physics suit sa propre progression en 20 unités. Chaque programme ci-dessous est une couche d’alignement facultative : choisissez-en un pour voir quelles leçons traitent chacun de ses thèmes.",
+ "ref.cw.pick": "Programme",
+ "ref.cw.source": "Source officielle :",
+ "ref.cw.verified": "les codes et intitulés des thèmes sont copiés exactement du document officiel (affichés en anglais tels que publiés).",
+ "ref.cw.provisional": "la correspondance entre leçons et thèmes est celle de l’auteur et n’a pas encore été vérifiée par un enseignant de ce programme.",
+ "ref.cw.coverage": "Thèmes couverts par au moins une leçon : {n} sur {total}",
+ "ref.cw.gaps": "non traités dans ce cours",
+ "ref.cw.gap": "Non traité",
+ "sec.align": "Alignement sur les programmes (provisoire)",
+ "sec.align.none": "Approfondissement au-delà des programmes alignés"
 }

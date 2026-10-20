@@ -300,7 +300,7 @@
  "ref.si": "Đơn vị SI và chuyển đổi",
  "ref.glossary": "Bảng thuật ngữ",
  "ref.misconceptions": "Hiểu lầm thường gặp",
- "ref.standards": "Đối chiếu chuẩn chương trình",
+ "ref.standards": "Đối chiếu chương trình",
  "ref.safety": "An toàn phòng thí nghiệm",
  "ref.math": "Tóm tắt nhanh toán và lượng giác",
  "ref.translations": "Báo cáo mức độ hoàn thiện bản dịch",
@@ -451,5 +451,15 @@
  "ref.about.h2": "Điểm đánh giá là ước lượng để luyện tập; đó không phải là điểm của một bài kiểm tra đã được thẩm định hay chuẩn hóa.",
  "ref.about.h3": "Các liên kết video mở trang tìm kiếm trên Khan Academy, YouTube và The Organic Chemistry Tutor; từng video riêng lẻ chưa được xem xét.",
  "ref.about.h4": "Gia sư ngoại tuyến dùng các gợi ý được viết sẵn, không dùng trí tuệ nhân tạo. AI đám mây chỉ được dùng nếu nhà trường kết nối dịch vụ của riêng mình.",
- "ref.about.h5": "Các bản dịch do AI soạn thảo và chưa được xem lại; việc đối chiếu chuẩn là tạm thời cho đến khi được một giáo viên có chứng chỉ xem xét."
+ "ref.about.h5": "Các bản dịch do AI soạn thảo và chưa được xem lại; việc đối chiếu chuẩn là tạm thời cho đến khi được một giáo viên có chứng chỉ xem xét.",
+ "ref.cw.d": "ByrdWay Physics theo trình tự 20 đơn vị riêng. Mỗi chương trình dưới đây là một lớp đối chiếu tùy chọn: chọn một chương trình để xem bài học nào dạy từng chủ đề của nó.",
+ "ref.cw.pick": "Chương trình",
+ "ref.cw.source": "Nguồn chính thức:",
+ "ref.cw.verified": "mã và tên chủ đề được sao chép nguyên văn từ tài liệu chính thức (hiển thị bằng tiếng Anh như khi công bố).",
+ "ref.cw.provisional": "việc ghép bài học với từng chủ đề là của tác giả và chưa được giáo viên của chương trình này rà soát.",
+ "ref.cw.coverage": "Chủ đề có ít nhất một bài học: {n} / {total}",
+ "ref.cw.gaps": "không được dạy trong khóa học này",
+ "ref.cw.gap": "Không dạy",
+ "sec.align": "Đối chiếu chương trình (tạm thời)",
+ "sec.align.none": "Mở rộng ngoài các chương trình được đối chiếu"
 }

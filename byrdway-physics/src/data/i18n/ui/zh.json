@@ -300,7 +300,7 @@
  "ref.si": "国际单位制与单位换算",
  "ref.glossary": "术语表",
  "ref.misconceptions": "常见误解",
- "ref.standards": "课程标准对照",
+ "ref.standards": "课程对标",
  "ref.safety": "实验室安全",
  "ref.math": "数学与三角函数速查",
  "ref.translations": "翻译完成度报告",
@@ -451,5 +451,15 @@
  "ref.about.h2": "评估分数只是练习性的估计，并非经过验证的或标准化的考试成绩。",
  "ref.about.h3": "视频链接会在 Khan Academy、YouTube 和 The Organic Chemistry Tutor 上打开搜索；各个视频未经逐一审核。",
  "ref.about.h4": "离线辅导使用预先写好的提示，而不是人工智能。只有学校接入自己的服务时，才会使用云端 AI。",
- "ref.about.h5": "译文由 AI 起草且未经审校；标准对应关系在经认证教师审核之前均为暂定。"
+ "ref.about.h5": "译文由 AI 起草且未经审校；标准对应关系在经认证教师审核之前均为暂定。",
+ "ref.cw.d": "ByrdWay Physics 采用自己的 20 个单元顺序。下面每套课程都是可选的对标层：选择一套即可查看哪些课讲授其中的每个主题。",
+ "ref.cw.pick": "课程体系",
+ "ref.cw.source": "官方来源：",
+ "ref.cw.verified": "主题编号和标题均按官方文件原文照录（以英文原样显示）。",
+ "ref.cw.provisional": "各主题对应哪些课由作者整理，尚未经该课程体系的教师审核。",
+ "ref.cw.coverage": "至少有一课覆盖的主题：{n} / {total}",
+ "ref.cw.gaps": "本课程未涉及",
+ "ref.cw.gap": "未涉及",
+ "sec.align": "课程对标（暂定）",
+ "sec.align.none": "超出所对标课程的拓展内容"
 }

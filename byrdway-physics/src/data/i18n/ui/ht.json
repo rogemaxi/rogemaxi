@@ -300,7 +300,7 @@
  "ref.si": "Inite SI ak konvèsyon",
  "ref.glossary": "Glosè",
  "ref.misconceptions": "Move konsepsyon komen",
- "ref.standards": "Korespondans ak estanda yo",
+ "ref.standards": "Aliyman ak pwogram yo",
  "ref.safety": "Sekirite nan laboratwa",
  "ref.math": "Referans rapid matematik ak trigonometri",
  "ref.translations": "Rapò sou tradiksyon ki fini",
@@ -451,5 +451,15 @@
  "ref.about.h2": "Nòt evalyasyon yo se estimasyon pratik; se pa nòt yon egzamen ki valide oswa estandadize.",
  "ref.about.h3": "Lyen videyo yo louvri rechèch sou Khan Academy, YouTube ak The Organic Chemistry Tutor; yo pa t revize chak videyo apa.",
  "ref.about.h4": "Titè san entènèt la sèvi ak endis ki ekri, pa entèlijans atifisyèl. IA sou entènèt la sèvi sèlman si yon lekòl konekte pwòp sèvis li.",
- "ref.about.h5": "Se IA ki ekri tradiksyon yo e yo poko revize; aliyman ak estanda yo pwovizwa jiskaske yon pwofesè sètifye revize l."
+ "ref.about.h5": "Se IA ki ekri tradiksyon yo e yo poko revize; aliyman ak estanda yo pwovizwa jiskaske yon pwofesè sètifye revize l.",
+ "ref.cw.d": "ByrdWay Physics swiv pwòp sekans 20 inite li. Chak pwogram anba a se yon kouch aliyman opsyonèl: chwazi youn pou w wè ki leson ki anseye chak sijè li yo.",
+ "ref.cw.pick": "Pwogram",
+ "ref.cw.source": "Sous ofisyèl:",
+ "ref.cw.verified": "kòd ak tit sijè yo kopye egzakteman nan dokiman ofisyèl la (yo parèt an anglè jan yo te pibliye).",
+ "ref.cw.provisional": "ki leson ki anseye chak sijè se koresponndans otè a fè, epi yon pwofesè pwogram sa a poko revize l.",
+ "ref.cw.coverage": "Sijè ki gen omwen yon leson: {n} sou {total}",
+ "ref.cw.gaps": "pa anseye nan kou sa a",
+ "ref.cw.gap": "Pa anseye",
+ "sec.align": "Aliyman ak pwogram yo (pwovizwa)",
+ "sec.align.none": "Anrichisman ki depase pwogram ki aliyen yo"
 }

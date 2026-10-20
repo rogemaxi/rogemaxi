@@ -300,7 +300,7 @@
  "ref.si": "Unidades SI e conversões",
  "ref.glossary": "Glossário",
  "ref.misconceptions": "Concepções equivocadas comuns",
- "ref.standards": "Correspondência com os padrões curriculares",
+ "ref.standards": "Alinhamento curricular",
  "ref.safety": "Segurança no laboratório",
  "ref.math": "Referência rápida de matemática e trigonometria",
  "ref.translations": "Relatório de completude das traduções",
@@ -451,5 +451,15 @@
  "ref.about.h2": "As pontuações das avaliações são estimativas de prática; não são a nota de um teste validado ou padronizado.",
  "ref.about.h3": "Os links de vídeo abrem buscas no Khan Academy, no YouTube e no The Organic Chemistry Tutor; os vídeos individuais não foram revisados.",
  "ref.about.h4": "O tutor off-line usa dicas escritas, não inteligência artificial. A IA na nuvem só é usada se uma escola conectar seu próprio serviço.",
- "ref.about.h5": "As traduções são redigidas por IA e não revisadas; o alinhamento aos padrões é provisório até ser revisado por um professor certificado."
+ "ref.about.h5": "As traduções são redigidas por IA e não revisadas; o alinhamento aos padrões é provisório até ser revisado por um professor certificado.",
+ "ref.cw.d": "O ByrdWay Physics segue sua própria sequência de 20 unidades. Cada currículo abaixo é uma camada de alinhamento opcional: escolha um para ver quais lições ensinam cada um de seus tópicos.",
+ "ref.cw.pick": "Currículo",
+ "ref.cw.source": "Fonte oficial:",
+ "ref.cw.verified": "os códigos e títulos dos tópicos são copiados exatamente do documento oficial (exibidos em inglês, como publicados).",
+ "ref.cw.provisional": "quais lições ensinam cada tópico é o mapeamento do autor e ainda não foi revisado por um professor deste currículo.",
+ "ref.cw.coverage": "Tópicos com pelo menos uma lição: {n} de {total}",
+ "ref.cw.gaps": "não ensinados neste curso",
+ "ref.cw.gap": "Não ensinado",
+ "sec.align": "Alinhamento curricular (provisório)",
+ "sec.align.none": "Aprofundamento além dos currículos alinhados"
 }

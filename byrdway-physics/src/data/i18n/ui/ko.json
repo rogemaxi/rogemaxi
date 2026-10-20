@@ -300,7 +300,7 @@
  "ref.si": "SI 단위와 단위 환산",
  "ref.glossary": "용어집",
  "ref.misconceptions": "흔한 오개념",
- "ref.standards": "교육과정 기준 대응표",
+ "ref.standards": "교육과정 연계",
  "ref.safety": "실험실 안전",
  "ref.math": "수학·삼각함수 빠른 참고",
  "ref.translations": "번역 완성도 보고서",
@@ -451,5 +451,15 @@
  "ref.about.h2": "평가 점수는 연습용 추정치이며, 검증되었거나 표준화된 시험 점수가 아닙니다.",
  "ref.about.h3": "동영상 링크는 Khan Academy, YouTube, The Organic Chemistry Tutor에서 검색 결과를 엽니다. 개별 동영상은 검토하지 않았습니다.",
  "ref.about.h4": "오프라인 튜터는 인공지능이 아니라 미리 작성된 힌트를 사용합니다. 클라우드 AI는 학교가 자체 서비스를 연결한 경우에만 사용됩니다.",
- "ref.about.h5": "번역은 AI 초안이며 검토되지 않았습니다. 성취기준 연계는 자격을 갖춘 교사가 검토하기 전까지 잠정적입니다."
+ "ref.about.h5": "번역은 AI 초안이며 검토되지 않았습니다. 성취기준 연계는 자격을 갖춘 교사가 검토하기 전까지 잠정적입니다.",
+ "ref.cw.d": "ByrdWay Physics는 자체 20개 단원 순서를 따릅니다. 아래 각 교육과정은 선택적인 연계 층입니다. 하나를 고르면 각 주제를 어느 수업에서 다루는지 볼 수 있습니다.",
+ "ref.cw.pick": "교육과정",
+ "ref.cw.source": "공식 출처:",
+ "ref.cw.verified": "주제 코드와 제목은 공식 문서에서 그대로 옮겼습니다(발표된 대로 영어로 표시).",
+ "ref.cw.provisional": "각 주제를 다루는 수업의 연결은 저자가 정한 것이며, 아직 해당 교육과정 교사의 검토를 받지 않았습니다.",
+ "ref.cw.coverage": "수업이 하나 이상 있는 주제: {total}개 중 {n}개",
+ "ref.cw.gaps": "이 과정에서 다루지 않음",
+ "ref.cw.gap": "다루지 않음",
+ "sec.align": "교육과정 연계(잠정)",
+ "sec.align.none": "연계된 교육과정을 넘어서는 심화"
 }

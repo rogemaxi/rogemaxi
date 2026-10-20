@@ -300,7 +300,7 @@
  "ref.si": "Unidades SI y conversiones",
  "ref.glossary": "Glosario",
  "ref.misconceptions": "Ideas erróneas comunes",
- "ref.standards": "Correspondencia con estándares",
+ "ref.standards": "Alineación curricular",
  "ref.safety": "Seguridad en el laboratorio",
  "ref.math": "Referencia rápida de matemáticas y trigonometría",
  "ref.translations": "Informe de completitud de traducciones",
@@ -451,5 +451,15 @@
  "ref.about.h2": "Los puntajes de evaluación son estimaciones de práctica; no son el puntaje de una prueba validada ni estandarizada.",
  "ref.about.h3": "Los enlaces de video abren búsquedas en Khan Academy, YouTube y The Organic Chemistry Tutor; los videos individuales no fueron revisados.",
  "ref.about.h4": "El tutor sin conexión usa pistas escritas, no inteligencia artificial. La IA en la nube solo se usa si una escuela conecta su propio servicio.",
- "ref.about.h5": "Las traducciones están redactadas por IA y sin revisar; la alineación con los estándares es provisional hasta que la revise un docente certificado."
+ "ref.about.h5": "Las traducciones están redactadas por IA y sin revisar; la alineación con los estándares es provisional hasta que la revise un docente certificado.",
+ "ref.cw.d": "ByrdWay Physics sigue su propia secuencia de 20 unidades. Cada currículo de abajo es una capa de alineación opcional: elige uno para ver qué lecciones enseñan cada uno de sus temas.",
+ "ref.cw.pick": "Currículo",
+ "ref.cw.source": "Fuente oficial:",
+ "ref.cw.verified": "los códigos y títulos de los temas se copian exactamente del documento oficial (se muestran en inglés tal como se publicaron).",
+ "ref.cw.provisional": "qué lecciones enseñan cada tema es la correspondencia del autor y aún no la ha revisado un docente de este currículo.",
+ "ref.cw.coverage": "Temas con al menos una lección: {n} de {total}",
+ "ref.cw.gaps": "no se enseñan en este curso",
+ "ref.cw.gap": "No se enseña",
+ "sec.align": "Alineación curricular (provisional)",
+ "sec.align.none": "Ampliación más allá de los currículos alineados"
 }
