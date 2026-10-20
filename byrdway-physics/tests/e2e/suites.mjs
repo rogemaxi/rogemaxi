@@ -76,7 +76,9 @@ export const SUITES = {
 
   async 'labs: every registered lab runs in 3D and 2D, measures update, a run is recorded'({ page, expect, goto }) {
     await goto('#/labs');
+    const only = (process.env.LABS || '').split(',').filter(Boolean).map(Number);
     for (let n = 1; n <= 20; n++) {
+      if (only.length && !only.includes(n)) continue;
       await page.evaluate(h => (location.hash = h), '#/lab/' + n); await page.waitForTimeout(500);
       if (!(await page.locator('[data-renderer]').count())) continue;
       expect(await page.locator('[data-renderer="3d"]').count() === 1, `lab ${n}: 3D renderer`);
