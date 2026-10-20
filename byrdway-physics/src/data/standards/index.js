@@ -31,4 +31,10 @@ export const findFramework = id => FRAMEWORKS.find(f => f.id === id);
 export function lessonAlignment(sectionId) {
   return FRAMEWORKS.map(fw => ({ fw, codes: (fw.map[sectionId] || []).map(code => fw.items.find(i => i.code === code) || { code, text: '' }) })).filter(x => x.codes.length);
 }
+// Badge label with course level where the framework distinguishes it (Cambridge AS vs A Level, IB HL-only topics).
+export function badgeLabel(fw, codes) {
+  if (fw.id === 'CAIE') { const lv = [...new Set(codes.map(c => c.level))]; return `Cambridge ${lv.map(l => (l === 'A' ? 'A Level' : 'AS')).join('/')}`; }
+  if (fw.id === 'IB') return codes.every(c => c.level === 'HL only') ? 'IB DP HL' : 'IB DP';
+  return fw.short;
+}
 export const gaps = fw => fw.items.filter(i => !Object.values(fw.map).some(cs => cs.includes(i.code)));

@@ -9,12 +9,12 @@ import { findLab } from '../../lab/labs/index.js';
 import { diagnose } from '../../engines/errors.js';
 import { speakButton } from '../narration.js';
 import * as PHYS from '../../physics/index.js';
-import { lessonAlignment } from '../../data/standards/index.js';
+import { lessonAlignment, badgeLabel } from '../../data/standards/index.js';
 
 // Curriculum layers this lesson supports (provisional mapping; official topic titles in the tooltip).
 function alignBadges(id) {
   const a = lessonAlignment(id);
-  return `<p class="align"><span class="hint">${tt('sec.align')}:</span> ${a.length ? a.map(({ fw, codes }) => `<a class="chip" href="#/reference/standards/${fw.id}" title="${esc(codes.map(c => c.code + ' ' + c.text).join(' · '))}">${esc(fw.short)} ${codes.map(c => esc(c.code)).join(', ')}</a>`).join(' ') : `<span class="hint">${tt('sec.align.none')}</span>`}</p>`;
+  return `<p class="align"><span class="hint">${tt('sec.align')}:</span> ${a.length ? a.map(({ fw, codes }) => `<a class="chip" href="#/reference/standards/${fw.id}" title="${esc(codes.map(c => c.code + ' ' + c.text).join(' · '))}">${esc(badgeLabel(fw, codes))} ${codes.map(c => esc(c.code)).join(', ')}</a>`).join(' ') : `<span class="hint">${tt('sec.align.none')}</span>`}</p>`;
 }
 
 // Grade against the exact value from the item's calc restatement (verified by tests to match the displayed answer),

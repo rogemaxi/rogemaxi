@@ -18,7 +18,7 @@ An offline, single-file interactive course for Physics I and Physics I Honors by
   - a 250-item bank and a 20-question adaptive diagnostic that builds a personal plan
   - five mastery levels, with DOK 4 performance tasks and rubrics at Level 4
   - Core and Honors finals
-- Reference: formulas, constants, SI units, glossary, misconceptions, Florida standards crosswalk, lab safety, math reference, translation report.
+- Reference: formulas, constants, SI units, glossary, misconceptions, **curriculum alignment** (AP Physics 1, 2, C: Mechanics, C: E&M; Cambridge AS & A Level 9702; IB DP Physics; NGSS; optional Florida layer — see `docs/CURRICULUM_CROSSWALK.md`), lab safety, math reference, translation report.
 - 12 interface languages: English, Spanish, French, Haitian Creole, Portuguese, Arabic (right-to-left), Chinese, Hindi, Bengali, Vietnamese, Korean, Japanese. Lesson translation is in progress; see `docs/TRANSLATION_REPORT.md`.
 
 ## Use it
@@ -60,6 +60,6 @@ node tools/i18n.mjs report   # regenerate docs/TRANSLATION_REPORT.md
 
 - Assessment scores are practice estimates; item difficulties are author-assigned, not psychometrically calibrated.
 - Translations are AI-drafted and not yet reviewed by native-speaker teachers. Untranslated text appears in English and is marked as such.
-- The standards alignment is provisional until a Florida-certified teacher reviews it.
+- Curriculum alignments are provisional until reviewed by teachers of each curriculum; coverage gaps are listed in `docs/CURRICULUM_CROSSWALK.md`.
 - Video links are search results, not individually reviewed videos.
 - The Tutor is offline guided hints, not AI. Cloud AI works only if a school connects its own service; no API key is ever stored in the file.

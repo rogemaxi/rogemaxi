@@ -216,7 +216,7 @@ export const SUITES = {
       await page.evaluate(h => (location.hash = h), '#/reference/' + k); await page.waitForTimeout(200);
       expect((await page.locator('#refbody').innerText()).length > 150, `reference ${k}`);
     }
-    for (const [fw, n] of [['AP1', 43], ['AP2', 46], ['APCM', 41], ['APCE', 31], ['FL', 37]]) {
+    for (const [fw, n] of [['AP1', 43], ['AP2', 46], ['APCM', 41], ['APCE', 31], ['CAIE', 76], ['IB', 24], ['NGSS', 26], ['FL', 37]]) {
       await page.evaluate(h => (location.hash = h), '#/reference/standards/' + fw); await page.waitForTimeout(200);
       expect(await page.locator('#refbody tbody tr').count() === n, `${fw}: all ${n} official topics listed`);
       expect((await page.locator('#refbody .notice').innerText()).includes('Provisional'), `${fw}: alignment labeled provisional`);
