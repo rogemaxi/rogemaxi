@@ -1,6 +1,6 @@
 // Content-key enumeration shared by the app (i18n.js) and the Node tooling/tests. No imports.
 // Keys whose string values are code, identifiers, units, or colors — never prose. Numeric values are skipped anyway.
-export const SKIP = new Set(['id', 'eq', 'calc', 'calcTol', 'fn', 'color', 'trailColor', 'emissive', 'kind', 'unit', 'mode', 'pathway', 'sym', 'dims', 'src', 'shape', 'dok', 'tags', 'prereqTags', 'section', 'type']);
+export const SKIP = new Set(['id', 'eq', 'calc', 'calcTol', 'fn', 'color', 'trailColor', 'emissive', 'kind', 'unit', 'ansUnit', 'mode', 'pathway', 'sym', 'dims', 'src', 'shape', 'dok', 'tags', 'prereqTags', 'section', 'type']);
 // Paths whose values are symbols or units even though they contain letters (formula variable tables: [symbol, meaning, unit]).
 export const SKIP_PATH = /(^|\.)vars\.\d+\.(0|2)$/;
 export const isText = s => typeof s === 'string' && /\p{L}{2}/u.test(s);
