@@ -13,7 +13,7 @@ const X0 = -LEN / 2, Y0 = 1.2;         // drawing offset: the rope runs from x =
 const gauss = x => Math.exp(-x * x / (2 * SIG * SIG));
 
 const probeX = p => (p.mode === 'standing' ? LEN / (2 * p.n) : PROBE);
-const tEnd = (p, v) => p.mode === 'pulses' ? (X2 - X1 + 0.6) / v + 0.2 : p.mode === 'standing' ? 8 : 16;
+const tEnd = (p, v) => p.mode === 'pulses' ? (LEN - X1 + 4 * SIG) / v + 0.2 : p.mode === 'standing' ? 8 : 16;
 
 export default {
   num: 14, unit: 13, sections: ['13.1', '13.2', '13.3', '13.5', '13.7', '13.8'],

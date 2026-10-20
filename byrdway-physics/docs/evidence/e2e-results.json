@@ -1,13 +1,13 @@
 {
  "file": "dist/ByrdWay_Physics_I_Honors.html",
- "at": "2026-10-20T13:22:57.543Z",
+ "at": "2026-10-20T13:31:51.226Z",
  "browser": "Chromium (Playwright 1.56.1, SwiftShader WebGL)",
  "results": [
   {
    "name": "labs: every registered lab runs in 3D and 2D, measures update, a run is recorded",
    "status": "pass",
-   "ms": 33195,
-   "checks": 18,
+   "ms": 43402,
+   "checks": 24,
    "error": null
   }
  ]

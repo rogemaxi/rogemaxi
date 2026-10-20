@@ -228,7 +228,7 @@ function tutor(root, id) {
   root.innerHTML = `${sectionPicker('tutor', sec.id)}
     <div class="card"><h2>${tt('tutor.offline')}</h2><p class="hint">${tt('tutor.offline.d')}</p><div id="tstep"></div>
       <div class="row"><button class="btn" id="tprev">←</button><button class="btn gold" id="tnext">${tt('tutor.next')} →</button></div></div>
-    <div class="card"><h2>${tt('tutor.prompt')}</h2><p class="hint">${tt('tutor.prompt.d')}</p><textarea readonly rows="6" id="tp">${esc(prompt)}</textarea><button class="btn" id="tcopy">${tt('tutor.copy')}</button></div>
+    <div class="card"><h2>${tt('tutor.prompt')}</h2><p class="hint">${tt('tutor.prompt.d')}</p><textarea readonly rows="6" id="tp" aria-label="${tt('tutor.prompt')}">${esc(prompt)}</textarea><button class="btn" id="tcopy">${tt('tutor.copy')}</button></div>
     <div class="card"><h2>${tt('tutor.cloud')}</h2><p class="hint">${tt('tutor.cloud.d')}</p>
       <label>${tt('tutor.endpoint')} <input id="tep" type="url" placeholder="https://" value="${esc(endpoint)}"></label><button class="btn" id="tsave">${tt('tutor.connect')}</button>
       ${endpoint ? `<label>${tt('tutor.ask')}<textarea id="tq" rows="3"></textarea></label><button class="btn gold" id="task">${tt('tutor.ask')}</button><div class="fb" id="tans" aria-live="polite"></div>` : `<p class="hint">${tt('tutor.cloud.none')}</p>`}</div>`;

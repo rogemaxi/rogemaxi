@@ -11,6 +11,7 @@
     "report": "node tools/reports.mjs"
   },
   "devDependencies": {
+    "axe-core": "^4.10.2",
     "esbuild": "0.24.0",
     "playwright": "^1.56.1",
     "three": "0.170.0"

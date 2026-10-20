@@ -1,0 +1,216 @@
+{
+ "at": "2026-10-20T13:29:54.446Z",
+ "tool": "axe-core 4.10.2",
+ "results": [
+  {
+   "lang": "en",
+   "route": "#/cover",
+   "violations": []
+  },
+  {
+   "lang": "en",
+   "route": "#/home",
+   "violations": []
+  },
+  {
+   "lang": "en",
+   "route": "#/units",
+   "violations": []
+  },
+  {
+   "lang": "en",
+   "route": "#/unit/6",
+   "violations": []
+  },
+  {
+   "lang": "en",
+   "route": "#/section/6.6",
+   "violations": []
+  },
+  {
+   "lang": "en",
+   "route": "#/section/16.5",
+   "violations": []
+  },
+  {
+   "lang": "en",
+   "route": "#/lab/5",
+   "violations": []
+  },
+  {
+   "lang": "en",
+   "route": "#/lab/8",
+   "violations": []
+  },
+  {
+   "lang": "en",
+   "route": "#/labs",
+   "violations": []
+  },
+  {
+   "lang": "en",
+   "route": "#/engines",
+   "violations": []
+  },
+  {
+   "lang": "en",
+   "route": "#/engine/flash/3",
+   "violations": []
+  },
+  {
+   "lang": "en",
+   "route": "#/engine/formula",
+   "violations": []
+  },
+  {
+   "lang": "en",
+   "route": "#/engine/tutor/12.3",
+   "violations": []
+  },
+  {
+   "lang": "en",
+   "route": "#/engine/detective",
+   "violations": []
+  },
+  {
+   "lang": "en",
+   "route": "#/assess",
+   "violations": []
+  },
+  {
+   "lang": "en",
+   "route": "#/diagnostic",
+   "violations": []
+  },
+  {
+   "lang": "en",
+   "route": "#/mastery/4",
+   "violations": []
+  },
+  {
+   "lang": "en",
+   "route": "#/reference/standards",
+   "violations": []
+  },
+  {
+   "lang": "en",
+   "route": "#/reference/glossary",
+   "violations": []
+  },
+  {
+   "lang": "en",
+   "route": "#/videos",
+   "violations": []
+  },
+  {
+   "lang": "en",
+   "route": "#/settings",
+   "violations": []
+  },
+  {
+   "lang": "ar",
+   "route": "#/cover",
+   "violations": []
+  },
+  {
+   "lang": "ar",
+   "route": "#/home",
+   "violations": []
+  },
+  {
+   "lang": "ar",
+   "route": "#/units",
+   "violations": []
+  },
+  {
+   "lang": "ar",
+   "route": "#/unit/6",
+   "violations": []
+  },
+  {
+   "lang": "ar",
+   "route": "#/section/6.6",
+   "violations": []
+  },
+  {
+   "lang": "ar",
+   "route": "#/section/16.5",
+   "violations": []
+  },
+  {
+   "lang": "ar",
+   "route": "#/lab/5",
+   "violations": []
+  },
+  {
+   "lang": "ar",
+   "route": "#/lab/8",
+   "violations": []
+  },
+  {
+   "lang": "ar",
+   "route": "#/labs",
+   "violations": []
+  },
+  {
+   "lang": "ar",
+   "route": "#/engines",
+   "violations": []
+  },
+  {
+   "lang": "ar",
+   "route": "#/engine/flash/3",
+   "violations": []
+  },
+  {
+   "lang": "ar",
+   "route": "#/engine/formula",
+   "violations": []
+  },
+  {
+   "lang": "ar",
+   "route": "#/engine/tutor/12.3",
+   "violations": []
+  },
+  {
+   "lang": "ar",
+   "route": "#/engine/detective",
+   "violations": []
+  },
+  {
+   "lang": "ar",
+   "route": "#/assess",
+   "violations": []
+  },
+  {
+   "lang": "ar",
+   "route": "#/diagnostic",
+   "violations": []
+  },
+  {
+   "lang": "ar",
+   "route": "#/mastery/4",
+   "violations": []
+  },
+  {
+   "lang": "ar",
+   "route": "#/reference/standards",
+   "violations": []
+  },
+  {
+   "lang": "ar",
+   "route": "#/reference/glossary",
+   "violations": []
+  },
+  {
+   "lang": "ar",
+   "route": "#/videos",
+   "violations": []
+  },
+  {
+   "lang": "ar",
+   "route": "#/settings",
+   "violations": []
+  }
+ ]
+}
