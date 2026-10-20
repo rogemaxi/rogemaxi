@@ -16,8 +16,9 @@ const sections = {};
 for (let n = 1; n <= 20; n++) Object.assign(sections, (await import(root + `src/data/curriculum/u${String(n).padStart(2, '0')}.js`)).default.sections || {});
 const authored = Object.keys(sections).length;
 const { LABS } = await import(root + 'src/lab/labs/index.js');
-let bank = [], levels = {}, finals = {};
-if (existsSync(root + 'src/data/bank/index.js')) ({ BANK: bank = [], LEVELS: levels = {}, FINALS: finals = {} } = await import(root + 'src/data/bank/index.js'));
+let bank = [], tasks = [];
+if (existsSync(root + 'src/data/bank/index.js')) ({ ITEMS: bank = [], TASKS: tasks = [] } = await import(root + 'src/data/bank/index.js'));
+const { STANDARDS = [], STANDARDS_SOURCE = {} } = existsSync(root + 'src/data/reference/index.js') ? await import(root + 'src/data/reference/index.js') : {};
 const scopes = await allScopes();
 const keys = new Map(scopes.flatMap(s => contentKeys(s.scope, s.obj)));
 const LANGS = ['es', 'fr', 'ht', 'pt', 'ar', 'zh', 'hi', 'bn', 'vi', 'ko', 'ja'];
@@ -45,7 +46,7 @@ req('R1.2', 'Physics Master TOC Blueprint v1.0 (20 units, 170 sections)', 'sourc
 req('R1.3', 'Video Link Companion: 242 rows, 726 links, section mapping preserved', 'src/data/resources.json', res.counts.links === 726 ? 'VERIFIED' : 'IN PROGRESS', 'import_library.py count assertions', `${res.counts.rows} rows, ${res.counts.links} links + ${res.counts.anchors} anchors`);
 req('R4', 'All 20 units with original instruction in all 170 sections (20 components each)', 'src/data/curriculum/u01–u20.js', st(authored, 170, uok(/authored sections are complete|numeric answer|duplicated/)), 'tests/unit/content.test.js (completeness, calc re-check, no duplicate paragraphs)', `${frac(authored, 170)} sections authored`, '', authored < 170 ? `${170 - authored} sections to author` : '');
 req('R5.1', 'Core / Honors / Advanced pathways, advanced clearly labeled as enrichment', 'resources.json pathway tags; views (badges, notes); settings', 'VERIFIED', 'E2E shell + section rendering; pathway badges from the owner’s library tags', `Core ${res.sections.filter(s => s.pathway === 'Core').length}, Honors ${res.sections.filter(s => s.pathway === 'Honors').length}, Advanced ${res.sections.filter(s => s.pathway === 'Advanced').length}`);
-req('R5.2', 'Florida Physics 1 / Physics 1 Honors standards crosswalk (verified vs provisional)', 'docs/STANDARDS_CROSSWALK.md', existsSync(root + 'docs/STANDARDS_CROSSWALK.md') ? 'IMPLEMENTED/UNVERIFIED' : 'NOT STARTED', '—', '—', 'No district approval or certification is claimed.');
+req('R5.2', 'Florida Physics 1 / Physics 1 Honors standards crosswalk (verified vs provisional)', 'src/data/reference/index.js → Reference ▸ Standards; docs/STANDARDS_CROSSWALK.md', STANDARDS.length ? 'IMPLEMENTED/UNVERIFIED' : 'NOT STARTED', 'E2E reference suite (37 benchmarks listed, provisional labels)', `${STANDARDS.length} content benchmarks; code + wording verified against ${STANDARDS_SOURCE.url || '—'} (retrieved ${STANDARDS_SOURCE.retrieved || '—'})`, 'Section alignment is the author’s mapping (provisional). Physics 1 Honors (#2003390) list not retrieved. No district approval or certification is claimed.', 'Certified-teacher review of the alignment; retrieve the Honors course list.');
 req('R6', 'Interactive 3D engine: orbit/zoom/camera presets, run/pause/reset, parameters, live numbers, vectors, trails, energy, slow motion, replay, run comparison, graphs, concept/quant views, effects off ⇒ same physics, reduced motion, low graphics', 'src/lab/harness.js, render3d.js, render2d.js', eok(/Lab 5/) ? 'VERIFIED' : 'IMPLEMENTED/UNVERIFIED', 'E2E: Lab 5 3D + 2D fallback suites; labs.test.js model checks', 'Lab 5 verified in WebGL (SwiftShader) and 2D fallback', 'Rapier not used: custom deterministic solvers are tested directly; rigid-body stacking is out of scope.');
 req('R7', '20 signature laboratories, each with question, predict gate, variables, model, measurements, equations, graph, data, guided, challenges, honors, reset/replay, validated evaluation, videos, progress', 'src/lab/labs/lab01–lab20.js', st(LABS.length, 20, uok(/required investigation structure/)), 'tests/unit/labs.test.js per-lab analytic comparisons', `${frac(LABS.length, 20)} labs built`, '', LABS.length < 20 ? `${20 - LABS.length} labs to build` : '');
 req('R8', 'Full content localization in 12 languages with RTL Arabic, completeness detector, honest narration fallback', 'src/data/i18n/*, tools/i18n.mjs, src/app/narration.js', 'IN PROGRESS', 'i18n.test.js (parity, placeholders, numbers preserved); E2E i18n[12 langs] on the reference slice', tr.map(t => `${t.l} content ${((100 * t.content) / keys.size).toFixed(1)}% · UI ${((100 * t.ui) / uiEn.length).toFixed(0)}%`).join('; '), 'Translations are AI-drafted and unreviewed by native-speaker teachers. Narration uses device voices only when present.', 'Translate all remaining content keys; obtain native-speaker review.');
@@ -53,8 +54,8 @@ const engineFiles = ['cheat', 'blueprint', 'flash', 'test', 'labs', 'feynman', '
 const engSrc = existsSync(root + 'src/app/views/engines.js') ? readFileSync(root + 'src/app/views/engines.js', 'utf8') : '';
 const enginesBuilt = engineFiles.filter(e => engSrc.includes(`'${e}'`) || engSrc.includes(`${e}:`)).length;
 req('R9', 'Ten working learning engines', 'src/app/views/engines.js, src/engines/*', st(enginesBuilt, 10, eok(/engines/)), 'E2E engine suites', `${frac(enginesBuilt, 10)} engines wired`, 'The AI Tutor is an offline guided tutor; cloud AI requires a school-hosted endpoint (no keys in the file).');
-req('R10', 'Adaptive diagnostic: ≥250 validated items, 20-question adaptive session, personalized plan', 'src/data/bank/*, src/engines/diagnostic.js', st(bank.length ? Math.min(bank.length, 250) : 0, 250, uok(/bank/)), 'tests/unit/bank.test.js', `${bank.length} items`, 'Item difficulties are author-assigned, not psychometrically calibrated.');
-req('R11', 'Five mastery levels with authentic tasks; Core and Honors finals', 'src/data/bank/levels.js', Object.keys(levels).length ? 'IN PROGRESS' : 'NOT STARTED', 'bank.test.js', `${Object.keys(levels).length} levels, ${Object.keys(finals).length} finals`);
+req('R10', 'Adaptive diagnostic: ≥250 validated items, 20-question adaptive session, personalized plan', 'src/data/bank/*, src/engines/assess.js, src/app/views/assess.js', st(Math.min(bank.length, 250), 250, uok(/bank|diagnostic|plan/) && eok(/assessment/)), 'tests/unit/bank.test.js (answers vs calc, coverage, staircase, plan) + E2E full 20-question run', `${bank.length} items, every numeric answer re-computed`, 'Item difficulties are author-assigned, not psychometrically calibrated; scores are labeled practice estimates.');
+req('R11', 'Five mastery levels with authentic tasks (DOK 4 at Level 4); Core and Honors finals', 'src/engines/assess.js, src/app/views/assess.js, bank TASKS', tasks.length >= 20 && uok(/mastery levels and finals|DOK 4/) && eok(/assessment/) ? 'VERIFIED' : 'IN PROGRESS', 'bank.test.js (level/final selection, task rubrics) + E2E (all 5 levels, rubric save, both finals)', `5 levels × 12 items; ${tasks.length} DOK 4 performance tasks with 4-level rubrics; finals 38 items each`, 'DOK 4 tasks are scored by the student or teacher with the rubric; the app does not grade open-ended reasoning.');
 req('R12', 'Video discovery library: per-section Khan/OCT/YouTube search links, safe external opening, honest labeling', 'src/app/views/index.js (videos), section.js', eok(/section 5.3/) ? 'VERIFIED' : 'IMPLEMENTED/UNVERIFIED', 'E2E: 3 links per section, target=_blank rel=noopener', '726 links from owner workbook', 'Links are search results, not reviewed videos (stated in UI).');
 req('R13', 'Student dashboard (pathway, diagnostic, plan, completion, unit mastery, labs, assessments, next lesson, Honors readiness, streak, saved progress, quick sims, language, accessibility)', 'src/app/views/index.js', eok(/section 5.3 full/) ? 'VERIFIED' : 'IMPLEMENTED/UNVERIFIED', 'E2E: completion counted on dashboard after reload');
 req('R14', 'Scientific accuracy tests across all listed domains', 'tests/unit/physics.test.js', uok(/kinematics|Newton|energy|momentum|circular|rotation|oscillations|fluids|thermal|waves|optics|electrostatics|circuits|magnetism|modern|relativity/) ? 'VERIFIED' : 'IN PROGRESS', 'physics.test.js: hand-computed references, limits, conservation laws', `${unit.tests.filter(t => /kinematics|projectile|Newton|incline|Atwood|energy|momentum|circular|rotation|oscillations|fluids|thermal|waves|optics|electrostatics|circuits|magnetism|modern|relativity|astro|RK4/.test(t.name)).length} physics test groups`);
@@ -88,3 +89,27 @@ ${e2e.results.map(r => `- ${r.status === 'pass' ? '✅' : '❌'} ${r.name} — $
 `;
 writeFileSync(root + 'docs/TRACEABILITY.md', md);
 console.log(md.split('\n').slice(0, 8).join('\n'));
+
+// ---- standards crosswalk (generated from src/data/reference/index.js) ----
+if (STANDARDS.length) {
+  const title = id => res.sections.find(s => s.id === id)?.topic || '?';
+  const cw = `# Florida Standards Crosswalk — Physics 1 (#2003380)
+
+Generated by \`node tools/reports.mjs\` from \`src/data/reference/index.js\`.
+
+- **Source:** ${STANDARDS_SOURCE.url} — retrieved ${STANDARDS_SOURCE.retrieved}. CPALMS lists ${STANDARDS_SOURCE.total} standards for the course; ${STANDARDS.length} are science content/nature-of-science benchmarks mapped below. The B.E.S.T. MA.K12.MTR.* and ELA.K12.EE.* expectations apply course-wide.
+- **Verified:** benchmark code and wording were copied from the CPALMS course page (long N.1.1 text abridged, marked).
+- **Provisional:** the section alignment is the author’s mapping. It has **not** been reviewed by a Florida-certified physics teacher or approved by any district.
+- **Not covered:** Physics 1 Honors (#2003390) standards list was not retrieved; no Honors alignment is claimed.
+
+| Benchmark | Text (verified) | Sections (provisional alignment) |
+|---|---|---|
+${STANDARDS.map(s => `| ${s.code} | ${s.text} | ${s.sections.map(id => `${id} ${title(id)}`).join('; ')} |`).join('\n')}
+
+## Core sections with no direct Physics 1 (#2003380) benchmark
+These sections go beyond the benchmarks CPALMS lists for this course (for example rotational dynamics, fluids, oscillator detail, magnetism and induction). They are taught for depth and Honors readiness; Unit 2 math sections support the course-wide MA.K12.MTR expectations. No alignment is claimed for them:
+
+${res.sections.filter(s => s.pathway === 'Core' && !STANDARDS.some(b => b.sections.includes(s.id))).map(s => `${s.id} ${s.topic}`).join(' · ')}
+`;
+  writeFileSync(root + 'docs/STANDARDS_CROSSWALK.md', cw);
+}
