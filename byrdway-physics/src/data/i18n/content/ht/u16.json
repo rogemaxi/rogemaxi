@@ -1,0 +1,7 @@
+{
+ "unit.16|blueprint.0.tool": "I = Q/t, R = ρL/A",
+ "unit.16|blueprint.1.tool": "V = IR",
+ "unit.16|blueprint.2.tool": "R_eq = R₁ + R₂ + …",
+ "unit.16|blueprint.3.tool": "1/R_eq = 1/R₁ + 1/R₂ + …",
+ "unit.16|blueprint.5.tool": "P = IV = I²R = V²/R; E = Pt"
+}

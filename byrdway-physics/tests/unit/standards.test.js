@@ -17,9 +17,9 @@ const layers = [
   ['AP2', P2, ap.courses.find(c => c.id === 'AP2').items.map(i => i.code), []],
   ['APCM', CM, ap.courses.find(c => c.id === 'APCM').items.map(i => i.code), []],
   ['APCE', CE, ap.courses.find(c => c.id === 'APCE').items.map(i => i.code), []],
-  ['CAIE', CAIE_MAP, readJSON('sources/benchmarks/cambridge_9702.json').items.map(i => i.code).filter(sub), ['11.2', '21.2', '24.3', '25.1']],
+  ['CAIE', CAIE_MAP, readJSON('sources/benchmarks/cambridge_9702.json').items.map(i => i.code).filter(sub), []],
   ['IB', IB_MAP, readJSON('sources/benchmarks/ib_dp_physics.json').items.map(i => i.code).filter(sub), []],
-  ['NGSS', NGSS_MAP, readJSON('sources/benchmarks/ngss_hs.json').items.map(i => i.code), ['HS-PS2-6', 'HS-PS4-2', 'HS-ESS1-6']],
+  ['NGSS', NGSS_MAP, readJSON('sources/benchmarks/ngss_hs.json').items.map(i => i.code), ['HS-ESS1-6']],
 ];
 
 test('official source lists have the expected sizes', () => {

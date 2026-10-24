@@ -140,7 +140,7 @@ ${blockers.length ? '### Blocking defects\n' + blockers.map(b => `- ${b}`).join(
 
 ### Marketing claims that must stay accurate
 - AP Physics C (both courses): every topic has a lesson, but calculus-based depth is concentrated in Honors sections and the labeled AP C extensions — describe it as "covers all AP Physics C topics; reviewer-confirmed depth pending", not as a full AP C course.
-- Cambridge 9702: 71/76 sub-topics; IB DP: 23/24 topics; NGSS: 23/26 PEs supported (not "met").
+- Cambridge 9702: all 76 sub-topics have a lesson (several via labeled A Level extensions); IB DP: 24/24 topics; NGSS: 25/26 PEs supported (not "met"); HS-ESS1-6 (Earth's early history) is outside a physics course.
 - The Physics TOC Blueprint v1.0 document was not found; the section list comes from the Video Link Library Master Table.
 
 ### Evidence summary
