@@ -16,7 +16,7 @@ const layers = [
   ['AP1', P1, ap.courses.find(c => c.id === 'AP1').items.map(i => i.code), []],
   ['AP2', P2, ap.courses.find(c => c.id === 'AP2').items.map(i => i.code), []],
   ['APCM', CM, ap.courses.find(c => c.id === 'APCM').items.map(i => i.code), []],
-  ['APCE', CE, ap.courses.find(c => c.id === 'APCE').items.map(i => i.code), ['8.4', '8.5', '8.6', '12.4', '13.6']],
+  ['APCE', CE, ap.courses.find(c => c.id === 'APCE').items.map(i => i.code), []],
   ['CAIE', CAIE_MAP, readJSON('sources/benchmarks/cambridge_9702.json').items.map(i => i.code).filter(sub), ['10.3', '11.2', '21.2', '24.3', '25.1']],
   ['IB', IB_MAP, readJSON('sources/benchmarks/ib_dp_physics.json').items.map(i => i.code).filter(sub), ['B.2']],
   ['NGSS', NGSS_MAP, readJSON('sources/benchmarks/ngss_hs.json').items.map(i => i.code), ['HS-PS2-6', 'HS-PS4-2', 'HS-ESS1-6']],

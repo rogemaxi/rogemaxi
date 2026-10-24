@@ -1,8 +1,8 @@
 // Provisional lesson → AP topic alignment (author's mapping; topic codes/titles verified against the College Board
 // Course at a Glance PDFs in sources/benchmarks/ap_physics.json). Requires review by an AP-trained teacher (H3).
 // P1 = AP Physics 1, P2 = AP Physics 2, CE = AP Physics C: E&M. AP Physics C: Mechanics shares AP Physics 1's
-// Lessons were checked for the topic's actual content (e.g. no lesson teaches Gauss's law, Ampère's law, Biot–Savart
-// integration or LC circuits, so those AP C: E&M topics are reported as gaps rather than mapped).
+// Lessons were checked for the topic's actual content. Gauss's law, flux, continuous distributions (15.8) and
+// Biot–Savart, Ampère's law, LC circuits (17.9) are taught as labeled "AP Physics C extension" content.
 // topic numbering for Units 1–7 (except P1 2.9 Circular Motion = C:M 2.10), so CM is derived from P1 plus CM_EXTRA.
 export const P1 = {
   '2.4': ['1.1'], '2.5': ['1.5'], '2.6': ['1.4'], '2.7': ['1.3'],
@@ -28,9 +28,9 @@ export const P2 = {
   '19.6': ['15.4'], '20.6': ['11.5'],
 };
 export const CE = {
-  '15.1': ['8.1', '8.2'], '15.2': ['8.2', '10.1', '10.2'], '15.3': ['8.1'], '15.4': ['8.3'], '15.5': ['9.1'], '15.6': ['9.2'], '15.7': ['10.3', '10.4'], '15.8': ['8.3', '9.3'],
+  '15.1': ['8.1', '8.2'], '15.2': ['8.2', '10.1', '10.2'], '15.3': ['8.1'], '15.4': ['8.3'], '15.5': ['9.1'], '15.6': ['9.2'], '15.7': ['10.3', '10.4'], '15.8': ['8.3', '8.4', '8.5', '8.6', '9.3'],
   '16.1': ['11.1', '11.3'], '16.2': ['11.3'], '16.3': ['11.2', '11.5'], '16.4': ['11.5'], '16.5': ['11.5'], '16.6': ['11.6', '11.7'], '16.7': ['11.4'], '16.9': ['11.8'],
-  '17.1': ['12.1'], '17.2': ['12.2'], '17.3': ['12.3'], '17.4': ['12.3'], '17.5': ['13.1'], '17.6': ['13.2'], '17.7': ['13.2', '13.3'], '17.8': ['13.2'], '17.9': ['13.3', '13.4', '13.5'],
+  '17.1': ['12.1'], '17.2': ['12.2'], '17.3': ['12.3'], '17.4': ['12.3'], '17.5': ['13.1'], '17.6': ['13.2'], '17.7': ['13.2', '13.3'], '17.8': ['13.2'], '17.9': ['12.3', '12.4', '13.3', '13.4', '13.5', '13.6'],
 };
 const CM_EXTRA = { '2.8': ['1.2'], '3.8': ['1.2'], '4.7': ['1.5', '2.9'], '6.9': ['3.2', '3.3'], '10.4': ['7.5'], '10.8': ['7.1', '7.3', '7.5'] };
 export const CM = (() => {

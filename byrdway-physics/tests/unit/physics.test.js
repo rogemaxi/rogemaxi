@@ -312,3 +312,27 @@ test('RK4 integrator: harmonic oscillator conserves energy to high precision', (
   near(y[0], Math.cos(6.283), 1e-8);
   near(0.5 * (y[0] ** 2 + y[1] ** 2), 0.5, 1e-10);
 });
+
+test('AP Physics C field results: Gauss and Ampère symmetry cases, ring axis, LC oscillation', async () => {
+  const P = await import('../../src/physics/index.js');
+  const close = (a, b, r = 1e-9) => assert.ok(Math.abs(a - b) <= r * Math.abs(b), `${a} vs ${b}`);
+  // Gauss's law sphere: outside equals point charge; continuity at the surface; linear inside
+  close(P.uniformSphereField(4e-9, 0.1, 0.3), P.C.k * 4e-9 / 0.09);
+  close(P.uniformSphereField(4e-9, 0.1, 0.1 - 1e-12), P.uniformSphereField(4e-9, 0.1, 0.1), 1e-6);
+  close(P.uniformSphereField(4e-9, 0.1, 0.05), 0.5 * P.uniformSphereField(4e-9, 0.1, 0.1));
+  // flux of a point charge through a closed surface = q/ε0 ; k = 1/(4πε0) consistency
+  close(P.gaussEnclosedFlux(2e-9), 4 * Math.PI * P.C.k * 2e-9, 1e-6);
+  // infinite line from Gauss = 2kλ/r ; ring axis: far field → point charge, centre → 0
+  close(P.lineChargeField(3e-8, 0.05), 2 * P.C.k * 3e-8 / 0.05, 1e-6);
+  close(P.ringAxisField(5e-9, 0.01, 100), P.C.k * 5e-9 / 1e4, 1e-6);
+  assert.equal(P.ringAxisField(5e-9, 0.1, 0), 0);
+  // Ampère: inside wire linear in r and continuous at surface; toroid; numerical Biot–Savart for a loop matches μ0I/2R
+  close(P.wireFieldInside(10, 0.002, 0.002), P.wireField(10, 0.002));
+  close(P.wireFieldInside(10, 0.002, 0.001), 0.5 * P.wireField(10, 0.002));
+  close(P.toroidField(500, 2, 0.1), P.C.mu0 * 500 * 2 / (2 * Math.PI * 0.1));
+  let B = 0; const n = 2000, R = 0.04, I = 5; for (let i = 0; i < n; i++) B += P.C.mu0 * I * (2 * Math.PI * R / n) / (4 * Math.PI * R * R);
+  close(B, P.loopCenterField(I, R), 1e-12);
+  // LC: ω = 1/√(LC); energy ½Q²/C = ½LI_max² with I_max = ωQ_max
+  const L = 2e-3, Cc = 5e-6, Q = 1e-5, w = P.lcOmega(L, Cc);
+  close(P.lcPeriod(L, Cc), 2 * Math.PI / w); close(0.5 * Q * Q / Cc, 0.5 * L * (w * Q) ** 2);
+});

@@ -223,7 +223,9 @@ export const SUITES = {
     }
     expect(await page.locator('#refbody tr.gap').count() === 0, 'Florida layer shows no false gaps');
     await page.evaluate(() => (location.hash = '#/reference/standards/APCE')); await page.waitForTimeout(200);
-    expect(await page.locator('#refbody tr.gap').count() === 5, 'AP C: E&M gaps (Gauss, flux, distributions, Ampère, LC) shown honestly');
+    expect(await page.locator('#refbody tr.gap').count() === 0, 'AP C: E&M fully mapped after the 15.8/17.9 extensions');
+    await page.evaluate(() => (location.hash = '#/reference/standards/CAIE')); await page.waitForTimeout(200);
+    expect(await page.locator('#refbody tr.gap').count() === 5, 'Cambridge gaps (potential dividers, particles, rectification, PET, standard candles) shown honestly');
     await page.evaluate(() => (location.hash = '#/section/9.3')); await page.waitForTimeout(200);
     expect((await page.locator('.align').innerText()).includes('AP 1 5.3'), 'lesson 9.3 shows its AP 1 torque alignment');
   },

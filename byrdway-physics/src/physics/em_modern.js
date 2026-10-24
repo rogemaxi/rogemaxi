@@ -97,6 +97,17 @@ export const cyclotronPeriod = (m, q, B) => 2 * Math.PI * m / (Math.abs(q) * B);
 export const wireField = (I, r) => C.mu0 * I / (2 * Math.PI * r);
 export const loopCenterField = (I, R, N = 1) => N * C.mu0 * I / (2 * R);
 export const solenoidField = (N, L, I) => C.mu0 * (N / L) * I;
+// Calculus-based (AP Physics C) results: Gauss's law and Ampère's law for symmetric sources, ring on-axis field, LC oscillation.
+export const electricFlux = (E, A, angleDeg = 0) => E * A * Math.cos(deg(angleDeg));        // uniform field, flat area
+export const gaussEnclosedFlux = qEnc => qEnc / C.eps0;                                       // ∮E·dA = Q_enc/ε₀
+export const lineChargeField = (lambda, r) => lambda / (2 * Math.PI * C.eps0 * r);            // infinite line
+export const sheetChargeField = sigma => sigma / (2 * C.eps0);                                // infinite sheet
+export const uniformSphereField = (Q, R, r) => (r >= R ? C.k * Q / (r * r) : C.k * Q * r / R ** 3); // insulating sphere
+export const ringAxisField = (Q, R, x) => C.k * Q * x / (x * x + R * R) ** 1.5;
+export const wireFieldInside = (I, R, r) => (r >= R ? C.mu0 * I / (2 * Math.PI * r) : C.mu0 * I * r / (2 * Math.PI * R * R));
+export const toroidField = (N, I, r) => C.mu0 * N * I / (2 * Math.PI * r);
+export const lcOmega = (L, Cap) => 1 / Math.sqrt(L * Cap);
+export const lcPeriod = (L, Cap) => 2 * Math.PI * Math.sqrt(L * Cap);
 export const flux = (B, A, angleDeg = 0) => B * A * Math.cos(deg(angleDeg)); // angle between B and area normal
 export const faradayEMF = (N, dPhi, dt) => -N * dPhi / dt;
 export const motionalEMF = (B, L, v) => B * L * v;
