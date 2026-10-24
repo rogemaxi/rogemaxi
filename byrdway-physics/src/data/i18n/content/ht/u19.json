@@ -888,5 +888,12 @@
  "19.9|explainWords.1.2": "mc²",
  "19.9|explainWords.2.0": "gama",
  "19.9|explainWords.2.1": "klasik",
- "19.9|explainWords.2.2": "neglijab"
+ "19.9|explainWords.2.2": "neglijab",
+ "19.6|explain.4": "Ekstansyon A Level: bouji estanda. Kèk objè gen yon lumineziz L konnen, tankou etwal varyab Sefeyid (ki peryòd pulsasyon revele L) ak sipènova tip Ia. Mezire fliks radyan F ki rive sou Latè bay distans lan avèk lwa envès kare F = L/(4πd²), kidonk d = √(L/(4πF)). Se konsa yo jwenn distans galaksi yo.",
+ "19.6|vocab.7.0": "Bouji estanda",
+ "19.6|vocab.7.1": "Yon objè astwonomik ki gen yon lumineziz konnen, yo sèvi pou jwenn distans apati fliks mezire li.",
+ "19.6|vocab.8.0": "Entansite fliks radyan",
+ "19.6|vocab.8.1": "Pisans resevwa pa inite sifas, F = L/(4πd²), an W/m².",
+ "19.6|practice.5.q": "Ekstansyon A Level: Yo obsève yon Sefeyid ak lumineziz 1.0 × 10³⁰ W ak fliks 2.0 × 10⁻¹² W/m². Ki distans li ye?",
+ "19.6|practice.5.solution": "d = √(L/(4πF)) = √(1.0 × 10³⁰ / (4π × 2.0 × 10⁻¹²)) = 1.99 × 10²⁰ m (apeprè 21 000 ane limyè)."
 }
