@@ -888,5 +888,12 @@
  "19.9|explainWords.1.2": "mc²",
  "19.9|explainWords.2.0": "gamma",
  "19.9|explainWords.2.1": "clásic",
- "19.9|explainWords.2.2": "desprecia"
+ "19.9|explainWords.2.2": "desprecia",
+ "19.6|explain.4": "Ampliación A Level: candelas estándar. Algunos objetos tienen una luminosidad L conocida, como las estrellas variables cefeidas (cuyo periodo de pulsación revela L) y las supernovas de tipo Ia. Medir el flujo radiante F que llega a la Tierra permite entonces hallar la distancia con la ley del inverso del cuadrado F = L/(4πd²), de modo que d = √(L/(4πF)). Así se hallan las distancias a otras galaxias.",
+ "19.6|vocab.7.0": "Candela estándar",
+ "19.6|vocab.7.1": "Objeto astronómico de luminosidad conocida, que se usa para hallar la distancia a partir de su flujo medido.",
+ "19.6|vocab.8.0": "Intensidad del flujo radiante",
+ "19.6|vocab.8.1": "Potencia recibida por unidad de área, F = L/(4πd²), en W/m².",
+ "19.6|practice.5.q": "Ampliación A Level: Una cefeida de luminosidad 1.0 × 10³⁰ W se observa con un flujo de 2.0 × 10⁻¹² W/m². ¿A qué distancia está?",
+ "19.6|practice.5.solution": "d = √(L/(4πF)) = √(1.0 × 10³⁰ / (4π × 2.0 × 10⁻¹²)) = 1.99 × 10²⁰ m (unos 21 000 años luz)."
 }
