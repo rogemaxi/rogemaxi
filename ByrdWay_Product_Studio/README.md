@@ -1,4 +1,4 @@
-# ByrdWay Product Engineering Studio v0.4.1
+# ByrdWay Product Engineering Studio v0.4.2
 
 **Status:** Studio software acceptance criteria PASS on Windows (127 tests incl. real-window GUI workflows,
 packaged-.exe self-test) — see `PRODUCTION_READINESS_REPORT.md`. **Production certification is BLOCKED** until one

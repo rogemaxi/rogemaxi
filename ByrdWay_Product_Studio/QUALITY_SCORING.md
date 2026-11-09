@@ -1,4 +1,4 @@
-# ByrdWay Quality Scoring — specification (v0.4.1)
+# ByrdWay Quality Scoring — specification (v0.4.2)
 
 Implemented in `quality.py`; tested in `tests/test_repair_loop.py::Scoring`. The score is computed **only** by
 the Release QA role from a **fresh re-extraction of the candidate package**, never from the repair agent's own

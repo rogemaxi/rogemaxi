@@ -1,18 +1,18 @@
-# Owner Quick Start — ByrdWay Product Engineering Studio v0.4.1
+# Owner Quick Start — ByrdWay Product Engineering Studio v0.4.2
 
 ## Install once (about 10 minutes)
 **Option A — ready-made program (no Python):**
-1. On GitHub: **rogemaxi/rogemaxi → Releases → ByrdWay Product Engineering Studio v0.4.1** →
-   download **ByrdWayStudio_v0.4.1_Windows_exe.zip**. (It is a *draft* release until you click Publish; only you can see it.)
+1. On GitHub: **rogemaxi/rogemaxi → Releases → ByrdWay Product Engineering Studio v0.4.2** →
+   download **ByrdWayStudio_v0.4.2_Windows_exe.zip**. (It is a *draft* release until you click Publish; only you can see it.)
 2. Right-click the ZIP → **Properties** → tick **Unblock** → OK → right-click → **Extract All** → `C:\ByrdWay`.
-3. Download **ByrdWay_Product_Studio_v0.4.1_source.zip** too, extract it, and double-click
+3. Download **ByrdWay_Product_Studio_v0.4.2_source.zip** too, extract it, and double-click
    `install_windows.bat` once — it installs the Chromium browser engine used for testing (answer **Y**).
 4. Open `C:\ByrdWay\ByrdWayStudio\ByrdWayStudio.exe`. First time only: *More info → Run anyway* (unsigned program).
 
 **Option B — from source:** extract the source ZIP, install Python 3.12 (tick *Add to PATH*), run
 `install_windows.bat`, then `START_WINDOWS.bat`.
 
-Check: **Help → About** shows **v0.4.1**. **Help → Run self-test** should say **PASSED**.
+Check: **Help → About** shows **v0.4.2**. **Help → Run self-test** should say **PASSED**.
 
 ## Repair an existing product (tab 1 → tab 2)
 1. **① Import Product…** — pick a Power Tool ZIP/HTML or an Explainer/Concept Tiles PDF. A locked copy is made;

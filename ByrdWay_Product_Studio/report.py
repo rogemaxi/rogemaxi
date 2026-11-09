@@ -75,6 +75,16 @@ def write_job_report(root, job):
                  f'(visual review confirmed: {ap.get("visual_reviewed")})</p>')
     if qa.get('reasons'):
         b.append('<h2>Why it is not ready</h2><ul>' + ''.join(f'<li>{E(r)}</li>' for r in qa['reasons']) + '</ul>')
+    un = qa.get('unverified_items') or []
+    if un:
+        b.append(f'<h2>Questions that need your review ({len(un)})</h2><p>The verifier cannot check these '
+                 'automatically (proofs, word problems, multi-part or unsupported question types). Check each one, '
+                 'then use "Attest Unverifiable Item…" in tab 2 (key below, or ALL).</p><table><tr><th>#</th>'
+                 '<th>Question</th><th>Why</th><th>Key</th></tr>')
+        for n_, u in enumerate(un, 1):
+            b.append(f'<tr><td>{n_}</td><td>{E(str(u.get("question")))}</td><td>{E(u["status"])}: '
+                     f'{E(u["evidence"][:120])}</td><td><small>{E(u["key"])}</small></td></tr>')
+        b.append('</table>')
     corr = job.get('corrections') or []
     if corr:
         b.append('<h2>Defects and corrections</h2><table><tr><th>State</th><th>Severity</th><th>Problem</th>'

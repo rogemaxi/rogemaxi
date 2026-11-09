@@ -151,8 +151,19 @@ def strip_answer(ans):
 
 def parse_answer_set(ans, var=None):
     a = strip_answer(ans)
+    a = re.sub(r'\s*\((?:or|i\.e\.?|=)\s[^)]*\)', '', a)          # "64 (or 2^6)" -> "64"
     a = re.sub(r'^\{(.*)\}$', r'\1', a)
     parts = re.split(r'\s*(?:,|;|\bor\b|\band\b)\s*', a)
+    expanded = []
+    for p in parts:                                                   # "x = -4 ± √13" -> two roots
+        if p.count('±') == 1:
+            left, right = p.split('±')
+            head = re.sub(r'^\s*[A-Za-z]\s*=\s*', '', left).strip()
+            expanded += [f'{head} + ({right.strip()})' if head else right.strip(),
+                         f'{head} - ({right.strip()})' if head else f'-({right.strip()})']
+        else:
+            expanded.append(p)
+    parts = expanded
     vals = []
     for p in parts:
         p = p.strip()
@@ -535,6 +546,9 @@ _NUM_LIST = r'(-?\d+(?:\.\d+)?(?:\s*,\s*-?\d+(?:\.\d+)?)+)'
 def classify(question):
     """Infer a verification spec from question text. Returns spec or None."""
     q = normalize(question)
+    # "Solve x^2 - 9x + 18 = 0 by factoring." -> the method phrase is instruction, not mathematics
+    q = re.sub(r'\s+(?:by|using|with)\s+(?:the\s+)?(?:factoring|completing the square|quadratic formula|square[- ]root(?:s| method)?|'
+               r'inverse operations|the zero[- ]product property|zero[- ]product property)\b.*$', '', q, flags=re.I).strip().rstrip('.')
     ql = q.lower()
     m = re.search(r'solve(?:\s+for\s+([a-z]))?\s*[:\-]?\s*(.+?=.+?)(?:\s+for\s+([a-z]))?\s*$', q, re.I)
     if m:
@@ -585,6 +599,20 @@ def classify(question):
     return None
 
 
+def _spec_parses(spec):
+    try:
+        t = spec['type']
+        if t in ('expression', 'equivalence', 'derivative', 'integral', 'limit'):
+            safe_parse(spec['expr'])
+        elif t == 'solve':
+            safe_equation(spec['equation'])
+        return True
+    except UnsafeExpression as e:
+        return 'too large' in str(e) or 'Nested power' in str(e)   # keep DoS guard visible as PARSE_ERROR
+    except Exception:
+        return False
+
+
 def verify_item(item):
     """Verify one question/answer item. Never raises for bad content."""
     question = str(item.get('question', ''))
@@ -598,7 +626,10 @@ def verify_item(item):
             return _result(PARSE_ERROR, 'multiple choice', None, item.get('correct'), [], 'Correct-choice index invalid')
     if answer is None or str(answer).strip() == '':
         return _result(PARSE_ERROR, 'unknown', None, answer, [], 'No answer given')
+    explicit = bool(item.get('verify'))
     spec = item.get('verify') or classify(question)
+    if spec and not explicit and not _spec_parses(spec):
+        spec = None                       # inferred from wording that is not pure mathematics
     if not spec:
         return _result(UNSUPPORTED, 'unclassified', None, answer, [],
                        'Question type not supported by deterministic verifier: human or AI-assisted review required')
@@ -663,7 +694,7 @@ def extract_qa_pairs(text):
 
 
 _KEY_Q = r'(?:question|q|prompt|problem|questionText|stem|text)'
-_KEY_A = r'(?:answer|ans|correctAnswer|correct_answer|solution|key|expected)'
+_KEY_A = r'(?:answer|ans|correctAnswer|correct_answer|solution|key|expected|a)'   # bare `a` only counts beside a question key
 _KEY_CHOICES = r'(?:choices|options|answers|answerChoices|alternatives)'
 _KEY_CORRECT = r'(?:correct|correctIndex|correct_index|answerIndex|answer_index|correctOption|correctChoice)'
 
@@ -756,8 +787,10 @@ def extract_source_items(path, text):
                 km, am = am, None          # `answer: 2` beside options = an index, not a value
         if not qm or not (am or (cm and km)):
             continue
-        if not re.search(r'[\d=+\-*/^×÷√π]', _unq(qm.group(1))) and not (am and re.search(r'\d', am.group(1))):
-            continue                       # not a math item (e.g. a menu config)
+        generic = re.match(r'''["']?(?:text|stem|prompt)\b''', qm.group(0)) or \
+            (am and re.match(r'''["']?(?:key|expected)\b''', am.group(0)))
+        if generic and not re.search(r'[\d=+\-*/^×÷√π]', _unq(qm.group(1))) and not (am and re.search(r'\d', am.group(1))):
+            continue                       # generic field names without math = UI text, not a quiz item
         item = {'question': _unq(qm.group(1)), 'file': path, 'patch_target': obj,
                 'line': text[:start].count('\n') + 1}
         if am:

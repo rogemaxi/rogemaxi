@@ -69,7 +69,7 @@ def _launch(p, chromium_path=''):
 
 
 def run_browser_tests(site_dir, entry, shots_dir, label='run', timeout_ms=15000, max_clicks=80,
-                      chromium_path=''):
+                      chromium_path='', max_routes=150, sweep_seconds=240):
     site_dir = Path(site_dir).resolve()
     shots_dir = Path(shots_dir)
     shots_dir.mkdir(parents=True, exist_ok=True)
@@ -129,28 +129,64 @@ def run_browser_tests(site_dir, entry, shots_dir, label='run', timeout_ms=15000,
                 shot = shots_dir / f'{label}_desktop.png'
                 page.screenshot(path=str(shot), full_page=True)
                 report['screenshots']['desktop'] = str(shot)
-                # interaction sweep
-                handles = page.query_selector_all(CLICK_SELECTOR)
-                report['click_targets'] = len(handles)
-                for i in range(min(len(handles), max_clicks)):
-                    els = page.query_selector_all(CLICK_SELECTOR)
-                    if i >= len(els):
-                        break
-                    el = els[i]
-                    try:
-                        if not el.is_visible():
-                            continue
-                        desc = el.evaluate("e => (e.tagName + ' ' + (e.id ? '#' + e.id + ' ' : '') + "
-                                           "(e.innerText || e.value || e.getAttribute('aria-label') || '')"
-                                           ".trim().slice(0, 40))")
-                        current['action'] = f'click {desc}'
-                        el.click(timeout=2000, no_wait_after=True)
-                        report['clicks'] += 1
-                        page.wait_for_timeout(80)
-                        if page.url.split('#')[0] != entry_path.as_uri():
-                            page.goto(entry_path.as_uri(), wait_until='load')
-                    except Exception as e:
-                        report.setdefault('click_failures', []).append(f'{current["action"]}: {str(e).splitlines()[0][:120]}')
+                # interaction sweep over every in-app screen. Single-page tools switch screens by changing
+                # the #fragment; each discovered #route is visited and swept (bounded by routes, clicks, time).
+                base = entry_path.as_uri()
+                start_hash = page.evaluate('() => location.hash')
+                queue, seen = [start_hash], {start_hash}
+                report['routes_visited'] = []
+                t_end = time.time() + sweep_seconds
+
+                def discover():
+                    for h in page.evaluate("() => { const out = new Set(); if (location.hash) out.add(location.hash);"
+                                           " document.querySelectorAll('a[href^=\"#\"]').forEach(a => {"
+                                           " const h = a.getAttribute('href'); if (h && h.length > 1) out.add(h); });"
+                                           " return Array.from(out); }"):
+                        if h not in seen and len(seen) < max_routes:
+                            seen.add(h)
+                            queue.append(h)
+                        elif h not in seen:
+                            report['routes_capped'] = True
+
+                while queue and time.time() < t_end:
+                    route = queue.pop(0)
+                    current['action'] = f'open screen {route or "(start)"}'
+                    page.goto(base + route, wait_until='load')
+                    page.wait_for_timeout(120)
+                    report['routes_visited'].append(route or '(start)')
+                    discover()
+                    n = len(page.query_selector_all(CLICK_SELECTOR))
+                    report['click_targets'] += n
+                    for i in range(min(n, max_clicks)):
+                        if time.time() > t_end:
+                            break
+                        els = page.query_selector_all(CLICK_SELECTOR)
+                        if i >= len(els):
+                            break
+                        el = els[i]
+                        try:
+                            if not el.is_visible():
+                                continue
+                            href = el.get_attribute('href') or ''
+                            if href.startswith('#') and len(href) > 1:
+                                continue                      # navigation links are covered by visiting their route
+                            desc = el.evaluate("e => (e.tagName + ' ' + (e.id ? '#' + e.id + ' ' : '') + "
+                                               "(e.innerText || e.value || e.getAttribute('aria-label') || '')"
+                                               ".trim().slice(0, 40))")
+                            current['action'] = f'click {desc} on {route or "(start)"}'
+                            el.click(timeout=2000, no_wait_after=True)
+                            report['clicks'] += 1
+                            page.wait_for_timeout(60)
+                            if page.url.split('#')[0] != base:
+                                page.goto(base + route, wait_until='load')
+                            elif page.evaluate('() => location.hash') != route:
+                                discover()
+                                page.goto(base + route, wait_until='load')
+                                page.wait_for_timeout(80)
+                        except Exception as e:
+                            report.setdefault('click_failures', []).append(f'{current["action"]}: {str(e).splitlines()[0][:120]}')
+                report['routes_discovered'] = len(seen)
+                report['routes_not_visited'] = len(queue)
                 current['action'] = 'mobile render'
                 page.set_viewport_size({'width': 375, 'height': 740})
                 page.goto(entry_path.as_uri(), wait_until='load')
@@ -182,7 +218,11 @@ def browser_checks(report):
          ', '.join(map(str, report['broken_images'][:5])) or 'all images loaded'),
         ('browser.interactions_exercised', 'browser_runtime', 'MAJOR',
          report['load_ok'] and (report['click_targets'] == 0 or report['clicks'] > 0),
-         f"{report['clicks']} clicks of {report['click_targets']} targets"),
+         f"{report['clicks']} clicks over {len(report.get('routes_visited', []))} screen(s), {report['click_targets']} targets"),
+        ('browser.all_screens_visited', 'browser_runtime', 'MAJOR',
+         report['load_ok'] and not report.get('routes_not_visited') and not report.get('routes_capped'),
+         f"{len(report.get('routes_visited', []))} of {report.get('routes_discovered', 0)} screens visited"
+         + (' - time/route limit reached' if report.get('routes_not_visited') else '')),
         ('browser.mobile_no_overflow', 'responsive', 'MINOR',
          report['mobile_overflow_px'] is not None and report['mobile_overflow_px'] <= 2,
          f"horizontal overflow {report['mobile_overflow_px']}px at 375px width"),

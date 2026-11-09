@@ -1,4 +1,4 @@
-# Known limitations, unverified items and unresolved defects (v0.4.1, 2026-11-09)
+# Known limitations, unverified items and unresolved defects (v0.4.2, 2026-11-09)
 
 Labels: **IMPLEMENTED+TESTED** · **IMPLEMENTED, NOT VERIFIED ON TARGET** · **PARTIAL** · **NOT IMPLEMENTED**
 
@@ -7,7 +7,7 @@ Labels: **IMPLEMENTED+TESTED** · **IMPLEMENTED, NOT VERIFIED ON TARGET** · **P
 |---|---|---|
 | Real owner Power Tool | **BLOCKED — owner file needed** | Supply one original ByrdWay Power Tool ZIP/HTML with known defects. All results so far come from controlled fixtures. |
 | Real owner Explainer / Concept Tiles + editable source | **BLOCKED — owner file needed** | Supply one real Explainer PDF and its editable source (Canva/PPTX/DOCX export). |
-| Windows runtime | **VERIFIED on Windows Server 2025 (v0.4.1, run 42663089124)** (CI run https://github.com/rogemaxi/rogemaxi/actions/runs/42544542267) | Same Windows core as Windows 11. Still run `install_windows.bat` + the 2-minute smoke test (USER_GUIDE §6) on your own PC once. |
+| Windows runtime | **VERIFIED on Windows Server 2025 (v0.4.2, run 42663089124)** (CI run https://github.com/rogemaxi/rogemaxi/actions/runs/42544542267) | Same Windows core as Windows 11. Still run `install_windows.bat` + the 2-minute smoke test (USER_GUIDE §6) on your own PC once. |
 | Windows .exe | **VERIFIED on Windows Server 2025** | Built by CI; full self-test passes inside the .exe; GUI launches. Not code-signed (Windows SmartScreen will warn: More info → Run anyway). |
 | Chromium OS sandbox on Windows | IMPLEMENTED; tests pass on Windows | The CI log does not record which sandbox mode was used (the runner is an administrator account). |
 | Live OpenAI calls | IMPLEMENTED, NOT VERIFIED ON TARGET | All AI paths tested with a mock client; no real API call was made (no key, no spend authorized). Uses the official `openai` SDK Responses API. |
@@ -33,6 +33,18 @@ wrong multiple-choice index/letter, misspelled `onclick` handler, `getElementByI
 typo mismatches, broken in-page links, missing `lang`, missing viewport.
 Detected only (need a person or approved AI suggestion): JavaScript runtime errors without a matching static cause,
 missing alt text, unnamed buttons, duplicate ids, external CDN dependencies, mobile overflow, unsupported question types.
+
+## Findings from the first real owner products (v0.4.2)
+* **Flattened "anime" Explainers** (every page one picture, no text layer) cannot be verified by the Studio at all:
+  no OCR and no image review are implemented. Text-in-image errors (misspelled labels, wrong symbols, characters
+  covering text) are invisible to it. Options for the owner: export with a text layer / supply the editable source, or
+  authorize building an image-review step (paid OpenAI vision calls under the existing spending controls).
+* **Power Tool answer coverage**: 16 of 100 real answer items fall in machine-checkable domains; 84 need owner
+  review. Extending the verifier to inequalities, systems, lines/slope and multi-part answers would raise coverage —
+  an owner decision (feature work), not done.
+* **Browser sweep** clicks up to 80 controls per screen; on the real tool 450 of 1,461 controls were clicked
+  (navigation links are covered by visiting their screens). Product-specific scripts (typing answers into the tool's
+  own checker) are not implemented.
 
 ## Functional limitations
 * **Academic verifier scope (PARTIAL by nature):** deterministic coverage = arithmetic/fractions/radicals/trig values,
