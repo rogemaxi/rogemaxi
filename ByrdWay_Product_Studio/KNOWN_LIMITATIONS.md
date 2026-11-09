@@ -5,9 +5,9 @@ Labels: **IMPLEMENTED+TESTED** · **IMPLEMENTED, NOT VERIFIED ON TARGET** · **P
 ## Not yet verified (owner action required)
 | Item | Status | What is needed |
 |---|---|---|
-| Real owner Power Tool | NOT VERIFIED | Supply one original ByrdWay Power Tool ZIP/HTML with known defects. All results so far come from controlled fixtures. |
-| Real owner Explainer / Concept Tiles + editable source | NOT VERIFIED | Supply one real Explainer PDF and its editable source (Canva/PPTX/DOCX export). |
-| Windows runtime | **VERIFIED on Windows Server 2025** (CI run https://github.com/rogemaxi/rogemaxi/actions/runs/42544542267) | Same Windows core as Windows 11. Still run `install_windows.bat` + the 2-minute smoke test (USER_GUIDE §6) on your own PC once. |
+| Real owner Power Tool | **BLOCKED — owner file needed** | Supply one original ByrdWay Power Tool ZIP/HTML with known defects. All results so far come from controlled fixtures. |
+| Real owner Explainer / Concept Tiles + editable source | **BLOCKED — owner file needed** | Supply one real Explainer PDF and its editable source (Canva/PPTX/DOCX export). |
+| Windows runtime | **VERIFIED on Windows Server 2025 (v0.4.0, run 42663089124)** (CI run https://github.com/rogemaxi/rogemaxi/actions/runs/42544542267) | Same Windows core as Windows 11. Still run `install_windows.bat` + the 2-minute smoke test (USER_GUIDE §6) on your own PC once. |
 | Windows .exe | **VERIFIED on Windows Server 2025** | Built by CI; full self-test passes inside the .exe; GUI launches. Not code-signed (Windows SmartScreen will warn: More info → Run anyway). |
 | Chromium OS sandbox on Windows | IMPLEMENTED; tests pass on Windows | The CI log does not record which sandbox mode was used (the runner is an administrator account). |
 | Live OpenAI calls | IMPLEMENTED, NOT VERIFIED ON TARGET | All AI paths tested with a mock client; no real API call was made (no key, no spend authorized). Uses the official `openai` SDK Responses API. |
@@ -41,6 +41,10 @@ Labels: **IMPLEMENTED+TESTED** · **IMPLEMENTED, NOT VERIFIED ON TARGET** · **P
 * **Math rendering** in built modules is plain text (no MathJax, to stay offline).
 * **No hard timeout** on a single SymPy simplification (see SECURITY_REVIEW).
 * **Single-user, single-machine**; no concurrent job execution.
+
+* **Windows 11 desktop** itself was not available for testing (GitHub has no Windows 11 runners).
+* **Code signing**: the .exe is unsigned (a certificate is a purchase — owner decision). SmartScreen warns once.
+* **Antivirus** behaviour could not be tested in CI.
 
 ## Unresolved defects
 None known in the implemented scope at the time of the final test run (see TEST_RESULTS.md).

@@ -1,17 +1,31 @@
-# Test execution results
+# Test execution results — ByrdWay Product Engineering Studio v0.4.0
 
-Recorded 2026-11-09. Windows results come from GitHub Actions run https://github.com/rogemaxi/rogemaxi/actions/runs/42544542267
-(workflow `.github/workflows/byrdway-windows.yml`, commit 67ebd45), which re-runs on every change.
+Windows results: GitHub Actions run https://github.com/rogemaxi/rogemaxi/actions/runs/42663089124 (commit faa30e9).
+The workflow fails if ANY test is skipped on Windows, if the packaged .exe self-test fails, or if the .exe version
+differs from `version.py`.
 
 | Environment | Command | Result |
 |---|---|---|
-| **Windows** (Microsoft Windows Server 2025, image windows-2025-vs2026), Python 3.12.10 | `install` as in install_windows.bat, then `python -m unittest discover -s tests -v` | **Ran 103 tests — OK, 0 skipped (desktop UI included)** (64.8 s) |
-| **Windows**, source | `python app.py --selftest` | **14/14 checks passed** (7.0 s) |
-| **Windows**, packaged | `pyinstaller byrdway_studio.spec` → `ByrdWayStudio.exe --selftest` | **Build OK; 14/14 self-test checks passed inside the .exe**, Chromium running (6.8 s) |
-| **Windows**, packaged GUI | launch `ByrdWayStudio.exe` | **Window started, stayed running 20 s, workspace created** |
-| Linux, Python 3.13 | `python -m unittest discover -s tests` | Ran 103 tests — OK (UI test skipped: no Tk) |
-| Linux, Python 3.12 + Tk + Xvfb (earlier v0.2 build, 96 tests) | `xvfb-run -a python -m unittest discover -s tests -v` | Ran 96 tests — OK |
-| Baseline v0.1 before any change | `python -m unittest discover -s tests -v` | Ran 4 tests — OK (the 4 original tests still pass unchanged) |
+| **Windows Server 2025** (windows-2025-vs2026), Python 3.12 | `python -m unittest discover -s tests -v` | **Ran 127 tests — OK, 0 skipped** (incl. 15 real-window GUI tests) |
+| **Windows**, source | `python app.py --selftest` | **14/14 passed**, version 0.4.0 |
+| **Windows**, packaged | `pyinstaller byrdway_studio.spec` → `ByrdWayStudio.exe --selftest` | **14/14 passed**, version 0.4.0 = version.py |
+| **Windows**, packaged GUI | launch `ByrdWayStudio.exe` | window started, ran 20 s, workspace created |
+| Linux, Python 3.12 + Tk + Xvfb | `xvfb-run -a python -m unittest discover -s tests -v` | Ran 127 tests — OK, 0 skipped |
+| Linux, Python 3.13 (no Tk) | `python -m unittest discover -s tests` | Ran 127 tests — OK, 15 skipped (GUI tests need Tk; they run on Windows) |
+
+## Real-window GUI tests (tests/test_gui_workflows.py) — all PASS on Windows
+Products & Jobs: import → diagnose (read-only report) → repair copy → report with before/after → approve → export →
+original byte-identical · release gate refuses approval/export of a BLOCKED job, reject works · bad import explained
+and logged · 16 buttons explain when nothing is selected · every button wired.
+Builders: form validation errors with line numbers (nothing built) · draft save + resume · form → 2 modules →
+review → approve → assemble → Release QA PASS · wrong answer blocks unit with plain message · sample labelled and
+blocked · Lil Dr. Byrd: missing image blocks, registered image → approved.
+Settings/Backup/Help: limits validation + AI DISABLED status · backup + restore · Help self-test shows version.
+
+## Defects found by these tests and fixed (details: ROOT_CAUSE_REPORT.md)
+R4 Tk abort from garbage collection on a worker thread · R5 built modules blocked by missing hidden elements ·
+R6 "Open Latest Report" ordering · R7 method name clash preventing the window from opening · R8 (earlier) .exe
+could not find Chromium.
 
 ## Coverage map (SSOI §9 → tests)
 | Required area | Tests |
@@ -39,7 +53,7 @@ Recorded 2026-11-09. Windows results come from GitHub Actions run https://github
 * Windows CI run 1: inside the .exe, Playwright looked for Chromium only inside the package → browser tests did not run. Fixed in `browsertest.configure_frozen`; run 3 passes.
 * Earlier: scanned page with only a page number treated as text; QA accepted silent edits in already-patched files (now history replay); built-module answer keys invisible to QA; Chromium OS sandbox disabled.
 
-## Full verbose output (earlier Linux Python 3.12 run, 96 tests)
+## Older verbose output (v0.2 Linux run, 96 tests, kept for history)
 ```
 test_cases (test_academic.TestVerifier.test_cases) ... ok
 test_extract_claims_from_text (test_academic.TestVerifier.test_extract_claims_from_text) ... ok

@@ -952,7 +952,7 @@ class BlueprintEditor(tk.Toplevel):
             fr = ttk.Frame(right, padding=4)
             right.add(fr, text=label)
             ttk.Label(fr, text=self.B.FORM_HELP[key], foreground='#0b3d91', justify='left').pack(anchor='w')
-            t = tk.Text(fr, wrap='none', font=('Consolas', 10), undo=True)
+            t = tk.Text(fr, wrap='word', font=('Consolas', 10), undo=True)
             t.pack(fill='both', expand=True)
             self.texts[key] = t
         self.msg = ttk.Label(self, text='', foreground='#aa1111', wraplength=1000, justify='left')

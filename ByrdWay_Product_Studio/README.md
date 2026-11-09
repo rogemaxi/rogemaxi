@@ -1,10 +1,8 @@
 # ByrdWay Product Engineering Studio v0.4.0
 
-**Status:** working local application with a tested repair → verify → QA → owner-approval → export pipeline,
-desktop UI, cost-controlled optional OpenAI assistance and 103 automated tests.
-**Verified on Windows** (CI: tests incl. UI, source and packaged-.exe self-tests, GUI launch — `TEST_RESULTS.md`).
-**Remaining production gate:** one real owner Power Tool and one real Explainer must pass Release QA
-(`KNOWN_LIMITATIONS.md`). No 99.9 claim is made for any real product until Release QA measures it.
+**Status:** Studio software acceptance criteria PASS on Windows (127 tests incl. real-window GUI workflows,
+packaged-.exe self-test) — see `PRODUCTION_READINESS_REPORT.md`. **Production certification is BLOCKED** until one
+real owner Power Tool and one real Explainer pass Release QA. Start here: **`OWNER_QUICK_START.md`**.
 Health check any time: `python app.py --selftest` (or `ByrdWayStudio.exe --selftest`).
 
 Owner: Genesis 2 & 7, LLC · ByrdWay Mathematics & Science. Claude is not required at runtime.
