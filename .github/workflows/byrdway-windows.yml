@@ -15,8 +15,6 @@ jobs:
       run:
         shell: pwsh
         working-directory: ByrdWay_Product_Studio
-    env:
-      E2E: ${{ runner.temp }}\e2e_explainer_evidence
     steps:
       - uses: actions/checkout@v4
 
@@ -32,6 +30,8 @@ jobs:
 
       - name: Full automated test suite incl. real-window GUI and Explainer end-to-end (no skips allowed)
         run: |
+          "E2E=$env:RUNNER_TEMP\e2e_explainer_evidence" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          $env:E2E = "$env:RUNNER_TEMP\e2e_explainer_evidence"
           $env:BYRDWAY_E2E_EVIDENCE = $env:E2E
           python -m unittest discover -s tests -v 2>&1 | Tee-Object -FilePath test_results_windows.txt
           if ($LASTEXITCODE -ne 0) { exit 1 }
