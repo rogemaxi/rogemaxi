@@ -37,6 +37,10 @@ def run(report_path=None, browser=True):
             fixed = {a['check'] for it in job.get('iterations', []) for a in it['applied']}
             for c in ('academic.wrong_answer', 'js.undefined_handler', 'assets.missing', 'nav.anchor', 'a11y.lang'):
                 check(f'power_tool_repaired:{c}', c in fixed)
+            br = qa.get('browser') or {}
+            if have_browser:
+                check('browser_tests_executed', br.get('available') and br.get('load_ok'),
+                      br.get('unavailable_reason') or br.get('harness_errors') or 'ok')
             check('power_tool_release_qa_pass', qa.get('decision') == 'PASS' if have_browser else
                   qa.get('decision') == 'NOT_VERIFIED', f'{qa.get("decision")} {qa.get("score")} {qa.get("reasons")}')
             src, _ = original_file(ws, m['id'])

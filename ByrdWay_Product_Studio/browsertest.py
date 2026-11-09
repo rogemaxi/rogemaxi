@@ -10,13 +10,32 @@ Isolation model (uploaded JS is untrusted):
 If Playwright/Chromium is not installed, returns available=False (the quality
 gate then reports NOT VERIFIED rather than passing).
 """
-import os, time
+import os, sys, time
 from pathlib import Path
 
 FALLBACK_CHROMIUM = ['/opt/pw-browsers/chromium']
 
 CLICK_SELECTOR = ('button, input[type=button], input[type=submit], [onclick], '
                   'a[href^="#"], [role=button], summary')
+
+
+def _default_browsers_path():
+    if os.name == 'nt':
+        return str(Path(os.environ.get('LOCALAPPDATA', Path.home() / 'AppData' / 'Local')) / 'ms-playwright')
+    if sys.platform == 'darwin':
+        return str(Path.home() / 'Library' / 'Caches' / 'ms-playwright')
+    return str(Path.home() / '.cache' / 'ms-playwright')
+
+
+def configure_frozen():
+    """In a PyInstaller build, Playwright otherwise looks for Chromium only INSIDE the
+    package (PLAYWRIGHT_BROWSERS_PATH=0). Point it at the normal per-user install made by
+    `python -m playwright install chromium` / install_windows.bat."""
+    if getattr(sys, 'frozen', False) and 'PLAYWRIGHT_BROWSERS_PATH' not in os.environ:
+        os.environ['PLAYWRIGHT_BROWSERS_PATH'] = _default_browsers_path()
+
+
+configure_frozen()
 
 
 def playwright_available():
