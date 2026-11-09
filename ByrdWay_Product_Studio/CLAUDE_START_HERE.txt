@@ -1,0 +1,3 @@
+Open Claude Code in THIS extracted project folder. Tell Claude Code:
+
+Read CLAUDE.md and all existing project files. This is an existing ByrdWay application, not a new project. Continue implementing its milestones in order. Run and verify tests after each milestone, preserve originals and approved assets, and do not claim completion without evidence. The delivered application must run locally on Windows with OpenAI API optional and Claude not required at runtime. Begin now with baseline tests and milestone A.
