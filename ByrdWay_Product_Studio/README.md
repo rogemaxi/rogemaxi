@@ -1,4 +1,4 @@
-# ByrdWay Product Engineering Studio v0.2
+# ByrdWay Product Engineering Studio v0.4.0
 
 **Status:** working local application with a tested repair → verify → QA → owner-approval → export pipeline,
 desktop UI, cost-controlled optional OpenAI assistance and 103 automated tests.

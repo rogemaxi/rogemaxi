@@ -72,6 +72,35 @@ class Studio:
     def rerun_qa(self, job_id):
         return release.requeue_qa(self.root, job_id)
 
+    def diagnose(self, pid, progress=None, run_browser=True):
+        return Orchestrator(self.root).diagnose(pid, run_browser=run_browser, progress=progress)
+
+    def latest_report(self, pid):
+        cands = []
+        for j in self.jobs():
+            if j['product_id'] == pid and (self.root / 'jobs' / j['id'] / 'report.html').exists():
+                p = self.root / 'jobs' / j['id'] / 'report.html'
+                cands.append((p.stat().st_mtime_ns, 1, p))
+        for d in (self.root / 'reports').glob('diag_*/diagnosis.json'):
+            try:
+                x = json.loads(d.read_text(encoding='utf-8'))
+            except ValueError:
+                continue
+            if x.get('product_id') == pid and (d.parent / 'diagnosis.html').exists():
+                p = d.parent / 'diagnosis.html'
+                cands.append((p.stat().st_mtime_ns, 0, p))
+        return max(cands, key=lambda c: (c[0], c[1]))[2] if cands else None
+
+    def job_html_report(self, job_id):
+        p = self.root / 'jobs' / job_id / 'report.html'
+        if not p.exists():
+            try:
+                import report
+                p = report.write_job_report(self.root, self.job(job_id))
+            except Exception:
+                return None
+        return p
+
     # builders
     def new_build(self, blueprint_path, kind):
         bp = json.loads(Path(blueprint_path).read_text(encoding='utf-8'))
@@ -81,10 +110,71 @@ class Studio:
         out = []
         for p in (self.root / 'builds').glob('*/state.json'):
             try:
-                out.append(json.loads(p.read_text(encoding='utf-8')))
-            except ValueError:
-                pass
+                s = json.loads(p.read_text(encoding='utf-8'))
+                bp = json.loads((p.parent / 'blueprint.json').read_text(encoding='utf-8'))
+            except (ValueError, OSError):
+                continue
+            s['title'] = bp.get('product_title') or (bp.get('chapters') or [{}])[0].get('title', '')
+            s['sample'] = builders.is_sample(bp)
+            done = sum(1 for u in s['order'] if s['units'][u]['status'] == 'OWNER_APPROVED')
+            s['summary'] = f'{done}/{len(s["order"])} approved' + (' — SAMPLE' if s['sample'] else '') + (
+                ' — assembled' if s.get('assembled') else '')
+            out.append(s)
         return sorted(out, key=lambda s: s.get('created_at', ''), reverse=True)
+
+    def build_prerequisites(self, kind, build_id=None):
+        bp = builders.Build(self.root, build_id).blueprint if build_id else None
+        return builders.prerequisites(self.root, kind, bp)
+
+    def sample_form(self, kind):
+        here = Path(__file__).resolve().parent / 'samples'
+        if kind == 'power_tool':
+            bp = json.loads((here / 'SAMPLE_power_tool_blueprint.json').read_text(encoding='utf-8'))
+            return builders.form_from_power_tool_blueprint(bp)
+        bp = json.loads((here / 'SAMPLE_lil_dr_byrd_physics_blueprint.json').read_text(encoding='utf-8'))
+        return builders.form_from_chapter_blueprint(bp)
+
+    def load_blueprint_form(self, path):
+        data = json.loads(Path(path).read_text(encoding='utf-8'))
+        if data.get('_form_kind'):                      # a saved draft
+            return data['_form_kind'], data['form']
+        if 'modules' in data:
+            return 'power_tool', builders.form_from_power_tool_blueprint(data)
+        if 'chapters' in data:
+            return 'lil_dr_byrd', builders.form_from_chapter_blueprint(data)
+        raise ValueError('This file is not a ByrdWay blueprint (no modules or chapters found).')
+
+    def build_form(self, build_id):
+        b = builders.Build(self.root, build_id)
+        kind = b.state['kind']
+        bp = b.blueprint
+        return kind, (builders.form_from_power_tool_blueprint(bp) if kind == 'power_tool'
+                      else builders.form_from_chapter_blueprint(bp))
+
+    def create_build_from_form(self, kind, form):
+        bp = (builders.power_tool_blueprint_from_form(form) if kind == 'power_tool'
+              else builders.chapter_blueprint_from_form(form))
+        builders.save_blueprint(self.root, bp, kind)
+        b = builders.Build.create(self.root, bp, kind)
+        activity(self.root, 'Power Tool Builder' if kind == 'power_tool' else 'Lil Dr. Byrd Builder',
+                 f'Build {b.id} created from form')
+        return b
+
+    def save_draft(self, kind, form):
+        d = self.root / 'blueprints' / 'drafts'
+        d.mkdir(parents=True, exist_ok=True)
+        import re, time
+        name = re.sub(r'[^A-Za-z0-9]+', '_', form.get('product_title') or (form.get('chapters') or [{}])[0].get('title') or 'draft')[:40]
+        p = d / f'{kind}_{name}_{time.strftime("%Y%m%d_%H%M%S")}.json'
+        engine.write_json(p, {'_form_kind': kind, 'form': form})
+        return p
+
+    def reject_unit(self, build_id, unit, reason):
+        return builders.Build(self.root, build_id).reject(unit, reason)
+
+    def assemble_and_verify(self, build_id, progress=None, run_browser=True):
+        m = self.assemble_and_import(build_id, True)
+        return self.run_job(m['id'], progress=progress, run_browser=run_browser)
 
     def build_next(self, build_id):
         b = builders.Build(self.root, build_id)

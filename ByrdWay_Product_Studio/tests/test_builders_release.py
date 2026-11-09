@@ -16,8 +16,21 @@ from orchestrator import Orchestrator
 from release import backup_workspace, verify_backup, restore_backup
 
 SAMPLES = HERE.parent / 'samples'
-PT = json.loads((SAMPLES / 'SAMPLE_power_tool_blueprint.json').read_text(encoding='utf-8'))
-LDB = json.loads((SAMPLES / 'SAMPLE_lil_dr_byrd_physics_blueprint.json').read_text(encoding='utf-8'))
+def _as_owner_content(bp):
+    """Test fixture: the sample's format with the SAMPLE marking removed, standing in for owner-approved
+    content. (The real sample stays protected - see test_v040.Forms.test_sample_content_blocks_release.)"""
+    bp = copy.deepcopy(bp)
+    bp.pop('_notice', None)
+    for k in ('product_title', 'series'):
+        if k in bp:
+            bp[k] = bp[k].replace('SAMPLE ', 'Test ')
+    for c in bp.get('chapters', []):
+        c['title'] = c['title'].replace('SAMPLE ', 'Test ')
+    return bp
+
+
+PT = _as_owner_content(json.loads((SAMPLES / 'SAMPLE_power_tool_blueprint.json').read_text(encoding='utf-8')))
+LDB = _as_owner_content(json.loads((SAMPLES / 'SAMPLE_lil_dr_byrd_physics_blueprint.json').read_text(encoding='utf-8')))
 
 
 class Base(unittest.TestCase):

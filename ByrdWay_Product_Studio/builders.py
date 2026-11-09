@@ -130,10 +130,10 @@ class Build:
         self.save(s)
 
 
-def _verify_items(items, where):
+def _verify_items(items, where, sample=False):
     results, n_bad, n_unsup, prov_review = [], 0, 0, 0
     for i, it in enumerate(items):
-        src = it.get('source', 'owner_blueprint')
+        src = 'sample_not_approved' if sample else it.get('source', 'owner_blueprint')
         if not str(src).startswith('owner'):
             prov_review += 1
         if it.get('answer') in (None, '') and it.get('correct') is None:
@@ -262,6 +262,11 @@ def _module_html(bp, m, honors_ok):
         if m.get('pathway'):
             body += '<button type="button" onclick="bwPathway()">Finish &amp; get my study path</button><div id="bw-pathway" aria-live="polite"></div>'
         parts.append(sec('practice', 'Practice', body)); nav.append(('practice', 'Practice'))
+    # elements the module script references always exist (hidden when the feature is unused)
+    if not practice:
+        parts.append('<p id="bw-score" hidden></p>')
+    if not (practice and m.get('pathway')):
+        parts.append('<div id="bw-pathway" hidden></div>')
     if m.get('honors'):
         if honors_ok:
             body = ''.join(f'<div class="card"><h3>{E(h["title"])}</h3><p>{E(h["explanation"])}</p></div>' for h in m['honors'])
@@ -289,8 +294,16 @@ def _choice_index(q):
         return None
 
 
+DEFAULT_TEMPLATE_ID = 'byrdway_template'
+
+
+def is_sample(bp):
+    return bool(bp.get('_sample')) or str(bp.get('product_title') or bp.get('series') or '').upper().startswith('SAMPLE') \
+        or 'SAMPLE' in str(bp.get('_notice', '')).upper()
+
+
 def _apply_template(root, bp, title, content, data_json):
-    tid = bp.get('template_asset_id')
+    tid = bp.get('template_asset_id') or (DEFAULT_TEMPLATE_ID if get_asset(root, DEFAULT_TEMPLATE_ID) else None)
     rec = get_asset(root, tid) if tid else None
     script = f'<script type="application/json" id="bw-data">{data_json}</script><script>{MODULE_JS}</script>'
     if rec:
@@ -317,7 +330,7 @@ def build_power_tool_module(root, build_id, module_id):
     m = next(x for x in bp['modules'] if x['id'] == module_id)
     honors_ok = bool(bp.get('honors_approved'))
     items = [dict(q) for q in m.get('practice', [])] + [dict(w) for w in m.get('worked_examples', [])]
-    results, n_bad, n_unsup, prov = _verify_items(items, f'{module_id}')
+    results, n_bad, n_unsup, prov = _verify_items(items, f'{module_id}', is_sample(bp))
     content, data_json = _module_html(bp, m, honors_ok)
     page, tinfo = _apply_template(root, bp, f'{bp["product_title"]} - {m["title"]}', content, data_json)
     out_dir = b.dir / 'modules' / module_id
@@ -401,7 +414,7 @@ def build_lil_dr_byrd_chapter(root, build_id, unit):
         body.append('<h2>Answers &amp; Solutions</h2><ol class="answers">'
                     + ''.join(f'<li>{E(str(q["answer"]))}{(" - " + E(q["explanation"])) if q.get("explanation") else ""}</li>' for q in practice) + '</ol>')
         items += [dict(q) for q in practice]
-    results, n_bad, n_unsup, prov = _verify_items(items, unit)
+    results, n_bad, n_unsup, prov = _verify_items(items, unit, is_sample(bp))
     html_doc = f'<html><head><meta charset="utf-8"><title>{E(ch["title"])}</title><style>{CHAPTER_CSS}</style></head><body>{"".join(body)}</body></html>'
     html_path = out_dir / 'chapter.html'
     atomic_write_text(html_path, html_doc)
@@ -467,9 +480,249 @@ def assemble(root, build_id, owner_confirmed=False):
             for u in s['order']:
                 z.write(s['units'][u]['output'], f'{u}.pdf')
         z.writestr('BUILD_PROVENANCE.json', json.dumps({'build': build_id, 'kind': s['kind'],
+                                                        'sample_content': is_sample(bp),
                                                         'blueprint_sha256': s['blueprint_sha256'],
                                                         'units': {u: {k: v for k, v in s['units'][u].items() if k != 'verification'}
                                                                   for u in s['order']}}, indent=2))
     s['assembled'] = {'path': str(out), 'sha256': sha256(out), 'at': utcnow()}
     b.save(s)
+    return out
+
+
+# ---------------------------------------------------------------- form editor support
+# Plain-text line formats used by the in-app blueprint form (no JSON for the owner).
+SEP = '::'
+FORM_HELP = {
+    'concepts': 'One per line:  Title :: explanation',
+    'worked_examples': 'One per line:  Problem :: step 1; step 2; step 3 :: answer',
+    'practice': ('One per line:  Question :: answer\n'
+                 'Multiple choice:  Question :: choice A | choice B | choice C :: correct choice\n'
+                 'Physics with units (optional 3rd part):  Question :: 49 N :: F = m*a ; m = 5 kg, a = 9.8 m/s^2 ; F'),
+    'flashcards': 'One per line:  Front :: Back',
+    'cheat_sheet': 'One per line:  Term :: meaning',
+    'sections': ('## Heading starts a section (## Honors: Heading = honors section)\n'
+                 'KEY: key idea   |   EXAMPLE: problem :: step 1; step 2 :: answer\n'
+                 'Any other line = a paragraph'),
+}
+
+
+class FormError(ValueError):
+    pass
+
+
+def _split(line, n_min, n_max, where):
+    parts = [p.strip() for p in line.split(SEP)]
+    if not n_min <= len(parts) <= n_max or not all(parts[:n_min]):
+        raise FormError(f'{where}: expected {n_min}-{n_max} parts separated by "{SEP}", got: {line!r}')
+    return parts
+
+
+def _lines(text):
+    return [(i + 1, l.strip()) for i, l in enumerate((text or '').splitlines()) if l.strip()]
+
+
+def _physics_spec(part):
+    """'F = m*a ; m = 5 kg, a = 9.8 m/s^2 ; F' -> verify spec."""
+    bits = [b.strip() for b in part.split(';')]
+    if len(bits) != 3 or '=' not in bits[0]:
+        raise FormError(f'Physics check must be "formula ; givens ; find", got {part!r}')
+    given = {}
+    for g in bits[1].split(','):
+        if '=' not in g:
+            raise FormError(f'Given value must look like "m = 5 kg", got {g!r}')
+        k, v = g.split('=', 1)
+        given[k.strip()] = v.strip()
+    return {'type': 'physics', 'formula': bits[0], 'given': given, 'find': bits[2]}
+
+
+def _practice(text, where):
+    out = []
+    for n, l in _lines(text):
+        p = _split(l, 2, 3, f'{where} practice line {n}')
+        if len(p) == 3 and '|' in p[1]:
+            choices = [c.strip() for c in p[1].split('|') if c.strip()]
+            if p[2] not in choices:
+                raise FormError(f'{where} practice line {n}: correct choice {p[2]!r} is not one of {choices}')
+            out.append({'question': p[0], 'choices': choices, 'answer': p[2]})
+        elif len(p) == 3:
+            out.append({'question': p[0], 'answer': p[1], 'verify': _physics_spec(p[2])})
+        else:
+            out.append({'question': p[0], 'answer': p[1]})
+    return out
+
+
+def _slug(t, used):
+    base = re.sub(r'[^a-z0-9]+', '-', t.lower()).strip('-')[:30] or 'module'
+    s, i = base, 2
+    while s in used:
+        s, i = f'{base}-{i}', i + 1
+    used.add(s)
+    return s
+
+
+def power_tool_blueprint_from_form(form):
+    """form: {product_title, subject, grade, honors_approved, modules:[{title, concepts, worked_examples,
+    practice, flashcards, cheat_sheet}]} with plain-text line fields. Raises FormError with line numbers."""
+    used, mods = set(), []
+    for i, m in enumerate(form.get('modules') or [], 1):
+        w = f'Module {i} ({m.get("title") or "untitled"})'
+        if not (m.get('title') or '').strip():
+            raise FormError(f'Module {i}: title is required')
+        mod = {'id': _slug(m['title'], used), 'title': m['title'].strip()}
+        mod['concepts'] = [{'title': p[0], 'explanation': p[1]} for n, l in _lines(m.get('concepts'))
+                           for p in [_split(l, 2, 2, f'{w} concepts line {n}')]]
+        mod['worked_examples'] = [{'question': p[0], 'steps': [s.strip() for s in p[1].split(';') if s.strip()],
+                                   'answer': p[2]} for n, l in _lines(m.get('worked_examples'))
+                                  for p in [_split(l, 3, 3, f'{w} worked examples line {n}')]]
+        mod['practice'] = _practice(m.get('practice'), w)
+        mod['flashcards'] = [{'front': p[0], 'back': p[1]} for n, l in _lines(m.get('flashcards'))
+                             for p in [_split(l, 2, 2, f'{w} flashcards line {n}')]]
+        mod['cheat_sheet'] = [[p[0], p[1]] for n, l in _lines(m.get('cheat_sheet'))
+                              for p in [_split(l, 2, 2, f'{w} cheat sheet line {n}')]]
+        mods.append({k: v for k, v in mod.items() if v != []})
+    bp = {'product_title': (form.get('product_title') or '').strip(), 'subject': (form.get('subject') or '').strip(),
+          'grade': (form.get('grade') or '').strip(), 'honors_approved': bool(form.get('honors_approved')),
+          'modules': mods, '_created_with': 'ByrdWay Studio blueprint form'}
+    if form.get('_sample'):
+        bp['_sample'] = True
+    errs = validate_power_tool_blueprint(bp)
+    if errs:
+        raise FormError('; '.join(errs))
+    return bp
+
+
+def form_from_power_tool_blueprint(bp):
+    def j(rows):
+        return '\n'.join(f' {SEP} '.join(r) for r in rows)
+    mods = []
+    for m in bp.get('modules', []):
+        pr = []
+        for q in m.get('practice', []):
+            if q.get('choices'):
+                ans = q.get('answer') if q.get('answer') not in (None, '') else q['choices'][_choice_index(q)]
+                pr.append([q['question'], ' | '.join(map(str, q['choices'])), str(ans)])
+            elif q.get('verify', {}).get('type') == 'physics':
+                v = q['verify']
+                pr.append([q['question'], str(q['answer']), f'{v["formula"]} ; ' +
+                           ', '.join(f'{k} = {x}' for k, x in v['given'].items()) + f' ; {v["find"]}'])
+            else:
+                pr.append([q['question'], str(q['answer'])])
+        mods.append({'title': m['title'],
+                     'concepts': j([[c['title'], c['explanation'] if isinstance(c['explanation'], str)
+                                     else ' '.join(c['explanation'])] for c in m.get('concepts', [])]),
+                     'worked_examples': j([[w['question'], '; '.join(w.get('steps', [])), str(w['answer'])]
+                                           for w in m.get('worked_examples', [])]),
+                     'practice': j(pr), 'flashcards': j([[f['front'], f['back']] for f in m.get('flashcards', [])]),
+                     'cheat_sheet': j([[str(r[0]), str(r[1])] for r in m.get('cheat_sheet', []) if isinstance(r, (list, tuple))])})
+    return {'product_title': bp.get('product_title', ''), 'subject': bp.get('subject', ''),
+            'grade': bp.get('grade', ''), 'honors_approved': bool(bp.get('honors_approved')),
+            'modules': mods, '_sample': is_sample(bp)}
+
+
+def chapter_blueprint_from_form(form):
+    """form: {subject, honors, honors_approved, chapters:[{title, sections, practice}]}"""
+    chs = []
+    for i, c in enumerate(form.get('chapters') or [], 1):
+        w = f'Chapter {i} ({c.get("title") or "untitled"})'
+        if not (c.get('title') or '').strip():
+            raise FormError(f'Chapter {i}: title is required')
+        sections, cur = [], None
+        for n, l in _lines(c.get('sections')):
+            if l.startswith('##'):
+                head = l.lstrip('#').strip()
+                honors = head.lower().startswith('honors:')
+                cur = {'heading': head.split(':', 1)[1].strip() if honors else head, 'paragraphs': []}
+                if honors:
+                    cur['honors'] = True
+                sections.append(cur)
+                continue
+            if cur is None:
+                raise FormError(f'{w} sections line {n}: start with a "## Heading" line')
+            if l.upper().startswith('KEY:'):
+                cur['key_idea'] = l[4:].strip()
+            elif l.upper().startswith('EXAMPLE:'):
+                p = _split(l[8:], 3, 4, f'{w} sections line {n}')
+                ex = {'question': p[0], 'steps': [s.strip() for s in p[1].split(';') if s.strip()], 'answer': p[2]}
+                if len(p) == 4:
+                    ex['verify'] = _physics_spec(p[3])
+                cur.setdefault('worked_examples', []).append(ex)
+            else:
+                cur['paragraphs'].append(l)
+        if not sections:
+            raise FormError(f'{w}: at least one "## Heading" section is required')
+        chs.append({'title': c['title'].strip(), 'sections': sections, 'practice': _practice(c.get('practice'), w)})
+    bp = {'series': 'Lil Dr. Byrd Explainer', 'subject': (form.get('subject') or '').strip(),
+          'honors': bool(form.get('honors')), 'honors_approved': bool(form.get('honors_approved')),
+          'mascot_asset_id': LIL_DR_BYRD_ID, 'answers_location': 'end_of_chapter', 'chapters': chs,
+          '_created_with': 'ByrdWay Studio blueprint form'}
+    if form.get('_sample'):
+        bp['_sample'] = True
+    errs = validate_chapter_blueprint(bp)
+    if errs:
+        raise FormError('; '.join(errs))
+    return bp
+
+
+def form_from_chapter_blueprint(bp):
+    chs = []
+    for c in bp.get('chapters', []):
+        lines = []
+        for s in c['sections']:
+            lines.append(('## Honors: ' if s.get('honors') else '## ') + s['heading'])
+            lines += s.get('paragraphs', [])
+            if s.get('key_idea'):
+                lines.append('KEY: ' + s['key_idea'])
+            for w in s.get('worked_examples', []):
+                parts = [w['question'], '; '.join(w.get('steps', [])), str(w['answer'])]
+                if w.get('verify', {}).get('type') == 'physics':
+                    v = w['verify']
+                    parts.append(f'{v["formula"]} ; ' + ', '.join(f'{k} = {x}' for k, x in v['given'].items()) + f' ; {v["find"]}')
+                lines.append('EXAMPLE: ' + f' {SEP} '.join(parts))
+        pr = []
+        for q in c.get('practice', []):
+            if q.get('verify', {}).get('type') == 'physics':
+                v = q['verify']
+                pr.append(f' {SEP} '.join([q['question'], str(q['answer']), f'{v["formula"]} ; ' +
+                                           ', '.join(f'{k} = {x}' for k, x in v['given'].items()) + f' ; {v["find"]}']))
+            else:
+                pr.append(f'{q["question"]} {SEP} {q["answer"]}')
+        chs.append({'title': c['title'], 'sections': '\n'.join(lines), 'practice': '\n'.join(pr)})
+    return {'subject': bp.get('subject', ''), 'honors': bool(bp.get('honors')),
+            'honors_approved': bool(bp.get('honors_approved')), 'chapters': chs, '_sample': is_sample(bp)}
+
+
+def save_blueprint(root, bp, kind, name=None):
+    """Save to <workspace>/blueprints/<kind>_<name>.json (drafts are kept; nothing is overwritten silently)."""
+    d = workspace(root) / 'blueprints'
+    d.mkdir(exist_ok=True)
+    title = name or bp.get('product_title') or bp.get('chapters', [{}])[0].get('title') or 'blueprint'
+    base = f'{kind}_{re.sub(r"[^A-Za-z0-9]+", "_", title).strip("_")[:40]}'
+    p, i = d / f'{base}.json', 2
+    while p.exists():
+        p, i = d / f'{base}_{i}.json', i + 1
+    write_json(p, bp)
+    return p
+
+
+def prerequisites(root, kind, bp=None):
+    """Checklist shown BEFORE building: [(label, ok, explanation)]."""
+    from browsertest import playwright_available
+    out = []
+    if bp is not None:
+        errs = validate_power_tool_blueprint(bp) if kind == 'power_tool' else validate_chapter_blueprint(bp)
+        out.append(('Blueprint is complete', not errs, '; '.join(errs) or 'OK'))
+        out.append(('Content is owner material (not the sample)', not is_sample(bp),
+                    'SAMPLE content can be built for practice but Release QA will block it.' if is_sample(bp) else 'OK'))
+    if kind == 'power_tool':
+        t = get_asset(root, (bp or {}).get('template_asset_id') or DEFAULT_TEMPLATE_ID)
+        out.append(('Approved ByrdWay page template registered', bool(t),
+                    'OK' if t else 'Not registered: modules use a PROVISIONAL layout and release will be BLOCKED. '
+                                   'Use "Register approved template…".'))
+        ok = playwright_available()
+        out.append(('Browser engine for interaction tests', ok, 'OK' if ok else 'Run install_windows.bat and answer Y to Chromium.'))
+    else:
+        m = get_asset(root, (bp or {}).get('mascot_asset_id') or LIL_DR_BYRD_ID)
+        out.append(('Approved Lil Dr. Byrd image registered', bool(m),
+                    'OK' if m else 'Not registered: chapters are built WITHOUT the mascot and release is BLOCKED. '
+                                   'Use "Register Lil Dr. Byrd image…". The Studio never draws a substitute.'))
     return out

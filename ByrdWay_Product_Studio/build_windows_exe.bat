@@ -5,6 +5,8 @@ REM by the developer (no Windows machine was available). Run CLEAN_MACHINE_SMOKE
 cd /d "%~dp0"
 if not exist .venv ( echo Run install_windows.bat first. & pause & exit /b 1 )
 call .venv\Scripts\activate.bat
+for /f "delims=" %%v in ('python -c "from version import __version__; print(__version__)"') do set BWVER=%%v
+echo ByrdWay Product Engineering Studio version %BWVER% (from version.py)
 python -m pip install -r requirements-build.txt || goto :fail
 python -m unittest discover -s tests || goto :fail
 pyinstaller --noconfirm byrdway_studio.spec || goto :fail

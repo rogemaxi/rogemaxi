@@ -71,7 +71,8 @@ def run(report_path=None, browser=True):
                 check('malicious_zip_rejected', True)
         except Exception as e:
             check('selftest_crashed', False, f'{type(e).__name__}: {e}\n{traceback.format_exc(limit=4)}')
-    rep = {'passed': all(r['passed'] for r in results), 'checks': results,
+    from version import __version__
+    rep = {'version': __version__, 'passed': all(r['passed'] for r in results), 'checks': results,
            'seconds': round(time.time() - t0, 1), 'python': sys.version.split()[0], 'platform': sys.platform}
     if report_path:
         Path(report_path).write_text(json.dumps(rep, indent=2), encoding='utf-8')

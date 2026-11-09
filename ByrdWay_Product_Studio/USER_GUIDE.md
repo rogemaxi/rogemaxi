@@ -1,4 +1,4 @@
-# ByrdWay Product Engineering Studio — Installation & User Guide (v0.2)
+# ByrdWay Product Engineering Studio — Installation & User Guide (v0.4.0)
 
 Owner: Genesis 2 & 7, LLC · ByrdWay Mathematics & Science. Runs locally on Windows 11. No Claude/Anthropic
 account is needed. OpenAI is optional and only used when you allow it.
@@ -14,24 +14,18 @@ account is needed. OpenAI is optional and only used when you allow it.
 Your data lives in `Documents\ByrdWay_Product_Studio` (originals, jobs, reports, exports, backups, logs, settings).
 
 ## 2. Everyday workflow: repair an existing product
-1. **Products tab → Import Product…** Choose a Power Tool (`.html` or `.zip`) or an Explainer / Concept Tiles PDF.
-   The original is copied, fingerprinted (SHA-256) and locked. Your own file is never changed.
-2. Select it → **Run Repair & Verify Job**. The Studio:
-   * finds defects (wrong answers, broken buttons, JS errors, missing images, broken links, accessibility,
-     PDF page/numbering/TOC issues, wrong arithmetic in explainers),
-   * applies the smallest safe fixes to a **working copy** (one at a time, checkpointed, rolled back on regression),
-   * re-tests in a sandboxed browser and independently re-verifies every answer,
-   * hands the repacked candidate to **Release QA**, which re-tests it from scratch and decides
-     PASS / BLOCKED / NOT_VERIFIED / BELOW_TARGET.
-3. **Jobs tab**: read the report and every QA check; **Before / After Diff** shows exact line changes;
-   **Open Evidence Folder** shows screenshots (desktop + phone), PDF page renders and visual diffs.
-4. If QA says **NOT_VERIFIED** because some questions cannot be checked automatically (e.g. essay questions,
-   image-only pages), review them yourself, then **Attest Unverifiable Item…** (use a key from the list, or `ALL`).
-   Attestation never overrides a failed check.
-5. If QA says **PASS**: **APPROVE for release…** (type your name; for PDFs you must confirm you looked at the page
-   images), then **Export Approved…**. The export folder contains the product, the full audit trail and
-   `SHA256SUMS.txt`. Nothing is uploaded; you publish to TpT yourself.
-6. **BLOCKED** means a defect needs human attention; the report lists each one under *Human escalation required*.
+See **OWNER_QUICK_START.md** (also under Help → Quick Start) for the short version.
+1. **Products tab → ① Import Product…** The original is copied, fingerprinted (SHA-256) and locked.
+2. **② Diagnose (no changes)** opens a readable report: every finding is **DETECTED** (a test failed) or
+   **SUSPECTED** (needs a look), with the exact **proposed correction** or "needs a person".
+3. **③ Repair a Copy & Verify** applies proposed corrections to a working copy (one at a time, checkpointed,
+   rolled back on regression), re-tests in a sandboxed browser, re-verifies every answer, and hands the candidate to
+   **Release QA**, which re-tests it from scratch. The repair report shows each defect's state:
+   VERIFIED (QA confirmed it is gone) · NOT AUTO-FIXABLE · REVERTED (caused a regression) · RESOLVED BY RELATED FIX,
+   plus before/after screenshots (desktop + phone) and before/after PDF pages.
+4. **Jobs tab**: the coloured **NEXT STEP** line tells you what to do. **Open Readable Report**, **Before / After
+   Diff**, **Open Evidence Folder**, **Re-run Release QA**, **Attest Unverifiable Item…**, **APPROVE for release…**,
+   **Reject…**, **Export Approved…**. Approval is refused unless Release QA passed; export is refused unless approved.
 
 ## 3. Optional AI assistance (OpenAI)
 1. **API Costs & Settings tab**: set *Owner-authorized funding* to what you actually added (e.g. 10), keep a
@@ -45,17 +39,12 @@ Your data lives in `Documents\ByrdWay_Product_Studio` (originals, jobs, reports,
    OpenAI dashboard. Prices in `settings.json` were copied from developers.openai.com/api/docs/pricing on
    2026-11-09; re-check before funding. A model without a configured price cannot be called.
 
-## 4. New products (builders)
-* Write a blueprint JSON (see `samples\SAMPLE_power_tool_blueprint.json` and
-  `samples\SAMPLE_lil_dr_byrd_physics_blueprint.json` — format examples only, not approved content).
-* **Register Approved Asset…** first: your approved ByrdWay HTML template (kind `template`, must contain
-  `{{CONTENT}}`; optional `{{TITLE}}`, `{{SCRIPT}}`) and the **Lil Dr. Byrd** image (id `lil_dr_byrd`, kind `mascot`).
-  The Studio never draws or substitutes the mascot; without it the chapter is built text-only and marked
-  BLOCKED_MISSING_APPROVED_ASSET.
-* **Builders tab → New … Build → Build Next Module/Chapter**. Every answer is verified; a wrong answer blocks the
-  module. Open the output, then **Approve Selected Unit…**. The next unit cannot be built until the previous one is
-  approved. When all are approved, **Assemble & Import for QA**, then run a Repair & Verify job on the package.
-* Builds using the built-in *provisional* layout are always BLOCKED at Release QA until an approved template is used.
+## 4. New products (builders tab)
+Numbered steps on screen: **1** choose product type · **2** create a blueprint with the fill-in form (no JSON), open a
+saved blueprint/draft, or practise with the sample (always marked SAMPLE and blocked at release) · **3** register
+approved assets (page template / Lil Dr. Byrd image) — a ✔/✖ checklist shows what is missing and why · **4** build one
+unit, open it, approve or reject it, then **Assemble, verify & send to Jobs**. Every answer is verified while building;
+a wrong answer blocks that unit with a plain explanation. Builds are saved continuously and can be resumed any time.
 
 ## 5. Backup & restore
 **Backup & Restore tab → Create verified backup now** (saved in `backups\`, every file hash-checked).

@@ -19,9 +19,13 @@ except Exception:
 class UISmoke(unittest.TestCase):
     def test_app_end_to_end(self):
         import fixtures
+        from unittest import mock
+        import app as appmod
         from app import App
-        with tempfile.TemporaryDirectory() as t:
+        with tempfile.TemporaryDirectory() as t, \
+                mock.patch.object(appmod.messagebox, 'askyesno', return_value=True):   # answer "Repair a copy?"
             app = App(Path(t) / 'ws')
+            app.opener = lambda p: None
             try:
                 self.assertEqual(app.nb.index('end'), 6)
                 z = fixtures.broken_power_tool_zip(Path(t) / 'tool.zip')
@@ -56,6 +60,8 @@ class UISmoke(unittest.TestCase):
                                          app.winfo_rooty() + app.winfo_height())).save(shot)
             finally:
                 app.destroy()
+                import gc
+                gc.collect()
 
 
 if __name__ == '__main__':

@@ -286,7 +286,8 @@ class Orchestrator:
                             rec = wc.apply_patch(fx['file'], fx['find'], fx['replace'], fx['reason'],
                                                  source='ai_suggestion' if f['check'] == 'ai.patch' else 'deterministic',
                                                  defect_id=f['id'])
-                        applied.append({'finding': f['id'], 'check': f['check'], 'file': fx['file'],
+                        applied.append({'finding': f['id'], 'key': list(map(str, _fkey(f))), 'check': f['check'],
+                                        'file': fx['file'], 'severity': f['severity'], 'detail': f['detail'],
                                         'reason': fx['reason'], 'line': rec.get('line')})
                     except Exception as e:  # any failed fix is rolled back, counted, never fatal
                         fail_count[_fixkey(f)] += 1
@@ -341,6 +342,7 @@ class Orchestrator:
             qa = ReleaseQAAgent(self.root, self.settings).evaluate(job, run_browser)
             job['qa'] = qa
             job['status'] = {'PASS': 'AWAITING_OWNER_APPROVAL'}.get(qa['decision'], qa['decision'])
+            job['corrections'] = correction_lifecycle(read_json(jd / 'baseline_findings.json'), job, qa)
             say(f'Release QA decision: {qa["decision"]} score={qa["score"]}')
         except Exception as e:
             log.error(ROLE_ORCH, 'Job failed', exc=e)
@@ -351,7 +353,51 @@ class Orchestrator:
         job['original_intact'] = verify_original(self.root, pid)
         self.save_job(job)
         self._write_report(job)
+        try:
+            import report
+            report.write_job_report(self.root, job)
+        except Exception as e:                       # report is evidence, never fatal
+            log.error(ROLE_ORCH, 'HTML report failed', exc=e)
         return job
+
+    # --------------------------------------------------------------------
+    def diagnose(self, pid, run_browser=True, progress=None):
+        """Read-only diagnosis: finds defects and PROPOSES corrections. Changes nothing."""
+        src, manifest = original_file(self.root, pid)
+        diag_id = 'diag_' + time.strftime('%Y%m%d%H%M%S') + '_' + uuid.uuid4().hex[:4]
+        out = self.root / 'reports' / diag_id
+        out.mkdir(parents=True)
+        wc = WorkingCopy.create(self.root, pid, diag_id)
+        try:
+            progress and progress('Diagnosing (read-only)...')
+            st = detect_all(self.settings, wc.files, out / 'evidence', 'baseline', run_browser)
+        finally:
+            shutil.rmtree(wc.dir, ignore_errors=True)
+        findings = []
+        for f in st['findings']:
+            state = 'SUSPECTED' if f['severity'] == 'INFO' else 'DETECTED'
+            findings.append({**f, 'state': state,
+                             'proposed_correction': describe_fix(f.get('fix')) if f.get('fix') else None})
+        unverified = [r for r in st['academic'] if r['status'] not in (academic.CORRECT, academic.INCORRECT)]
+        result = {'id': diag_id, 'product_id': pid, 'product_name': manifest['name'],
+                  'product_type': manifest.get('product_type'), 'created_at': utcnow(), 'findings': findings,
+                  'academic_checked': len(st['academic']),
+                  'academic_correct': len([r for r in st['academic'] if r['status'] == academic.CORRECT]),
+                  'academic_needs_human': [{'question': r.get('question'), 'status': r['status'],
+                                            'evidence': r['evidence']} for r in unverified],
+                  'browser': st.get('browser'), 'checks': [list(c) for c in st['checks']],
+                  'proposed_corrections': len([f for f in findings if f['proposed_correction']]),
+                  'needs_person': len([f for f in findings if not f['proposed_correction'] and f['state'] == 'DETECTED']),
+                  'original_intact': verify_original(self.root, pid)}
+        write_json(out / 'diagnosis.json', result)
+        try:
+            import report
+            report.write_diagnosis_report(self.root, result)
+        except Exception as e:
+            JobLog(self.root, diag_id).error(ROLE_ORCH, 'diagnosis report failed', exc=e)
+        JobLog(self.root, diag_id).info(ROLE_ORCH, f'Diagnosis of {manifest["name"]}: {len(findings)} findings, '
+                                        f'{result["proposed_corrections"]} correctable automatically')
+        return result
 
     def _ai_patches(self, job_id, wc, unresolved, approver, client, log):
         from ai_roles import propose_patches
@@ -492,6 +538,9 @@ class ReleaseQAAgent:
         prov = fresh / 'BUILD_PROVENANCE.json'
         if prov.exists():
             p = read_json(prov)
+            checks.append(('asset_fidelity.owner_content', 'asset_fidelity', 'CRITICAL', not p.get('sample_content'),
+                           'built from SAMPLE blueprint content - not approved ByrdWay material'
+                           if p.get('sample_content') else 'owner blueprint content'))
             for u, rec in p['units'].items():
                 t = (rec.get('template') or {}).get('template_status')
                 if t is not None:
@@ -556,6 +605,49 @@ def _replay_mismatches(orig, cand, fresh_dir, job):
         if (fresh_dir / rel).exists() and sha256(fresh_dir / rel) != h:
             problems.append(rel)
     return problems
+
+
+def describe_fix(fx):
+    if not fx:
+        return None
+    if fx.get('type') == 'pdf_text':
+        return f'Page {fx["page"]}: replace "{fx["find"]}" with "{fx["replace"]}" ({fx["reason"]})'
+    return f'{fx["file"]}: change `{fx["find"][:80]}` to `{fx["replace"][:80]}` ({fx["reason"]})'
+
+
+def correction_lifecycle(baseline, job, qa):
+    """Per-defect state: DETECTED/SUSPECTED -> PROPOSED -> APPLIED -> VERIFIED (or REVERTED /
+    NOT_AUTO_FIXABLE / STILL_OPEN). VERIFIED requires that Release QA's fresh re-test no longer finds it."""
+    applied, reverted = {}, set()
+    for it in job.get('iterations', []):
+        keys = [tuple(a['key']) for a in it['applied'] if a.get('key')]
+        if it.get('rolled_back'):
+            reverted.update(keys)
+        else:
+            for a in it['applied']:
+                if a.get('key'):
+                    applied[tuple(a['key'])] = a
+    still_open = {tuple(map(str, _fkey(f))) for f in qa.get('open_findings', [])}
+    out = []
+    for f in baseline:
+        k = tuple(map(str, _fkey(f)))
+        if k in applied and k not in still_open:
+            state = 'VERIFIED' if qa.get('decision') in ('PASS', 'NOT_VERIFIED', 'BELOW_TARGET', 'BLOCKED') else 'APPLIED'
+        elif k in applied:
+            state = 'APPLIED_BUT_STILL_FAILING'
+        elif k in reverted:
+            state = 'REVERTED_REGRESSION'
+        elif f.get('fix'):
+            state = 'PROPOSED_NOT_APPLIED'
+        elif k in still_open:
+            state = 'NOT_AUTO_FIXABLE' if f['severity'] != 'INFO' else 'SUSPECTED'
+        else:
+            state = 'RESOLVED_BY_RELATED_FIX'
+        if state == 'VERIFIED' and job.get('status') == 'AWAITING_OWNER_APPROVAL':
+            state = 'VERIFIED_AWAITING_OWNER_APPROVAL'
+        out.append({'severity': f['severity'], 'check': f['check'], 'file': f.get('file'), 'detail': f['detail'],
+                    'proposed_correction': describe_fix(f.get('fix')), 'state': state})
+    return out
 
 
 def _item_key(r):

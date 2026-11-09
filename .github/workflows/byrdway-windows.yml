@@ -8,6 +8,8 @@ on:
 jobs:
   windows:
     runs-on: windows-latest
+    permissions:
+      contents: write
     timeout-minutes: 60
     defaults:
       run:
@@ -30,7 +32,7 @@ jobs:
         run: |
           python -m unittest discover -s tests -v 2>&1 | Tee-Object -FilePath test_results_windows.txt
           if ($LASTEXITCODE -ne 0) { exit 1 }
-          if (Select-String -Path test_results_windows.txt -Pattern "skipped 'tkinter") { Write-Error "UI test was skipped"; exit 1 }
+          if (Select-String -Path test_results_windows.txt -Pattern "skipped") { Write-Error "A test was SKIPPED on Windows - not accepted"; exit 1 }
 
       - name: Source self-test (full pipeline, planted defects)
         run: |
@@ -46,6 +48,10 @@ jobs:
           $p = Start-Process -FilePath "dist\ByrdWayStudio\ByrdWayStudio.exe" -ArgumentList "--selftest" -Wait -PassThru -WorkingDirectory "$PWD"
           Get-Content selftest_report.json
           if ($p.ExitCode -ne 0) { Write-Error "exe self-test failed ($($p.ExitCode))"; exit 1 }
+          $want = python -c "from version import __version__; print(__version__)"
+          $got = (Get-Content selftest_report.json | ConvertFrom-Json).version
+          if ($got -ne $want) { Write-Error "exe reports version $got but version.py says $want"; exit 1 }
+          "Packaged exe version $got matches version.py" 
           Move-Item selftest_report.json selftest_report_exe.json
 
       - name: Packaged .exe GUI launch smoke test
@@ -65,6 +71,19 @@ jobs:
             Copy-Item USER_GUIDE.md, KNOWN_LIMITATIONS.md, QUALITY_SCORING.md, SECURITY_REVIEW.md dist\ByrdWayStudio\
             Compress-Archive -Path dist\ByrdWayStudio -DestinationPath ByrdWayStudio_Windows_exe.zip -Force
           }
+
+      - name: Draft GitHub release with the tested packages (owner publishes manually)
+        if: success() && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $v = python -c "from version import __version__; print(__version__)"
+          git archive --format=zip --prefix="ByrdWay_Product_Studio_v$v/" "HEAD:ByrdWay_Product_Studio" -o "ByrdWay_Product_Studio_v${v}_source.zip"
+          Copy-Item ByrdWayStudio_Windows_exe.zip "ByrdWayStudio_v${v}_Windows_exe.zip"
+          $notes = "Windows-verified candidate built by CI from commit $env:GITHUB_SHA. Tests, packaged-exe self-test and GUI launch passed in run $env:GITHUB_RUN_ID. DRAFT: not published."
+          gh release delete "v$v" --yes --cleanup-tag 2>$null
+          gh release create "v$v" "ByrdWayStudio_v${v}_Windows_exe.zip" "ByrdWay_Product_Studio_v${v}_source.zip" --draft --target $env:GITHUB_SHA --title "ByrdWay Product Engineering Studio v$v" --notes "$notes"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
 
       - uses: actions/upload-artifact@v4
         if: always()

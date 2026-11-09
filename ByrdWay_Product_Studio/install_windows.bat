@@ -12,6 +12,8 @@ if not exist .venv (
   py -3 -m venv .venv || goto :fail
 )
 call .venv\Scripts\activate.bat
+for /f "delims=" %%v in ('python -c "from version import __version__; print(__version__)"') do set BWVER=%%v
+echo ByrdWay Product Engineering Studio version %BWVER% (from version.py)
 python -m pip install --upgrade pip || goto :fail
 python -m pip install -r requirements.txt || goto :fail
 echo.
