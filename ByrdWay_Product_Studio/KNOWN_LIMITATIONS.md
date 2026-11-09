@@ -1,4 +1,4 @@
-# Known limitations, unverified items and unresolved defects (v0.4.3, 2026-11-09)
+# Known limitations, unverified items and unresolved defects (v0.5.0, 2026-11-09)
 
 Labels: **IMPLEMENTED+TESTED** · **IMPLEMENTED, NOT VERIFIED ON TARGET** · **PARTIAL** · **NOT IMPLEMENTED**
 
@@ -7,7 +7,7 @@ Labels: **IMPLEMENTED+TESTED** · **IMPLEMENTED, NOT VERIFIED ON TARGET** · **P
 |---|---|---|
 | Real owner Power Tool | **BLOCKED — owner file needed** | Supply one original ByrdWay Power Tool ZIP/HTML with known defects. All results so far come from controlled fixtures. |
 | Real owner Explainer / Concept Tiles + editable source | **BLOCKED — owner file needed** | Supply one real Explainer PDF and its editable source (Canva/PPTX/DOCX export). |
-| Windows runtime | **VERIFIED on Windows Server 2025 (v0.4.3, run 42663089124)** (CI run https://github.com/rogemaxi/rogemaxi/actions/runs/42544542267) | Same Windows core as Windows 11. Still run `install_windows.bat` + the 2-minute smoke test (USER_GUIDE §6) on your own PC once. |
+| Windows runtime | **VERIFIED on Windows Server 2025 (v0.5.0, run 42663089124)** (CI run https://github.com/rogemaxi/rogemaxi/actions/runs/42544542267) | Same Windows core as Windows 11. Still run `install_windows.bat` + the 2-minute smoke test (USER_GUIDE §6) on your own PC once. |
 | Windows .exe | **VERIFIED on Windows Server 2025** | Built by CI; full self-test passes inside the .exe; GUI launches. Not code-signed (Windows SmartScreen will warn: More info → Run anyway). |
 | Chromium OS sandbox on Windows | IMPLEMENTED; tests pass on Windows | The CI log does not record which sandbox mode was used (the runner is an administrator account). |
 | Live OpenAI calls | IMPLEMENTED, NOT VERIFIED ON TARGET | All AI paths tested with a mock client; no real API call was made (no key, no spend authorized). Uses the official `openai` SDK Responses API. |
@@ -22,7 +22,7 @@ Labels: **IMPLEMENTED+TESTED** · **IMPLEMENTED, NOT VERIFIED ON TARGET** · **P
 | Wrong arithmetic statement `a op b = c` (+ − × ÷ ·, fractions, powers) on a page **with a text layer**, statement occurring once on the page | Yes (two independent methods) | **Yes** — region text replacement on a copy; marked RECONSTRUCTED_REGION; replacement font is Helvetica (may differ from your font); change verified to stay inside the region; all other pages verified pixel-identical; **owner must confirm visual review** | — |
 | Wrong answer in an answer key (`Q…` / `A: …` lines) | Yes | **No** | Correct it in your editable source (Canva/PPTX/DOCX), export a new PDF, re-import and re-verify |
 | Math written in prose, equations drawn as images or vector art | No (not read) | No | Owner review + attestation |
-| Image-only / flattened pages (scans, flattened exports) | Text not read (no OCR) | **Never rewritten** | Owner review + attestation, or supply editable source |
+| Image-only / flattened pages (Anime Explainers, scans) | **Yes (v0.5.0)**: local page reader (OCR, two passes) reads arithmetic statements, solved equations and spelling; each suspected error has page, location and a picture; known OCR confusions (÷/− read as ':', lost superscripts, ✓ read as V) are retried so correct math is not accused | **Never** (artwork is not edited) | You confirm or dismiss each finding; confirmed ones go on a **correction sheet** + annotated review copy for your editable source. Each image page still needs your visual confirmation (the reader cannot see everything) |
 | Blank or duplicate pages, page-number gaps, broken table-of-contents targets or internal links, mixed page sizes, unembedded fonts, password protection | Yes | No (pages are never added, deleted or reordered) | Fix in source and re-import |
 | Illustrations, mascot artwork, layout, typography | Compared visually (any change outside a recorded correction BLOCKS release) | **Never modified** | — |
 | Editable sources inside a package (DOCX, PPTX, InDesign, Canva exports) | Detected and listed | **No editor implemented** | Edit in the original tool |
@@ -34,11 +34,15 @@ typo mismatches, broken in-page links, missing `lang`, missing viewport.
 Detected only (need a person or approved AI suggestion): JavaScript runtime errors without a matching static cause,
 missing alt text, unnamed buttons, duplicate ids, external CDN dependencies, mobile overflow, unsupported question types.
 
-## Findings from the first real owner products (v0.4.3)
-* **Flattened "anime" Explainers** (every page one picture, no text layer) cannot be verified by the Studio at all:
-  no OCR and no image review are implemented. Text-in-image errors (misspelled labels, wrong symbols, characters
-  covering text) are invisible to it. Options for the owner: export with a text layer / supply the editable source, or
-  authorize building an image-review step (paid OpenAI vision calls under the existing spending controls).
+## Findings from the first real owner products (v0.5.0)
+* **Flattened "anime" Explainers (v0.5.0):** read by a free, local page reader. On the real Algebra 1 + Honors
+  Explainer it verified 18 math statements and found 1 real math error and 9 real spelling errors, with 0 false
+  accusations (details delivered to the owner privately, not stored here). **Not covered:** math drawn in graphs or diagrams,
+  inequalities, words covered by characters, stylised or very small text, and statements the reader cannot see
+  clearly - so each image page still needs your visual confirmation, and a product with image pages reaches PASS
+  only after you decide every finding and attest the pages. Spelling suggestions are dictionary guesses; type the
+  real correction in the review screen. A misspelling that happens to split into real words (e.g. "intergers" =
+  "inter" + "gers") is not flagged, because OCR also drops spaces between real words.
 * **Power Tool answer coverage**: 16 of 100 real answer items fall in machine-checkable domains; 84 need owner
   review. Extending the verifier to inequalities, systems, lines/slope and multi-part answers would raise coverage —
   an owner decision (feature work), not done.

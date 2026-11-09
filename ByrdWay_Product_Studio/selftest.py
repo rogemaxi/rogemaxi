@@ -60,6 +60,18 @@ def run(report_path=None, browser=True):
             pj = Orchestrator(ws).run_repair_job(pm['id'], run_browser=False)
             check('pdf_wrong_claim_corrected', pj.get('qa', {}).get('decision') == 'PASS',
                   pj.get('qa', {}).get('reasons'))
+            import imageread
+            if imageread.available():
+                ip = fx.image_only_explainer_pdf(d / 'SelfTest_Flattened_Explainer.pdf')
+                rv = imageread.review_pdf(ip)
+                errs = {i['statement'] for i in rv['items'] if i['status'] == imageread.STATUS_ERR}
+                check('image_pdf_reader_finds_planted_error', '7 × 8 = 54' in errs, sorted(errs))
+                cp = fx.image_only_explainer_pdf(d / 'SelfTest_Flattened_Clean.pdf', with_errors=False)
+                rc = imageread.review_pdf(cp)
+                check('image_pdf_reader_no_false_accusation', rc['stats']['SUSPECTED_ERROR'] == 0
+                      and rc['stats']['VERIFIED_CORRECT'] >= 5, rc['stats'])
+            else:
+                check('image_pdf_reader_available', False, 'page reader (OCR) not installed')
             bad = d / 'evil.zip'
             import zipfile
             with zipfile.ZipFile(bad, 'w') as zz:

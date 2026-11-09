@@ -20,6 +20,7 @@ from pathlib import Path, PurePosixPath
 
 import academic
 import htmlaudit
+import imageread
 import pdftools
 from browsertest import run_browser_tests, browser_checks, compare_images
 from config import load_settings
@@ -93,6 +94,58 @@ class AcademicVerifierAgent:
         return results, findings, checks
 
 
+    def verify_image_review(self, rel, review, decisions):
+        """Turn an OCR review of image-only pages into results, findings and checks.
+        Suspected errors and typos need the OWNER's decision (confirmed / dismissed); until then they
+        hold the product at NOT_VERIFIED and cannot be covered by a blanket attestation."""
+        results, findings, checks = [], [], []
+        decisions = decisions or {}
+        for it in review['items']:
+            pno, iid = it['page'], it['id']
+            ev = f'read from the page image (OCR, confidence {it["conf"]:.2f}); ' + str(it.get('evidence') or '')
+            if it['status'] == imageread.STATUS_OK:
+                results.append({'status': academic.CORRECT, 'file': rel, 'page': pno, 'question': it['statement'],
+                                'evidence': ev, 'methods': it.get('methods', [])})
+                checks.append((f'academic:{rel}:p{pno}:ocr:{iid}', 'academic', 'CRITICAL', True, ev[:200]))
+                continue
+            if it['status'] == imageread.STATUS_MISREAD:
+                findings.append({'id': iid, 'check': 'image.ocr_misread', 'severity': 'INFO', 'category': 'academic',
+                                 'file': rel, 'page': pno, 'line': None, 'crop': it.get('crop'), 'fix': None,
+                                 'detail': f'Page {pno}: "{it["statement"]}" was read unclearly; it is correct if read as '
+                                           f'"{it.get("alternative_reading")}". Not reported as an error.',
+                                 'evidence': ev})
+                continue
+            if it['status'] not in (imageread.STATUS_ERR, 'SUSPECTED_TYPO'):
+                continue
+            typo = it['status'] == 'SUSPECTED_TYPO'
+            d = decisions.get(iid) or {}
+            verdict = d.get('verdict')
+            passed = None if not verdict else (verdict == 'dismissed')
+            sev = 'MINOR' if typo else 'CRITICAL'
+            cid = f'image:{rel}:{iid}'
+            checks.append((cid, 'typography' if typo else 'academic', sev, passed,
+                           (f'owner {verdict}: ' if verdict else 'awaiting owner decision: ') + it['statement']))
+            if verdict == 'dismissed':
+                continue
+            if not verdict:
+                results.append({'status': 'PENDING_OWNER_DECISION', 'file': rel, 'page': pno,
+                                'question': f'Image finding {iid}: {it["statement"]}', 'evidence': ev})
+            what = 'spelling' if typo else f'"{it["statement"]}" appears incorrect (verified value: {it.get("expected")})'
+            findings.append({'id': iid, 'check': 'image.typo' if typo else 'image.math_error', 'severity': sev,
+                             'category': 'typography' if typo else 'academic', 'file': rel, 'page': pno, 'line': None,
+                             'detail': f'Page {pno}: {what}' + (f' "{it["statement"]}"' if typo else '') +
+                                       (' - CONFIRMED by owner' if verdict == 'confirmed' else ' - read from the page image'),
+                             'evidence': ev, 'fix': None, 'proposal': it.get('proposal'), 'crop': it.get('crop'),
+                             'image_item': iid, 'decision': verdict, 'rect': it['rect'], 'statement': it['statement'],
+                             'expected': it.get('expected')})
+        for pno, st in review['pages'].items():
+            results.append({'status': 'OCR_PARTIAL', 'file': rel, 'page': int(pno),
+                            'question': f'Page {pno} is an image: confirm it has no errors the reader could not read',
+                            'evidence': f'{st["lines_read"]} text lines machine-read; {st["statements"]} math statements '
+                                        f'found, {st["verified"]} verified correct'})
+        return results, findings, checks
+
+
 class PowerToolRepairAgent:
     role = ROLE_PT
 
@@ -140,10 +193,11 @@ class ExplainerRepairAgent:
 
 
 # ============================================================== detection
-def detect_all(settings, site_dir, shots_dir, label, run_browser=True):
+def detect_all(settings, site_dir, shots_dir, label, run_browser=True, decisions=None, progress=None):
     """Run every applicable specialist against a directory of product files."""
     files = _files_map(site_dir)
-    res = {'findings': [], 'checks': [], 'browser': None, 'academic': [], 'pdf': {}, 'types': set()}
+    res = {'findings': [], 'checks': [], 'browser': None, 'academic': [], 'pdf': {}, 'types': set(),
+           'image_review': {}}
     html = [p for p in files if p.lower().endswith(('.html', '.htm'))]
     pdfs = [p for p in files if p.lower().endswith('.pdf')]
     av = AcademicVerifierAgent()
@@ -167,6 +221,20 @@ def detect_all(settings, site_dir, shots_dir, label, run_browser=True):
         res['academic'] += r
         res['findings'] += f2
         res['checks'] += c2
+        image_pages = rep.get('image_only_pages') or []
+        if image_pages:
+            if imageread.available():
+                review = imageread.review_pdf(Path(site_dir) / rel, image_pages,
+                                              crop_dir=Path(shots_dir) / f'{label}_image_review_{PurePosixPath(rel).stem}',
+                                              progress=progress, cache_dir=settings.get('_ocr_cache'))
+                res['image_review'][rel] = review
+                r3, f3, c3 = av.verify_image_review(rel, review, decisions)
+                res['academic'] += r3
+                res['findings'] += f3
+                res['checks'] += c3
+            else:
+                res['checks'].append((f'academic.image_reader:{rel}', 'academic', 'CRITICAL', None,
+                                      'image-only pages but the page reader (OCR) is not installed'))
     res['types'] = sorted(res['types'])
     return res
 
@@ -195,7 +263,8 @@ class Orchestrator:
 
     def __init__(self, root, settings=None):
         self.root = workspace(root)
-        self.settings = settings or load_settings(root)
+        self.settings = dict(settings or load_settings(root))
+        self.settings['_ocr_cache'] = str(self.root / 'cache' / 'ocr')
 
     def _job_dir(self, job_id):
         return self.root / 'jobs' / job_id
@@ -372,14 +441,14 @@ class Orchestrator:
         wc = WorkingCopy.create(self.root, pid, diag_id)
         try:
             progress and progress('Diagnosing (read-only)...')
-            st = detect_all(self.settings, wc.files, out / 'evidence', 'baseline', run_browser)
+            st = detect_all(self.settings, wc.files, out / 'evidence', 'baseline', run_browser, progress=progress)
         finally:
             shutil.rmtree(wc.dir, ignore_errors=True)
         findings = []
         for f in st['findings']:
             state = 'SUSPECTED' if f['severity'] == 'INFO' else 'DETECTED'
             findings.append({**f, 'state': state,
-                             'proposed_correction': describe_fix(f.get('fix')) if f.get('fix') else None})
+                             'proposed_correction': describe_fix(f.get('fix')) if f.get('fix') else f.get('proposal')})
         unverified = [r for r in st['academic'] if r['status'] not in (academic.CORRECT, academic.INCORRECT)]
         result = {'id': diag_id, 'product_id': pid, 'product_name': manifest['name'],
                   'product_type': manifest.get('product_type'), 'created_at': utcnow(), 'findings': findings,
@@ -390,6 +459,7 @@ class Orchestrator:
                   'browser': st.get('browser'), 'checks': [list(c) for c in st['checks']],
                   'proposed_corrections': len([f for f in findings if f['proposed_correction']]),
                   'needs_person': len([f for f in findings if not f['proposed_correction'] and f['state'] == 'DETECTED']),
+                  'image_findings': len([f for f in findings if f.get('image_item')]),
                   'original_intact': verify_original(self.root, pid)}
         write_json(out / 'diagnosis.json', result)
         try:
@@ -470,7 +540,8 @@ class ReleaseQAAgent:
 
     def __init__(self, root, settings):
         self.root = workspace(root)
-        self.settings = settings
+        self.settings = dict(settings)
+        self.settings['_ocr_cache'] = str(self.root / 'cache' / 'ocr')
 
     def evaluate(self, job, run_browser=True):
         jd = self.root / 'jobs' / job['id']
@@ -523,7 +594,8 @@ class ReleaseQAAgent:
             checks.append(('integrity.all_changes_recorded', 'integrity', 'CRITICAL', not silent,
                            f'changes not explained by recorded patches: {silent}' if silent
                            else 'replaying recorded patches on the original reproduces the candidate exactly'))
-        state = detect_all(self.settings, fresh, qa_dir / 'evidence', 'qa', run_browser)
+        state = detect_all(self.settings, fresh, qa_dir / 'evidence', 'qa', run_browser,
+                           decisions=job.get('image_decisions'))
         checks += state['checks']
         # visual comparison against the original
         visual = {}
@@ -575,13 +647,22 @@ class ReleaseQAAgent:
             ptype = 'BUILT_POWER_TOOL' if 'power_tool' in state['types'] else 'BUILT_EXPLAINER'
         attested = {a['item'] for a in job.get('attestations', [])}
         unverified = [r for r in state['academic'] if r['status'] not in (academic.CORRECT, academic.INCORRECT)]
-        n_att = len([r for r in unverified if _item_key(r) in attested]) + (len(unverified) if 'ALL' in attested else 0)
+        attestable = [r for r in unverified if r['status'] != 'PENDING_OWNER_DECISION']
+        n_att = len([r for r in attestable if _item_key(r) in attested]) + (len(attestable) if 'ALL' in attested else 0)
         n_att = min(n_att, len(unverified))
-        if 'ALL' in attested and not state['academic']:
+        if 'ALL' in attested and (not state['academic'] or
+                                  not any(r['status'] == 'PENDING_OWNER_DECISION' for r in state['academic'])):
             checks.append(('academic.owner_attested', 'academic', 'CRITICAL', True, 'owner attested academic review'))
         for a in job.get('attestations', []):
             checks.append((f'owner_attestation:{a["item"][:40]}', 'attestation', 'INFO', True, a.get('note', '')))
         result = score(checks, ptype, self.settings['repair']['quality_target'], len(unverified), n_att)
+        pending = [r for r in unverified if r['status'] == 'PENDING_OWNER_DECISION']
+        if pending:
+            result['reasons'].insert(0, f'{len(pending)} image finding(s) need your decision '
+                                        f'(tab 2: Review Image Findings…)')
+        result['image_findings'] = [f for f in state['findings'] if f.get('image_item')]
+        result['image_review'] = {rel: {'pages': v['pages'], 'stats': v['stats'], 'engine': v['engine']}
+                                  for rel, v in state.get('image_review', {}).items()}
         result['unverified_items'] = [{'key': _item_key(r), 'file': r.get('file'), 'question': r.get('question'),
                                        'status': r['status'], 'evidence': r['evidence']} for r in unverified]
         result['open_findings'] = state['findings']

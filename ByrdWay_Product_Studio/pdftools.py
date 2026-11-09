@@ -99,8 +99,8 @@ def inspect_pdf(path, render_dir=None, dpi=60):
         report['text_layer'] = len(image_only) < doc.page_count
         if image_only:
             add('pdf.image_only', 'INFO', 'pdf_structure', None,
-                f'{len(image_only)} image-only page(s): text cannot be machine-verified; '
-                f'needs editable source or approved OCR + human review', None)
+                f'{len(image_only)} image-only page(s): read by the page reader (OCR). Machine-read math is '
+                f'verified; you confirm each finding, and corrections are made in the editable source', None)
         sizes = {s for s in sizes if not any(abs(s[0] - t[0]) <= 2 and abs(s[1] - t[1]) <= 2 and t < s for t in sizes)}
         if len(sizes) > 1:                                   # ignore sub-2-point rounding differences
             add('pdf.page_sizes', 'MINOR', 'layout', None, f'Mixed page sizes: {sorted(sizes)}')

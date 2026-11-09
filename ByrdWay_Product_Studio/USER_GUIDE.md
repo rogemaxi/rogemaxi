@@ -1,4 +1,4 @@
-# ByrdWay Product Engineering Studio — Installation & User Guide (v0.4.3)
+# ByrdWay Product Engineering Studio — Installation & User Guide (v0.5.0)
 
 Owner: Genesis 2 & 7, LLC · ByrdWay Mathematics & Science. Runs locally on Windows 11. No Claude/Anthropic
 account is needed. OpenAI is optional and only used when you allow it.
@@ -26,6 +26,14 @@ See **OWNER_QUICK_START.md** (also under Help → Quick Start) for the short ver
 4. **Jobs tab**: the coloured **NEXT STEP** line tells you what to do. **Open Readable Report**, **Before / After
    Diff**, **Open Evidence Folder**, **Re-run Release QA**, **Attest Unverifiable Item…**, **APPROVE for release…**,
    **Reject…**, **Export Approved…**. Approval is refused unless Release QA passed; export is refused unless approved.
+
+### Flattened PDFs (every page a picture, e.g. Anime Explainers)
+The Studio reads the pictures with a free local page reader. **② Diagnose** lists every suspected math error and
+spelling error with its page and a picture. After **③ Repair a Copy & Verify**, tab 2 → **Review Image Findings…**:
+look at each picture, click **Confirm error** or **Not an error (misread)**, edit the correction text if needed.
+Then **Export Correction Sheet…** gives you the list of approved corrections, the pictures, and an annotated review
+copy (red boxes on a separate layer; the artwork is never changed). Make the corrections in your editable source,
+export a new PDF, and import it to verify. Each image page still needs your visual confirmation (**Attest… ALL**).
 
 ## 3. Optional AI assistance (OpenAI)
 1. **API Costs & Settings tab**: set *Owner-authorized funding* to what you actually added (e.g. 10), keep a

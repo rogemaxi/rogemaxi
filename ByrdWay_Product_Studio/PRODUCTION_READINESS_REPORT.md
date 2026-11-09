@@ -1,8 +1,8 @@
-# Production Readiness Report — ByrdWay Product Engineering Studio v0.4.3
+# Production Readiness Report — ByrdWay Product Engineering Studio v0.5.0
 
 ## How a release is identified (no hand-copied numbers)
 Every Windows CI run on a pushed commit writes **VERIFICATION_MANIFEST.txt** into the draft GitHub release
-"ByrdWay Product Engineering Studio v0.4.3". It states the commit, the workflow run URL, the Windows version, the test
+"ByrdWay Product Engineering Studio v0.5.0". It states the commit, the workflow run URL, the Windows version, the test
 count, the result of the self-test run **from the downloadable .exe ZIP itself**, and the SHA-256 of every downloadable
 file. After uploading, the workflow downloads every asset back and fails unless the checksums are identical.
 Check a download yourself: PowerShell `Get-FileHash <file> -Algorithm SHA256` must equal the manifest line.
@@ -11,19 +11,19 @@ Check a download yourself: PowerShell `Get-FileHash <file> -Algorithm SHA256` mu
 | Area | Status |
 |---|---|
 | Commit 0d20eaa (v0.4.0) as a release | **FAIL** — empty source ZIP (R16); superseded |
-| Studio software, v0.4.3 | **PASS** when its manifest shows: all tests OK with no skips, downloadable-.exe self-test passed, checksums verified |
+| Studio software, v0.5.0 | **PASS** when its manifest shows: all tests OK with no skips, downloadable-.exe self-test passed, checksums verified |
 | Real owner Power Tool (HTML, 64 screens, 100 answer items) | **NOT_VERIFIED → owner review required.** 0 defects, 0 wrong answers found, 16 answers machine-verified, all 64 screens clean in the browser; **84 answers** are question types the verifier cannot check (proofs, inequalities, lines/slope, word problems, multi-part). Release needs the owner's review and attestation. Original byte-identical |
-| Real owner Explainer (PDF, 14 flattened image pages) | **NOT_VERIFIED — Studio cannot read it.** No text layer, so no answer, label or explanation can be machine-checked; the Studio correctly refuses to rewrite it. A manual spot-check of one page found text-in-image errors the Studio cannot detect. Original byte-identical |
+| Real owner Explainer (PDF, 14 flattened image pages) | **v0.5.0: READ.** 18 statements verified, 1 real math error and 9 real typos found with pictures, 0 false accusations; awaits the owner's decisions and page confirmation. (Earlier, v0.4.x: **NOT_VERIFIED — Studio cannot read it.** No text layer, so no answer, label or explanation can be machine-checked; the Studio correctly refuses to rewrite it. A manual spot-check of one page found text-in-image errors the Studio cannot detect. Original byte-identical |
 | Full production certification | **BLOCKED** — Power Tool: owner review of 84 items. Explainer: requires either the editable source (text layer) or an owner-authorized image/OCR review capability, which is not implemented |
 
-## Workflow status (v0.4.3)
+## Workflow status (v0.5.0)
 | Workflow / criterion | Status | Evidence |
 |---|---|---|
 | One version everywhere (0.4.1) | PASS | `version.py`; CI fails if the downloadable .exe reports another version; `test_v040.Version` |
 | Commit ↔ CI run ↔ downloadable files correspond | PASS (per manifest) | manifest + download-back checksum comparison |
 | Windows install / startup / .exe launch | PASS on Windows Server 2025 | CI; GUI started from the downloadable ZIP |
 | Windows 11 desktop specifically | NOT TESTED | no Windows 11 CI machines; owner: Help → Run self-test (1 minute) |
-| **Explainer end to end**: import → diagnosis documented → owner authorizes repair → repair copy → independent verification → owner approval (with visual review) → export | **PASS** | `tests/test_e2e_explainer.py` in the real window on Windows; evidence ZIP `E2E_Explainer_Evidence_v0.4.3.zip` in the release (diagnosis report, repair report, before/after page images, exported PDF + audit trail) |
+| **Explainer end to end**: import → diagnosis documented → owner authorizes repair → repair copy → independent verification → owner approval (with visual review) → export | **PASS** | `tests/test_e2e_explainer.py` in the real window on Windows; evidence ZIP `E2E_Explainer_Evidence_v0.5.0.zip` in the release (diagnosis report, repair report, before/after page images, exported PDF + audit trail) |
 | Explainer defect that cannot be safely auto-corrected (answer key) | PASS (correctly refused) | detected → NOT_AUTO_FIXABLE → approval and export refused |
 | Power Tool end to end | PASS | `test_import_diagnose_repair_review_approve_export` (real window) |
 | Originals preserved | PASS | SHA-256 of locked original and of the owner's own file re-checked after export |

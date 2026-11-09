@@ -393,7 +393,9 @@ class App(tk.Tk):
         bar = ttk.Frame(f)
         bar.pack(fill='x')
         for text, cmd in [('Open Readable Report', self.open_job_report), ('Before / After Diff', self.show_diff), ('Open Evidence Folder', self.open_evidence),
-                          ('Re-run Release QA', self.rerun_qa), ('Attest Unverifiable Item…', self.attest),
+                          ('Re-run Release QA', self.rerun_qa), ('Review Image Findings…', self.review_image_findings),
+                          ('Export Correction Sheet…', self.export_correction_sheet),
+                          ('Attest Unverifiable Item…', self.attest),
                           ('APPROVE for release…', self.approve), ('Reject…', self.reject),
                           ('Export Approved…', self.export)]:
             ttk.Button(bar, text=text, command=cmd).pack(side='left', padx=2)
@@ -443,6 +445,39 @@ class App(tk.Tk):
                  'BLOCKED': '#fde8e8', 'ERROR': '#fde8e8'}.get(j['status'], '#fff8e1')
         self.jtext.tag_configure('next', background=color, font=('Segoe UI', 11, 'bold'))
         self.jtext.tag_add('next', '1.0', '1.end')
+
+    def review_image_findings(self):
+        try:
+            jid = self.selected_job()
+        except ValueError as e:
+            return messagebox.showinfo('Select', str(e))
+        items = self.studio.image_findings(jid)
+        if not items:
+            return messagebox.showinfo('Image findings', 'The page reader found no possible errors on image pages '
+                                                         'in this job (or the product has no image pages).')
+        self.image_dialog = ImageFindingsDialog(self, jid, items)
+        return self.image_dialog
+
+    def export_correction_sheet(self):
+        try:
+            jid = self.selected_job()
+        except ValueError as e:
+            return messagebox.showinfo('Select', str(e))
+        if not any(i['decision'] == 'confirmed' for i in self.studio.image_findings(jid)):
+            return messagebox.showinfo('Correction sheet', 'Confirm at least one finding in "Review Image Findings…" first.')
+        owner = simpledialog.askstring('Correction sheet', 'Your name (approves these corrections):')
+        if not owner:
+            return
+        if not messagebox.askyesno('Approve corrections', 'Export the confirmed corrections as a correction sheet and '
+                                   'an annotated review copy?\n\nYour product file is NOT changed; you make the '
+                                   'corrections in your editable source.'):
+            return
+        try:
+            out = self.studio.export_correction_sheet(jid, owner, True)
+            self.log_line(f'Correction sheet exported: {out}')
+            self.opener(out / 'correction_sheet.html')
+        except Exception as e:
+            self.error('Correction sheet not exported', e)
 
     def open_job_report(self):
         try:
@@ -925,6 +960,100 @@ class App(tk.Tk):
         self.actbox.delete('1.0', 'end')
         for e in self.studio.activity(400):
             self.actbox.insert('end', f'{e["ts"]} {e["level"]:5} {e.get("job", ""):24} {e["role"]:18} {e["message"]}\n')
+
+
+class ImageFindingsDialog(tk.Toplevel):
+    """Owner reviews each finding from image pages: picture of the spot, proposed correction,
+    Confirm error / Not an error. Nothing is changed in the product."""
+
+    def __init__(self, app, job_id, items):
+        super().__init__(app)
+        self.app, self.job_id, self.items = app, job_id, items
+        self.owner = None
+        self.title('Review image findings - nothing is changed in your product')
+        self.geometry('1100x640')
+        top = ttk.Frame(self, padding=8)
+        top.pack(fill='x')
+        ttk.Label(top, text='Look at each picture. Confirm real errors; dismiss misreads. Confirmed errors go on the '
+                            'correction sheet for your editable source.', wraplength=1050).pack(anchor='w')
+        body = ttk.PanedWindow(self, orient='horizontal')
+        body.pack(fill='both', expand=True, padx=8)
+        self.tree = ttk.Treeview(body, columns=('page', 'kind', 'statement', 'decision'), show='headings',
+                                 selectmode='browse')
+        for col, w in (('page', 50), ('kind', 60), ('statement', 260), ('decision', 100)):
+            self.tree.heading(col, text=col)
+            self.tree.column(col, width=w)
+        body.add(self.tree, weight=2)
+        right = ttk.Frame(body, padding=6)
+        body.add(right, weight=3)
+        self.pic = ttk.Label(right)
+        self.pic.pack(anchor='w', pady=4)
+        self.detail = ttk.Label(right, text='', wraplength=560, justify='left')
+        self.detail.pack(anchor='w', pady=4)
+        ttk.Label(right, text='Correction (edit if needed):').pack(anchor='w')
+        self.corr = tk.StringVar()
+        ttk.Entry(right, textvariable=self.corr, width=80).pack(anchor='w', fill='x')
+        bar = ttk.Frame(right)
+        bar.pack(anchor='w', pady=8)
+        ttk.Button(bar, text='Confirm error', command=lambda: self.decide('confirmed')).pack(side='left', padx=2)
+        ttk.Button(bar, text='Not an error (misread)', command=lambda: self.decide('dismissed')).pack(side='left', padx=2)
+        ttk.Button(bar, text='Close', command=self.destroy).pack(side='left', padx=12)
+        self.tree.bind('<<TreeviewSelect>>', lambda e: self.show())
+        self._img = None
+        self.fill()
+
+    def fill(self):
+        self.tree.delete(*self.tree.get_children())
+        for it in self.items:
+            self.tree.insert('', 'end', iid=it['id'], values=(it['page'], it['kind'], it['statement'],
+                                                             it['decision'] or 'to decide'))
+        pending = [i['id'] for i in self.items if not i['decision']]
+        if pending or self.items:
+            self.tree.selection_set(pending[0] if pending else self.items[0]['id'])
+            self.show()
+
+    def current(self):
+        s = self.tree.selection()
+        return next((i for i in self.items if s and i['id'] == s[0]), None)
+
+    def show(self):
+        it = self.current()
+        if not it:
+            return
+        self.detail.config(text=f'{it["detail"]}\n\nProposed: {it.get("proposal") or "-"}')
+        self.corr.set(it.get('correction') or it.get('proposal') or '')
+        self._img = None
+        if it.get('crop') and Path(it['crop']).exists():
+            try:
+                img = tk.PhotoImage(file=it['crop'])
+                k = max(1, -(-img.width() // 560))
+                self._img = img.subsample(k, k) if k > 1 else img
+            except tk.TclError:
+                self._img = None
+        self.pic.config(image=self._img or '', text='' if self._img else '(no picture)')
+
+    def decide(self, verdict):
+        it = self.current()
+        if not it:
+            return
+        if not self.owner:
+            self.owner = simpledialog.askstring('Your name', 'Your name (recorded with each decision):', parent=self)
+            if not self.owner:
+                return
+        try:
+            self.app.studio.decide_image_finding(self.job_id, it['id'], verdict, self.owner, self.corr.get().strip() or None)
+        except Exception as e:
+            return self.app.error('Decision not recorded', e)
+        self.items = self.app.studio.image_findings(self.job_id)
+        self.fill()
+        self.app.refresh_jobs()
+        if self.app.jtree.exists(self.job_id):
+            self.app.jtree.selection_set(self.job_id)
+            self.app.show_job()
+
+    def destroy(self):
+        super().destroy()
+        gc.collect()
 
 
 class BlueprintEditor(tk.Toplevel):

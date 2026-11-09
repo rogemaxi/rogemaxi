@@ -71,6 +71,15 @@ class Studio:
     def export(self, job_id, dest=None):
         return release.export_approved(self.root, job_id, dest)
 
+    def image_findings(self, job_id):
+        return release.image_findings(self.root, job_id)
+
+    def decide_image_finding(self, job_id, item_id, verdict, owner, correction=None):
+        return release.decide_image_finding(self.root, job_id, item_id, verdict, owner, correction)
+
+    def export_correction_sheet(self, job_id, owner, explicit=False, dest=None):
+        return release.export_correction_sheet(self.root, job_id, owner, explicit, dest)
+
     def rerun_qa(self, job_id):
         return release.requeue_qa(self.root, job_id)
 
@@ -252,6 +261,15 @@ def next_action(job):
             h.get('replace_file') for h in job.get('history', [])) else ''
         return (f'Release QA PASSED ({qa.get("score")}/100). Review "Before / After Diff", then click '
                 f'"APPROVE for release…".{extra}')
+    pend = [u for u in qa.get('unverified_items') or [] if isinstance(u, dict) and u.get('status') == 'PENDING_OWNER_DECISION']
+    if pend:
+        n = len(pend)
+        return (f'The page reader found {n} possible error(s) on image pages. Click "Review Image Findings…" '
+                f'and confirm or dismiss each one (a picture of each is shown).')
+    if st == 'BLOCKED' and any(f.get('image_item') and f.get('decision') == 'confirmed'
+                               for f in qa.get('image_findings') or []):
+        return ('You confirmed error(s) on image pages. Click "Export Correction Sheet…", correct them in your '
+                'editable source (Canva/PPTX), export a new PDF and import it to verify.')
     if st == 'NOT_VERIFIED':
         if qa.get('unverified_items'):
             return (f'{len(qa["unverified_items"])} question(s) cannot be checked automatically. Review them '

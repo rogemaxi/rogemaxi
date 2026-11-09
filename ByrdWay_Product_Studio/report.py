@@ -75,6 +75,28 @@ def write_job_report(root, job):
                  f'(visual review confirmed: {ap.get("visual_reviewed")})</p>')
     if qa.get('reasons'):
         b.append('<h2>Why it is not ready</h2><ul>' + ''.join(f'<li>{E(r)}</li>' for r in qa['reasons']) + '</ul>')
+    imf = qa.get('image_findings') or []
+    decided = job.get('image_decisions') or {}
+    if qa.get('image_review') or decided:
+        for rel, rv in (qa.get('image_review') or {}).items():
+            st = rv['stats']
+            b.append(f'<h2>Image pages read by the page reader (OCR): {E(rel)}</h2><p>{len(rv["pages"])} image page(s) read; '
+                     f'{st.get("VERIFIED_CORRECT", 0)} math statements verified correct, {st.get("SUSPECTED_ERROR", 0)} '
+                     f'possible math error(s), {st.get("SUSPECTED_TYPO", 0)} possible typo(s), '
+                     f'{st.get("LIKELY_OCR_MISREAD", 0)} unclear reading(s) not treated as errors. The reader cannot see '
+                     f'every detail of an illustration, so each page still needs your visual confirmation.</p>')
+        rows = [(f['image_item'], f) for f in imf] + [(k, {**v['snapshot'], 'decision': v['verdict']})
+                                                     for k, v in decided.items() if v['verdict'] == 'dismissed']
+        if rows:
+            b.append('<table><tr><th>Page</th><th>Picture</th><th>Finding</th><th>Proposed correction</th><th>Your decision</th></tr>')
+            for iid, f in sorted(rows, key=lambda x: (x[1].get('page') or 0)):
+                img = (f'<img style="max-width:360px" src="{E(_rel(f["crop"], jd))}" alt="{E(iid)}">'
+                       if f.get('crop') and Path(f['crop']).exists() else '')
+                dec = (decided.get(iid) or {}).get('verdict') or 'to decide'
+                b.append(f'<tr><td>{f.get("page")}</td><td>{img}</td><td>{E(str(f.get("detail") or f.get("statement")))}</td>'
+                         f'<td>{E(str((decided.get(iid) or {}).get("correction") or f.get("proposal") or ""))}</td>'
+                         f'<td>{E(dec)}</td></tr>')
+            b.append('</table>')
     un = qa.get('unverified_items') or []
     if un:
         b.append(f'<h2>Questions that need your review ({len(un)})</h2><p>The verifier cannot check these '
@@ -151,8 +173,10 @@ def write_diagnosis_report(root, d):
     if d['findings']:
         b.append('<h2>Findings</h2><table><tr><th>State</th><th>Severity</th><th>Problem</th><th>Proposed correction</th></tr>')
         for f in d['findings']:
+            pic = (f'<br><img style="max-width:340px" src="{E(_rel(f["crop"], dd))}" alt="evidence">'
+                   if f.get('crop') and Path(f['crop']).exists() else '')
             b.append(f'<tr><td><span class="pill s-{E(f["state"])}">{E(f["state"])}</span></td><td>{E(f["severity"])}</td>'
-                     f'<td>{E(f.get("file") or "")}{(":" + str(f["line"])) if f.get("line") else ""} {E(f["detail"])}</td>'
+                     f'<td>{E(f.get("file") or "")}{(":" + str(f["line"])) if f.get("line") else ""} {E(f["detail"])}{pic}</td>'
                      f'<td>{E(f["proposed_correction"] or "None - needs a person")}</td></tr>')
         b.append('</table>')
     if d['academic_needs_human']:

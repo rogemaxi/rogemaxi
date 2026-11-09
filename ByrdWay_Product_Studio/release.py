@@ -252,3 +252,123 @@ def _extract_backup(backup_zip, dest, max_total=4 * 1024 ** 3):
             target.parent.mkdir(parents=True, exist_ok=True)
             with z.open(info) as i, open(target, 'wb') as o:
                 shutil.copyfileobj(i, o)
+
+
+# ------------------------------------------------------- image-page findings (flattened PDFs)
+def image_findings(root, job_id):
+    """Owner-facing list: every suspected error / typo the page reader found, with its decision."""
+    job = Orchestrator(root).load_job(job_id)
+    qa = job.get('qa') or {}
+    dec = job.get('image_decisions', {})
+    items = {}
+    for f in (qa.get('image_findings') or []) + [x for x in (job.get('final_open_findings') or []) if x.get('image_item')]:
+        items.setdefault(f['image_item'], f)
+    out = []
+    for iid, f in items.items():
+        d = dec.get(iid, {})
+        out.append({'id': iid, 'page': f.get('page'), 'kind': 'typo' if f['check'] == 'image.typo' else 'math',
+                    'statement': f.get('statement'), 'detail': f['detail'], 'proposal': f.get('proposal'),
+                    'crop': f.get('crop'), 'rect': f.get('rect'), 'expected': f.get('expected'),
+                    'decision': d.get('verdict'), 'decided_by': d.get('owner'), 'correction': d.get('correction')})
+    for iid, d in dec.items():                      # dismissed items drop out of QA findings; keep them listed
+        if iid not in items and d.get('snapshot'):
+            out.append({**d['snapshot'], 'decision': d.get('verdict'), 'decided_by': d.get('owner')})
+    return sorted(out, key=lambda x: (x.get('page') or 0, x['id']))
+
+
+def decide_image_finding(root, job_id, item_id, verdict, owner, correction=None, note=''):
+    """Owner decision on one image finding: 'confirmed' (a real error, fix it in the source) or
+    'dismissed' (not an error, e.g. the reader misread the picture). Then Release QA re-evaluates."""
+    if verdict not in ('confirmed', 'dismissed'):
+        raise ValueError('verdict must be confirmed or dismissed')
+    if not owner or not owner.strip():
+        raise ValueError('Your name is required')
+    o = Orchestrator(root)
+    job = o.load_job(job_id)
+    if job['status'] in ('APPROVED', 'EXPORTED', 'REJECTED'):
+        raise PermissionError(f'Job is {job["status"]}')
+    known = {f['id']: f for f in image_findings(root, job_id)}
+    if item_id not in known:
+        raise ValueError(f'Unknown image finding {item_id}')
+    snap = {k: known[item_id][k] for k in ('id', 'page', 'kind', 'statement', 'detail', 'proposal', 'crop', 'rect', 'expected')}
+    job.setdefault('image_decisions', {})[item_id] = {'verdict': verdict, 'owner': owner.strip(), 'at': utcnow(),
+                                                     'correction': (correction or known[item_id].get('proposal')),
+                                                     'note': note, 'snapshot': snap}
+    qa = ReleaseQAAgent(o.root, o.settings).evaluate(job, run_browser=False) if _pdf_only(job) else \
+        ReleaseQAAgent(o.root, o.settings).evaluate(job)
+    job['qa'] = qa
+    job['status'] = {'PASS': 'AWAITING_OWNER_APPROVAL'}.get(qa['decision'], qa['decision'])
+    o.save_job(job)
+    JobLog(root, job_id).info('Explainer Repair', f'Owner {owner} {verdict} image finding {item_id}')
+    _refresh_report(root, job)
+    return job
+
+
+def _pdf_only(job):
+    return str(job.get('candidate', '')).lower().endswith('.pdf')
+
+
+def export_correction_sheet(root, job_id, owner, explicit_approval=False, dest_dir=None):
+    """Owner-approved corrections for a flattened PDF: a correction sheet (HTML + CSV, with picture evidence)
+    and an annotated REVIEW copy. The product file itself is not changed; corrections are made in the source."""
+    import csv, html as H
+    if explicit_approval is not True:
+        raise PermissionError('Explicit owner approval required')
+    root = workspace(root)
+    o = Orchestrator(root)
+    job = o.load_job(job_id)
+    if not verify_original(root, job['product_id']):
+        raise PermissionError('Original fingerprint mismatch: STOP')
+    confirmed = [f for f in image_findings(root, job_id) if f['decision'] == 'confirmed']
+    pending = [f for f in image_findings(root, job_id) if not f['decision']]
+    if not confirmed:
+        raise PermissionError('No confirmed findings. Confirm at least one in Review Image Findings first.')
+    out = Path(dest_dir) if dest_dir else root / 'exports' / f'{job_id}_correction_sheet'
+    out.mkdir(parents=True, exist_ok=True)
+    src, manifest = original_file(root, job['product_id'])
+    import imageread
+    review_pdf = out / (Path(manifest['name']).stem + '_REVIEW_ANNOTATED.pdf')
+    pixels_unchanged = imageread.annotated_review_copy(src, review_pdf, [
+        {'page': f['page'], 'rect': f['rect'], 'id': f['id'], 'statement': f['statement'], 'correction': f['correction']}
+        for f in confirmed])
+    if not pixels_unchanged:
+        review_pdf.unlink()
+        raise ValueError('Annotated copy changed page pixels; refused')
+    crops = out / 'evidence'
+    crops.mkdir(exist_ok=True)
+    rows = []
+    for f in confirmed:
+        img = ''
+        if f.get('crop') and Path(f['crop']).exists():
+            dst = crops / Path(f['crop']).name
+            shutil.copy2(f['crop'], dst)
+            img = f'<img src="evidence/{H.escape(dst.name)}" style="max-width:420px">'
+        rows.append((f, img))
+    with open(out / 'corrections.csv', 'w', newline='', encoding='utf-8') as fh:
+        w = csv.writer(fh)
+        w.writerow(['id', 'page', 'kind', 'as printed', 'correction', 'confirmed by'])
+        for f, _ in rows:
+            w.writerow([f['id'], f['page'], f['kind'], f['statement'], f['correction'], f['decided_by']])
+    trs = ''.join(f'<tr><td>{H.escape(f["id"])}</td><td>{f["page"]}</td><td>{H.escape(f["kind"])}</td>'
+                  f'<td>{H.escape(str(f["statement"]))}</td><td><b>{H.escape(str(f["correction"]))}</b></td>'
+                  f'<td>{img}</td></tr>' for f, img in rows)
+    (out / 'correction_sheet.html').write_text(
+        '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Correction sheet</title><style>'
+        'body{font-family:Segoe UI,Arial;margin:24px}td,th{border:1px solid #ccc;padding:6px;vertical-align:top}'
+        'table{border-collapse:collapse}</style></head><body>'
+        f'<h1>Correction sheet: {H.escape(manifest["name"])}</h1>'
+        f'<p>Approved by {H.escape(owner)} on {utcnow()}. These corrections are made in the editable source '
+        f'(Canva/PPTX/DOCX); the Studio never edits the artwork. Re-import the corrected PDF to verify.</p>'
+        + (f'<p><b>{len(pending)} finding(s) were not decided and are not included.</b></p>' if pending else '') +
+        '<table><tr><th>ID</th><th>Page</th><th>Kind</th><th>As printed</th><th>Correction</th><th>Evidence</th></tr>'
+        + trs + '</table>'
+        f'<p>Annotated review copy: {H.escape(review_pdf.name)} (red boxes + notes on a separate layer; '
+        f'page pictures verified unchanged).</p></body></html>', encoding='utf-8')
+    sums = {p.relative_to(out).as_posix(): sha256(p) for p in sorted(out.rglob('*'))
+            if p.is_file() and p.name != 'SHA256SUMS.txt'}
+    (out / 'SHA256SUMS.txt').write_text(''.join(f'{h}  {r}\n' for r, h in sums.items()), encoding='utf-8')
+    job.setdefault('correction_sheets', []).append({'dir': str(out), 'owner': owner, 'at': utcnow(),
+                                                    'confirmed': [f['id'] for f in confirmed]})
+    o.save_job(job)
+    JobLog(root, job_id).info('Explainer Repair', f'Correction sheet exported by {owner}: {len(confirmed)} item(s)')
+    return out

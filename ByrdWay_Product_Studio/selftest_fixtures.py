@@ -131,3 +131,32 @@ def representative_explainer_pdf(path, worked_example_error=True, answer_key_err
                  [1, 'Answer key', 4]])
     doc.save(str(path))
     return Path(path)
+
+
+def image_only_explainer_pdf(path, with_errors=True):
+    """A FLATTENED Explainer (every page one picture, no text layer) - TEST FIXTURE, not ByrdWay content.
+    Planted: '7 × 8 = 54' (wrong), '3x − 5 = 16 → x = 8' (wrong, x = 7), typo 'Equasion'.
+    Traps that must NOT be reported as errors: '6 × 9 = 54', '(−18) ÷ (−3) = 6' (OCR often reads ÷ as +),
+    '2x + 3 = 11 → x = 4'."""
+    import pymupdf as fitz
+    pages = [
+        [('Chapter 1: Multiplication and Signs', 20), ('Worked example 1:  ' + ('7 × 8 = 54' if with_errors else '7 × 8 = 56'), 18),
+         ('Worked example 2:  6 × 9 = 54', 18), ('Worked example 3:  (−18) ÷ (−3) = 6', 18),
+         ('Essential Vocabulary: an ' + ('equasion' if with_errors else 'equation') + ' states that two expressions are equal.', 15)],
+        [('Chapter 2: Solving Equations', 20), ('Solve: 2x + 3 = 11', 18), ('2x = 8', 18), ('x = 4', 18),
+         ('Solve: 3x − 5 = 16', 18), ('3x = 21', 18), ('x = 8' if with_errors else 'x = 7', 18)],
+    ]
+    text_doc = fitz.open()
+    for lines in pages:
+        p = text_doc.new_page(width=842, height=595)
+        y = 70
+        for text, size in lines:
+            p.insert_text((60, y), text, fontsize=size)
+            y += size + 22
+    out = fitz.open()
+    for p in text_doc:
+        pix = p.get_pixmap(dpi=150)
+        page = out.new_page(width=p.rect.width, height=p.rect.height)
+        page.insert_image(page.rect, pixmap=pix)                     # picture only: no text layer
+    out.save(str(path))
+    return Path(path)
