@@ -12,6 +12,12 @@ if __name__ == '__main__' and '--version' in sys.argv:
     print(__version__)
     sys.exit(0)
 
+if __name__ == '__main__' and '--install-browser' in sys.argv:
+    from browsertest import install_chromium
+    ok, msg = install_chromium()
+    print(msg)
+    sys.exit(0 if ok else 1)
+
 if __name__ == '__main__' and '--selftest' in sys.argv:      # headless: no GUI libraries needed
     import selftest
     sys.exit(selftest.main())
@@ -77,11 +83,23 @@ class App(tk.Tk):
         mb = tk.Menu(self)
         h = tk.Menu(mb, tearoff=0)
         h.add_command(label='Quick Start (open guide)', command=lambda: self.opener(Path(__file__).with_name('OWNER_QUICK_START.md')))
+        h.add_command(label='Install browser engine (one-time, ~150 MB download)…', command=self.install_browser)
         h.add_command(label='Run self-test (checks this PC)', command=self.run_selftest)
         h.add_command(label='About / version', command=lambda: messagebox.showinfo(
             'About', f'{APP_TITLE}\nWorkspace: {self.studio.root}\nNothing is ever published automatically.'))
         mb.add_cascade(label='Help', menu=h)
         self.config(menu=mb)
+
+    def install_browser(self):
+        if not messagebox.askyesno('Install browser engine',
+                                   'Power Tool interaction tests need the Chromium browser engine (about 150 MB, '
+                                   'downloaded once from Microsoft\'s Playwright servers). Download it now?'):
+            return
+        from browsertest import install_chromium
+        def done(r):
+            (messagebox.showinfo if r[0] else messagebox.showerror)('Browser engine', r[1])
+            self.log_line(('Browser engine: ' if r[0] else 'Browser engine NOT installed: ') + r[1])
+        self.run_bg('Installing browser engine', install_chromium, done)
 
     def run_selftest(self):
         import selftest

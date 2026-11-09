@@ -76,6 +76,16 @@ jobs:
           $got = (Get-Content "$env:RUNNER_TEMP\selftest_report.json" | ConvertFrom-Json).version
           if ($got -ne $v) { Write-Error "exe reports version $got but version.py says $v"; exit 1 }
           Copy-Item "$env:RUNNER_TEMP\selftest_report.json" selftest_report_exe.json
+          # exe-only owner path: install Chromium FROM THE EXE into an empty folder, then self-test with only that
+          $env:PLAYWRIGHT_BROWSERS_PATH = "$env:RUNNER_TEMP\exe_only_browsers"
+          $i = Start-Process -FilePath $exe -ArgumentList "--install-browser" -Wait -PassThru
+          if ($i.ExitCode -ne 0) { Write-Error "exe --install-browser failed ($($i.ExitCode))"; exit 1 }
+          Remove-Item "$env:RUNNER_TEMP\selftest_report.json" -ErrorAction SilentlyContinue
+          $p2 = Start-Process -FilePath $exe -ArgumentList "--selftest" -Wait -PassThru -WorkingDirectory $env:RUNNER_TEMP
+          if ($p2.ExitCode -ne 0) { Write-Error "self-test with exe-installed browser failed"; exit 1 }
+          if (-not (Get-ChildItem "$env:RUNNER_TEMP\exe_only_browsers" -Directory | Where-Object Name -like 'chromium*')) { Write-Error "exe did not install Chromium"; exit 1 }
+          "exe-only path: Chromium installed by the exe and self-test passed with it" | Tee-Object -FilePath exe_only_install.txt
+          Remove-Item Env:PLAYWRIGHT_BROWSERS_PATH
           $env:BYRDWAY_WORKSPACE = "$env:RUNNER_TEMP\byrdway_ws"
           $g = Start-Process -FilePath $exe -PassThru
           Start-Sleep -Seconds 20
@@ -96,6 +106,7 @@ jobs:
                  "windows: $((Get-CimInstance Win32_OperatingSystem).Caption) $((Get-CimInstance Win32_OperatingSystem).Version)",
                  "tests: $tests $ok (no skips allowed)",
                  "exe self-test (run from the downloadable ZIP): $((Get-Content selftest_report_exe.json | ConvertFrom-Json).passed)",
+                 "exe-only browser install + self-test: $(Test-Path exe_only_install.txt)",
                  "", "SHA-256 of downloadable files:")
           foreach ($f in $files) { $m += "$((Get-FileHash $f -Algorithm SHA256).Hash.ToLower())  $f" }
           $m | Tee-Object -FilePath VERIFICATION_MANIFEST.txt
@@ -131,5 +142,6 @@ jobs:
             ByrdWay_Product_Studio/test_results_windows.txt
             ByrdWay_Product_Studio/selftest_report_*.json
             ByrdWay_Product_Studio/gui_smoke.txt
+            ByrdWay_Product_Studio/exe_only_install.txt
             ByrdWay_Product_Studio/VERIFICATION_MANIFEST.txt
             ByrdWay_Product_Studio/E2E_Explainer_Evidence_*.zip

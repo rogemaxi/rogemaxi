@@ -85,7 +85,7 @@ class Diagnosis(Base):
         self.assertTrue(all(s.startswith('VERIFIED') for s in states), states)
         rep = (self.ws / 'jobs' / job['id'] / 'report.html').read_text(encoding='utf-8')
         self.assertIn('NEXT STEP', rep)
-        self.assertIn('Chromium', rep, 'NOT_VERIFIED for missing browser must say how to fix it')
+        self.assertIn('Install browser engine', rep, 'NOT_VERIFIED for missing browser must say how to fix it')
 
     def test_unfixable_is_reported_not_faked(self):
         p = self.d / 'bug.html'

@@ -1,4 +1,4 @@
-# Security review — ByrdWay Product Engineering Studio v0.4.2
+# Security review — ByrdWay Product Engineering Studio v0.4.3
 
 Reviewed 2026-11-09 against SSOI §7. Every control below is tested in `tests/` unless marked otherwise.
 

@@ -28,7 +28,7 @@ def run(report_path=None, browser=True):
         try:
             have_browser = browser and playwright_available()
             check('browser_engine_available', have_browser,
-                  'Chromium ready' if have_browser else 'Install Chromium: python -m playwright install chromium')
+                  'Chromium ready' if have_browser else 'Use Help → Install browser engine (or ByrdWayStudio.exe --install-browser)')
             z = fx.broken_power_tool_zip(d / 'SelfTest_Power_Tool.zip')
             h = sha256(z)
             m = import_product(z, ws)

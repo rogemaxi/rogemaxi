@@ -258,7 +258,7 @@ def next_action(job):
                     f'yourself, then use "Attest Unverifiable Item…" (or ALL).')
         miss = qa.get('missing_required_categories') or []
         if 'browser_runtime' in miss:
-            return 'Browser tests could not run. Re-run install_windows.bat and answer Y to the Chromium download.'
+            return 'Browser tests could not run: use Help → Install browser engine (one-time download), then Re-run Release QA.'
         if 'academic' in miss:
             return ('No answers could be read automatically (image-only pages or an unknown answer format). '
                     'Check the content yourself and attest ALL, or send the product to your developer.')

@@ -253,7 +253,7 @@ class Coordination(Base):
         from controller import next_action
         m = import_product(fixtures.broken_power_tool_zip(self.d / 't.zip'), self.ws)
         job = Orchestrator(self.ws).run_repair_job(m['id'], run_browser=False)
-        self.assertIn('Chromium', next_action(job))
+        self.assertIn('Install browser engine', next_action(job))
         self.assertIn('APPROVE', next_action({'status': 'AWAITING_OWNER_APPROVAL', 'qa': {'score': 100.0}}))
         self.assertIn('BLOCKED', next_action({'status': 'BLOCKED', 'qa': {'reasons': ['CRITICAL failed: x']}}))
         self.assertIn('Attest', next_action({'status': 'NOT_VERIFIED', 'qa': {'unverified_items': [1]}}))

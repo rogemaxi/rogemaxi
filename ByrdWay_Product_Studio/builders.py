@@ -719,7 +719,7 @@ def prerequisites(root, kind, bp=None):
                     'OK' if t else 'Not registered: modules use a PROVISIONAL layout and release will be BLOCKED. '
                                    'Use "Register approved template…".'))
         ok = playwright_available()
-        out.append(('Browser engine for interaction tests', ok, 'OK' if ok else 'Run install_windows.bat and answer Y to Chromium.'))
+        out.append(('Browser engine for interaction tests', ok, 'OK' if ok else 'Use Help → Install browser engine (one-time download).'))
     else:
         m = get_asset(root, (bp or {}).get('mascot_asset_id') or LIL_DR_BYRD_ID)
         out.append(('Approved Lil Dr. Byrd image registered', bool(m),

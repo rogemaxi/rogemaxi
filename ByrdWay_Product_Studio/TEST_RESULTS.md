@@ -1,4 +1,4 @@
-# Test execution results — ByrdWay Product Engineering Studio v0.4.2
+# Test execution results — ByrdWay Product Engineering Studio v0.4.3
 
 Authoritative Windows evidence for a given build is **VERIFICATION_MANIFEST.txt** in the matching draft GitHub
 release (commit, run URL, test count, downloadable-.exe self-test, SHA-256 of each download). The workflow fails on any
@@ -6,12 +6,12 @@ skipped test, a failed self-test of the downloadable .exe, a version mismatch, a
 asset whose checksum differs after download.
 
 History: v0.4.0 commit 0d20eaa — 127 tests passed on Windows (runs 42663089124, 42664267659) but its release was
-**defective** (empty source ZIP, see ROOT_CAUSE_REPORT R16). Superseded by v0.4.2.
+**defective** (empty source ZIP, see ROOT_CAUSE_REPORT R16). Superseded by v0.4.3.
 
-| Environment (v0.4.2) | Command | Result |
+| Environment (v0.4.3) | Command | Result |
 |---|---|---|
 | Windows Server 2025, Python 3.12 | CI workflow | see VERIFICATION_MANIFEST.txt |
-| Linux, Python 3.12 + Tk + Xvfb | `xvfb-run -a python -m unittest discover -s tests -v` | Ran 139 tests — OK, 0 skipped |
+| Linux, Python 3.12 + Tk + Xvfb | `xvfb-run -a python -m unittest discover -s tests -v` | Ran 140 tests — OK, 0 skipped |
 
 ## Explainer end-to-end acceptance (tests/test_e2e_explainer.py)
 Representative 4-page Explainer (title page with illustration, clickable contents, two chapters, answer key, page

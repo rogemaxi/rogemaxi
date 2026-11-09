@@ -38,6 +38,29 @@ def configure_frozen():
 configure_frozen()
 
 
+def install_chromium(timeout=1800):
+    """Download Chromium using the Playwright driver bundled with the app (works inside the .exe,
+    no Python needed). Returns (ok, message). Network: Playwright's download CDN only."""
+    import subprocess
+    try:
+        from playwright._impl._driver import compute_driver_executable, get_driver_env
+    except ImportError:
+        return False, 'Playwright is not installed in this build.'
+    node, cli = compute_driver_executable()
+    if not Path(node).exists() or not Path(cli).exists():
+        return False, f'Browser installer not found in this build ({node}).'
+    env = get_driver_env()
+    flags = {'creationflags': 0x08000000} if os.name == 'nt' else {}     # no console window on Windows
+    try:
+        r = subprocess.run([node, cli, 'install', 'chromium'], env=env, capture_output=True, text=True,
+                           timeout=timeout, **flags)
+    except subprocess.TimeoutExpired:
+        return False, 'Browser download timed out. Check the internet connection and try again.'
+    if r.returncode != 0:
+        return False, ('Browser download failed: ' + (r.stderr or r.stdout).strip()[-400:])
+    return True, f'Browser engine installed in {os.environ.get("PLAYWRIGHT_BROWSERS_PATH") or _default_browsers_path()}.'
+
+
 def playwright_available():
     try:
         import playwright.sync_api  # noqa

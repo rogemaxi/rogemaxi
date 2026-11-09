@@ -96,3 +96,13 @@ class SinglePageAppCrawl(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class BrowserInstaller(unittest.TestCase):
+    def test_missing_driver_reports_clearly(self):
+        from unittest import mock
+        import browsertest
+        with mock.patch('playwright._impl._driver.compute_driver_executable', return_value=('/nope/node', '/nope/cli.js')):
+            ok, msg = browsertest.install_chromium()
+        self.assertFalse(ok)
+        self.assertIn('not found', msg)

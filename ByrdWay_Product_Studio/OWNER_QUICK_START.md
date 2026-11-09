@@ -1,18 +1,17 @@
-# Owner Quick Start — ByrdWay Product Engineering Studio v0.4.2
+# Owner Quick Start — ByrdWay Product Engineering Studio v0.4.3
 
-## Install once (about 10 minutes)
-**Option A — ready-made program (no Python):**
-1. On GitHub: **rogemaxi/rogemaxi → Releases → ByrdWay Product Engineering Studio v0.4.2** →
-   download **ByrdWayStudio_v0.4.2_Windows_exe.zip**. (It is a *draft* release until you click Publish; only you can see it.)
-2. Right-click the ZIP → **Properties** → tick **Unblock** → OK → right-click → **Extract All** → `C:\ByrdWay`.
-3. Download **ByrdWay_Product_Studio_v0.4.2_source.zip** too, extract it, and double-click
-   `install_windows.bat` once — it installs the Chromium browser engine used for testing (answer **Y**).
-4. Open `C:\ByrdWay\ByrdWayStudio\ByrdWayStudio.exe`. First time only: *More info → Run anyway* (unsigned program).
+## Install once (about 10 minutes, no Python needed)
+1. GitHub → **rogemaxi/rogemaxi → Releases → ByrdWay Product Engineering Studio v0.4.3** (a *draft* only you can
+   see) → download **ByrdWayStudio_v0.4.3_Windows_exe.zip** and **VERIFICATION_MANIFEST.txt**.
+2. Optional integrity check: PowerShell `Get-FileHash .\ByrdWayStudio_v0.4.3_Windows_exe.zip` must equal the line in
+   VERIFICATION_MANIFEST.txt.
+3. Right-click the ZIP → **Properties** → tick **Unblock** → OK → right-click → **Extract All** → `C:\ByrdWay`.
+4. Open `C:\ByrdWay\ByrdWayStudio\ByrdWayStudio.exe` (first time: *More info → Run anyway*; the program is unsigned).
+5. **Help → Install browser engine** (one-time ~150 MB download; needed to test Power Tools).
+6. **Help → Run self-test** → must say **PASSED**. **Help → About** shows **v0.4.3**.
 
-**Option B — from source:** extract the source ZIP, install Python 3.12 (tick *Add to PATH*), run
-`install_windows.bat`, then `START_WINDOWS.bat`.
-
-Check: **Help → About** shows **v0.4.2**. **Help → Run self-test** should say **PASSED**.
+(Source alternative: extract `ByrdWay_Product_Studio_v0.4.3_source.zip`, install Python 3.12, run
+`install_windows.bat`, then `START_WINDOWS.bat`.)
 
 ## Repair an existing product (tab 1 → tab 2)
 1. **① Import Product…** — pick a Power Tool ZIP/HTML or an Explainer/Concept Tiles PDF. A locked copy is made;
