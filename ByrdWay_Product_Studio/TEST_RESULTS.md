@@ -1,14 +1,17 @@
 # Test execution results
 
-Recorded 2026-11-09 by the developer (Claude Code) on Linux. **Not yet run on Windows 11** — run
-`run_tests_windows.bat` there and keep its `test_results_windows.txt`.
+Recorded 2026-11-09. Windows results come from GitHub Actions run https://github.com/rogemaxi/rogemaxi/actions/runs/42544542267
+(workflow `.github/workflows/byrdway-windows.yml`, commit 67ebd45), which re-runs on every change.
 
 | Environment | Command | Result |
 |---|---|---|
-| Python 3.12.3 + Tk 8.6 + Xvfb, Chromium 1243 via Playwright 1.64.1 | `xvfb-run -a python -m unittest discover -s tests -v` | **Ran 96 tests — OK** (49.5 s) |
-| Python 3.13.18 (no Tk), same Chromium | `python -m unittest discover -s tests -v` | **Ran 96 tests — OK, 1 skipped** (UI test: no Tk) (43.8 s) |
+| **Windows** (Microsoft Windows Server 2025, image windows-2025-vs2026), Python 3.12.10 | `install` as in install_windows.bat, then `python -m unittest discover -s tests -v` | **Ran 103 tests — OK, 0 skipped (desktop UI included)** (64.8 s) |
+| **Windows**, source | `python app.py --selftest` | **14/14 checks passed** (7.0 s) |
+| **Windows**, packaged | `pyinstaller byrdway_studio.spec` → `ByrdWayStudio.exe --selftest` | **Build OK; 14/14 self-test checks passed inside the .exe**, Chromium running (6.8 s) |
+| **Windows**, packaged GUI | launch `ByrdWayStudio.exe` | **Window started, stayed running 20 s, workspace created** |
+| Linux, Python 3.13 | `python -m unittest discover -s tests` | Ran 103 tests — OK (UI test skipped: no Tk) |
+| Linux, Python 3.12 + Tk + Xvfb (earlier v0.2 build, 96 tests) | `xvfb-run -a python -m unittest discover -s tests -v` | Ran 96 tests — OK |
 | Baseline v0.1 before any change | `python -m unittest discover -s tests -v` | Ran 4 tests — OK (the 4 original tests still pass unchanged) |
-| PyInstaller 6.22.3 spec on Linux | `pyinstaller byrdway_studio.spec` | Build OK; frozen app launched and created its workspace. **Windows exe: not built/tested.** |
 
 ## Coverage map (SSOI §9 → tests)
 | Required area | Tests |
@@ -32,7 +35,11 @@ Recorded 2026-11-09 by the developer (Claude Code) on Linux. **Not yet run on Wi
 | Export integrity | `verify_export` assertions incl. tamper detection |
 | Desktop UI | `test_ui_smoke` (import → job → QA view in the real Tk app) |
 
-## Full verbose output (Python 3.12 run)
+## Defects found by testing and fixed
+* Windows CI run 1: inside the .exe, Playwright looked for Chromium only inside the package → browser tests did not run. Fixed in `browsertest.configure_frozen`; run 3 passes.
+* Earlier: scanned page with only a page number treated as text; QA accepted silent edits in already-patched files (now history replay); built-module answer keys invisible to QA; Chromium OS sandbox disabled.
+
+## Full verbose output (earlier Linux Python 3.12 run, 96 tests)
 ```
 test_cases (test_academic.TestVerifier.test_cases) ... ok
 test_extract_claims_from_text (test_academic.TestVerifier.test_extract_claims_from_text) ... ok

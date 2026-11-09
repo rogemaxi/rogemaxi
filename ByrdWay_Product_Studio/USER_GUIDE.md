@@ -72,11 +72,17 @@ Your data lives in `Documents\ByrdWay_Product_Studio` (originals, jobs, reports,
 6. With no API key configured, confirm the Costs tab says "API key configured: NO" and jobs still run.
 Record results; report any failure with `logs\activity.jsonl`.
 
-## 7. Building a Windows .exe (optional)
-`build_windows_exe.bat` builds `dist\ByrdWayStudio\ByrdWayStudio.exe` with PyInstaller using
-`byrdway_studio.spec`. **This has not been built or tested on Windows by the developer**; run the smoke test above
-on the built exe before relying on it. Chromium is not bundled; run `install_windows.bat` (or
-`python -m playwright install chromium`) once on the machine.
+## 7. Windows .exe (optional)
+A tested build is produced automatically on every change (GitHub → Actions → "ByrdWay Studio - Windows
+verification" → artifact **ByrdWayStudio-Windows-exe**). You can also build it yourself with
+`build_windows_exe.bat`. The exe passes the full self-test on Windows in CI. It is not code-signed, so
+SmartScreen will warn once (More info → Run anyway). Chromium is not bundled: run `install_windows.bat` once
+(or `python -m playwright install chromium`).
 
-## 8. Running tests
+## 8. Health check
+`START_WINDOWS.bat` users: open a Command Prompt in the folder and run `.venv\Scripts\python app.py --selftest`.
+exe users: `ByrdWayStudio.exe --selftest`. It repairs products with planted defects in a temporary folder and
+writes `selftest_report.json`; `"passed": true` means the whole pipeline works on this PC.
+
+## 9. Running tests
 `run_tests_windows.bat` or `python -m unittest discover -s tests -v`.
