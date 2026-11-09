@@ -121,6 +121,22 @@ class WorkingCopy:
         self._save(meta)
         return rec
 
+    def replace_file_bytes(self, rel, data, reason, source, evidence=None, defect_id=None):
+        """Replace a whole file (used for evidence-backed PDF region corrections)."""
+        rel = safe_relpath(rel)
+        p = self.path(rel)
+        if not p.exists():
+            raise PatchError(f'File not found in product: {rel}')
+        before = sha256(p)
+        atomic_write_bytes(p, data)
+        rec = {'ts': utcnow(), 'file': rel, 'replace_file': True, 'reason': reason, 'source': source,
+               'defect_id': defect_id, 'before_sha256': before, 'after_sha256': sha256(p),
+               'evidence': evidence or {}}
+        meta = self.meta
+        meta['history'].append(rec)
+        self._save(meta)
+        return rec
+
     # ------------------------------------------------------------ versions
     def checkpoint(self, label):
         meta = self.meta
