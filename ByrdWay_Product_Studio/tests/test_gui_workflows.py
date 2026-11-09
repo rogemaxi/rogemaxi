@@ -245,7 +245,8 @@ class Builders(GuiBase):
             self.app.build_next()
             self.pump()
             unit = self.app.btree.selection()[0]
-            self.assertIn('::', unit)
+            self.assertIn('::', unit, f'selection did not move to the built unit; messages={self.shown[-3:]}; '
+                                      f'units={ {u: x["status"] for u, x in self.app.studio.builds()[0]["units"].items()} }')
             self.app.open_unit()
             self.assertEqual(self.opened[-1].name, 'index.html')
             self.app.approve_unit()

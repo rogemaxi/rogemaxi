@@ -134,6 +134,7 @@ class App(tk.Tk):
                     a()
                     continue
                 self.busy = False
+                self.refresh_all()          # refresh FIRST so the completion step acts on the current screen
                 if kind == 'done':
                     self.status.set(label + ': done')
                     if b:
@@ -141,7 +142,6 @@ class App(tk.Tk):
                 else:
                     self.status.set(label + ': FAILED')
                     self.error(f'{label} failed', a)
-                self.refresh_all()
         except queue.Empty:
             pass
         if not getattr(self, '_closing', False):
