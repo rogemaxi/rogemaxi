@@ -141,3 +141,39 @@ class Studio:
 
     def activity(self, limit=300):
         return read_activity(self.root, limit)
+
+
+def next_action(job):
+    """One plain-English instruction for the owner, derived only from recorded job state."""
+    qa = job.get('qa') or {}
+    st = job.get('status')
+    if st == 'ERROR':
+        return f'Job crashed ({job.get("error")}). Send logs\\activity.jsonl to your developer.'
+    if st == 'EXPORTED':
+        return f'Done. Exported to {job.get("export", {}).get("dir")}. Upload to TpT yourself when ready.'
+    if st == 'APPROVED':
+        return 'Approved. Click "Export Approved…" to save the final product with its audit trail.'
+    if st == 'REJECTED':
+        return 'Rejected by owner. Nothing will be exported.'
+    if st == 'AWAITING_OWNER_APPROVAL':
+        extra = ' Check the before/after page images first (Open Evidence Folder).' if any(
+            h.get('replace_file') for h in job.get('history', [])) else ''
+        return (f'Release QA PASSED ({qa.get("score")}/100). Review "Before / After Diff", then click '
+                f'"APPROVE for release…".{extra}')
+    if st == 'NOT_VERIFIED':
+        if qa.get('unverified_items'):
+            return (f'{len(qa["unverified_items"])} question(s) cannot be checked automatically. Review them '
+                    f'yourself, then use "Attest Unverifiable Item…" (or ALL).')
+        miss = qa.get('missing_required_categories') or []
+        if 'browser_runtime' in miss:
+            return 'Browser tests could not run. Re-run install_windows.bat and answer Y to the Chromium download.'
+        if 'academic' in miss:
+            return ('No answers could be read automatically (image-only pages or an unknown answer format). '
+                    'Check the content yourself and attest ALL, or send the product to your developer.')
+        return 'Coverage incomplete: ' + '; '.join(qa.get('reasons', []))
+    if st == 'BLOCKED':
+        first = (qa.get('reasons') or ['see report'])[0]
+        return f'Release BLOCKED by a defect that needs a person: {first}'
+    if st == 'BELOW_TARGET':
+        return 'Minor issues keep the score under 99.9. See failed checks below; fix in source or re-run.'
+    return f'Status {st}.'

@@ -15,7 +15,7 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, simpledialog
 from pathlib import Path
 
-from controller import Studio
+from controller import Studio, next_action
 from engine import ROLES, save_proposal, original_file
 from ai_roles import run_review, ROLE_PROMPTS
 
@@ -307,7 +307,7 @@ class App(tk.Tk):
             return
         j = self.studio.job(jid)
         qa = j.get('qa') or {}
-        lines = [self.studio.job_report(jid), '', '=== Release QA checks ===']
+        lines = ['NEXT STEP: ' + next_action(j), '', self.studio.job_report(jid), '', '=== Release QA checks ===']
         for c in qa.get('checks', []):
             mark = {True: 'PASS', False: 'FAIL', None: 'NOT RUN'}[c[3]]
             lines.append(f'[{mark:7}] {c[2]:8} {c[0]}  {c[4]}')
@@ -316,6 +316,10 @@ class App(tk.Tk):
             lines += [f'{u["key"]}  ->  {u["status"]}: {u["evidence"]}' for u in qa['unverified_items']]
         self.jtext.delete('1.0', 'end')
         self.jtext.insert('1.0', '\n'.join(lines))
+        color = {'AWAITING_OWNER_APPROVAL': '#e6f4ea', 'APPROVED': '#e6f4ea', 'EXPORTED': '#e6f4ea',
+                 'BLOCKED': '#fde8e8', 'ERROR': '#fde8e8'}.get(j['status'], '#fff8e1')
+        self.jtext.tag_configure('next', background=color, font=('Segoe UI', 11, 'bold'))
+        self.jtext.tag_add('next', '1.0', '1.end')
 
     def show_diff(self):
         try:
