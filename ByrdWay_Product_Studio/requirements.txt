@@ -1,0 +1,13 @@
+# ByrdWay Product Engineering Studio v0.2 - pinned runtime dependencies (tested 2026-11-09, Python 3.12/3.13)
+# Core (required): mathematics verification, PDF inspection/rendering, image comparison
+sympy==1.14.0
+mpmath==1.3.0
+pymupdf==2.1
+pillow==12.3.0
+# Browser interaction tests (required for a Power Tool to reach PASS). After install run:
+#   python -m playwright install chromium      (downloads ~150 MB - owner approval)
+playwright==1.64.1
+# Optional: OpenAI-assisted review/repair (only used when you enable it and approve each call)
+openai==3.46.0
+# Optional: store the API key in Windows Credential Manager instead of an environment variable
+keyring==25.7.0

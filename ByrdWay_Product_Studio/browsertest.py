@@ -32,11 +32,20 @@ def _launch(p, chromium_path=''):
     paths = [chromium_path] if chromium_path else []
     paths += [os.environ.get('BYRDWAY_CHROMIUM_PATH', '')]
     attempts = [None] + [x for x in paths + FALLBACK_CHROMIUM if x and Path(x).exists()]
-    for exe in attempts:
-        try:
-            return p.chromium.launch(executable_path=exe) if exe else p.chromium.launch()
-        except Exception as e:
-            errors.append(f'{exe or "default"}: {str(e).splitlines()[0][:160]}')
+    # Playwright disables Chromium's OS-level sandbox by default; enable it where it works
+    # (Windows desktop users). Containers running as root cannot use it, so fall back.
+    sandbox_modes = [True, False] if os.name == 'nt' or os.environ.get('BYRDWAY_CHROMIUM_SANDBOX') == '1' else [False]
+    for sandbox in sandbox_modes:
+        for exe in attempts:
+            try:
+                kw = {'chromium_sandbox': sandbox}
+                if exe:
+                    kw['executable_path'] = exe
+                b = p.chromium.launch(**kw)
+                b._byrdway_sandbox = sandbox
+                return b
+            except Exception as e:
+                errors.append(f'{exe or "default"} sandbox={sandbox}: {str(e).splitlines()[0][:160]}')
     raise RuntimeError('Chromium could not be launched: ' + ' | '.join(errors))
 
 
@@ -63,6 +72,7 @@ def run_browser_tests(site_dir, entry, shots_dir, label='run', timeout_ms=15000,
         with sync_playwright() as p:
             browser = _launch(p, chromium_path)
             report['available'] = True
+            report['os_sandbox'] = getattr(browser, '_byrdway_sandbox', None)
             try:
                 ctx = browser.new_context(accept_downloads=False, service_workers='block',
                                           viewport={'width': 1280, 'height': 800})
