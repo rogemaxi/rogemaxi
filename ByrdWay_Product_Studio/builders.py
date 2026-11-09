@@ -266,7 +266,8 @@ def _module_html(bp, m, honors_ok):
         if honors_ok:
             body = ''.join(f'<div class="card"><h3>{E(h["title"])}</h3><p>{E(h["explanation"])}</p></div>' for h in m['honors'])
             parts.append(sec('honors', 'Honors Extension', body)); nav.append(('honors', 'Honors'))
-    data = {'practice': [{'answer': str(q.get('answer', '')), 'accept': [str(a) for a in q.get('accept', [])],
+    data = {'practice': [{'question': q['question'], 'answer': str(q.get('answer', '')),
+                          **({'verify': q['verify']} if q.get('verify') else {}), 'accept': [str(a) for a in q.get('accept', [])],
                           'choices': q.get('choices'), 'correct_index': _choice_index(q),
                           'explanation': q.get('explanation', ''), 'skill': q.get('skill')} for q in practice],
             'pathway': m.get('pathway') or {}}

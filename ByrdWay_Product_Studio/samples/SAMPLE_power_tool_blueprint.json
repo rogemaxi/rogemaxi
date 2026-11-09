@@ -1,0 +1,38 @@
+{
+  "_notice": "SAMPLE blueprint showing the format only. NOT approved ByrdWay curriculum. Replace content with owner-approved material.",
+  "product_title": "SAMPLE Linear Equations Power Tool",
+  "subject": "Algebra 1",
+  "grade": "8-9",
+  "honors": false,
+  "honors_approved": false,
+  "template_asset_id": null,
+  "modules": [
+    {
+      "id": "m1-one-step",
+      "title": "One- and Two-Step Equations",
+      "concepts": [
+        {"id": "balance", "title": "The balance idea",
+         "explanation": ["An equation is a balance. Whatever you do to one side, do to the other.",
+                         "Undo addition with subtraction and multiplication with division, in reverse order."]}
+      ],
+      "worked_examples": [
+        {"question": "Solve 3x + 5 = 20", "steps": ["Subtract 5 from both sides: 3x = 15", "Divide both sides by 3: x = 5"], "answer": "x = 5"}
+      ],
+      "cheat_sheet": [["Undo +a", "subtract a from both sides"], ["Undo ×a", "divide both sides by a (a ≠ 0)"]],
+      "flashcards": [{"front": "Inverse of adding 7?", "back": "Subtract 7"}, {"front": "Solve x/4 = 3", "back": "x = 12"}],
+      "practice": [
+        {"question": "Solve 2x + 3 = 11", "answer": "x = 4", "accept": ["4"], "skill": "two-step", "explanation": "2x = 8, so x = 4."},
+        {"question": "Solve 5x - 7 = 18", "answer": "x = 5", "accept": ["5"], "skill": "two-step", "explanation": "5x = 25, so x = 5."},
+        {"question": "What is 6 × 7?", "choices": ["36", "42", "48"], "answer": "42", "skill": "facts"}
+      ],
+      "pathway": {"two-step": "balance", "facts": "cheat-sheet"}
+    },
+    {
+      "id": "m2-variables-both-sides",
+      "title": "Variables on Both Sides",
+      "concepts": [{"id": "collect", "title": "Collect like terms", "explanation": "Move every x-term to one side and every number to the other."}],
+      "worked_examples": [{"question": "Solve 4x + 2 = 2x + 10", "steps": ["Subtract 2x: 2x + 2 = 10", "Subtract 2: 2x = 8", "Divide by 2: x = 4"], "answer": "x = 4"}],
+      "practice": [{"question": "Solve 3x + 4 = x + 12", "answer": "x = 4", "accept": ["4"]}]
+    }
+  ]
+}

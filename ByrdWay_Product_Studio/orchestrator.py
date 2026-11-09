@@ -332,6 +332,7 @@ class Orchestrator:
             job['candidate'] = str(cand)
             job['candidate_sha256'] = sha256(cand)
             job['history'] = wc.meta['history']
+            job['checkpoints'] = [{'id': c['id'], 'history_len': c['history_len']} for c in wc.meta['checkpoints']]
             diff = wc.diff()
             (jd / 'changes.diff').write_text(diff, encoding='utf-8')
             job['changes'] = wc.changed_files()
@@ -456,11 +457,11 @@ class ReleaseQAAgent:
                            f'changed/missing protected files: {bad}' if bad else 'all images/binaries byte-identical'))
             checks.append(('integrity.no_unexpected_file_changes', 'integrity', 'CRITICAL', not removed and not added,
                            f'removed {removed} added {added}'))
-            # every text change must be explained by the history (no silent edits)
-            explained = {h['file'] for h in job.get('history', []) if h.get('file')}
-            silent = [r for r in o if o[r] is not None and r in c and o[r] != c[r] and r not in explained]
+            # replay the recorded patch history onto the ORIGINAL; candidate must match exactly
+            silent = _replay_mismatches(o, c, fresh, job)
             checks.append(('integrity.all_changes_recorded', 'integrity', 'CRITICAL', not silent,
-                           f'unrecorded changes: {silent}' if silent else 'every change traceable to a recorded patch'))
+                           f'changes not explained by recorded patches: {silent}' if silent
+                           else 'replaying recorded patches on the original reproduces the candidate exactly'))
         state = detect_all(self.settings, fresh, qa_dir / 'evidence', 'qa', run_browser)
         checks += state['checks']
         # visual comparison against the original
@@ -527,6 +528,34 @@ class ReleaseQAAgent:
         write_json(self.root / 'jobs' / job['id'] / 'qa' / 'qa_result.json', result)
         log.info(ROLE_QA, f'QA decision {result["decision"]}', score=result['score'], reasons=result['reasons'][:10])
         return result
+
+
+def _replay_mismatches(orig, cand, fresh_dir, job):
+    import copy
+    state = {k: v for k, v in orig.items() if v is not None}
+    replaced = {}
+    snaps = {0: (copy.deepcopy(state), {})}
+    cps = {c['id']: c['history_len'] for c in job.get('checkpoints', [])}
+    problems = []
+    for i, h in enumerate(job.get('history', []), 1):
+        if 'rollback_to' in h:
+            s0, r0 = snaps.get(cps.get(h['rollback_to'], 0), snaps[0])
+            state, replaced = copy.deepcopy(s0), dict(r0)
+        elif h.get('replace_file'):
+            replaced[h['file']] = h['after_sha256']
+        elif h.get('file') in state:
+            if state[h['file']].count(h['find']) != 1:
+                problems.append(f'history replay failed at {h["file"]}')
+            else:
+                state[h['file']] = state[h['file']].replace(h['find'], h['replace'], 1)
+        snaps[i] = (copy.deepcopy(state), dict(replaced))
+    for rel, text in state.items():
+        if cand.get(rel) is not None and cand[rel] != text:
+            problems.append(rel)
+    for rel, h in replaced.items():
+        if (fresh_dir / rel).exists() and sha256(fresh_dir / rel) != h:
+            problems.append(rel)
+    return problems
 
 
 def _item_key(r):

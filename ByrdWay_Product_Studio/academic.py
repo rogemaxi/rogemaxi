@@ -19,7 +19,7 @@ Anything not matched is UNSUPPORTED (flagged for human review, never passed).
 Untrusted text is never passed to eval: expressions go through a strict token
 whitelist and an exponent-size guard before SymPy parses them.
 """
-import math, re, statistics as pystats
+import json, math, re, statistics as pystats
 from fractions import Fraction
 
 import sympy as sp
@@ -669,8 +669,16 @@ _VAL = r'''("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|-?\d+(?:\.\d+)?)'''
 
 def _unq(v):
     v = v.strip()
-    if v[:1] in '"\'':
-        return v[1:-1].replace('\\"', '"').replace("\\'", "'")
+    if v[:1] == '"':
+        try:
+            return json.loads(v)            # decodes \u00d7 etc. exactly like JS
+        except ValueError:
+            return v[1:-1].replace('\\"', '"')
+    if v[:1] == "'":
+        try:
+            return json.loads('"' + v[1:-1].replace('"', '\\"').replace("\\'", "'") + '"')
+        except ValueError:
+            return v[1:-1].replace("\\'", "'")
     return v
 
 
@@ -681,7 +689,11 @@ def extract_source_items(path, text):
     repair can replace the answer with an exact-once patch.
     """
     items = []
+    json_spans = [m.span(1) for m in re.finditer(
+        r'<script[^>]*type=["\']application/json["\'][^>]*>(.*?)</script>', text, re.S | re.I)]
     for m in re.finditer(r'\{[^{}]{0,2000}\}', text):
+        if any(a <= m.start() < b for a, b in json_spans):
+            continue                       # parsed structurally below
         obj = m.group(0)
         qm = re.search(r'''["']?\b''' + _KEY_Q + r'''\b["']?\s*:\s*''' + _VAL, obj)
         am = re.search(r'''["']?\b''' + _KEY_A + r'''\b["']?\s*:\s*''' + _VAL, obj)
@@ -702,6 +714,15 @@ def extract_source_items(path, text):
             item['correct_literal'] = km.group(1)
             item['correct_span'] = km.span(1)
         items.append(item)
+    for m in re.finditer(r'<script[^>]*type=["\']application/json["\'][^>]*>(.*?)</script>', text, re.S | re.I):
+        try:
+            data = json.loads(m.group(1).replace('<\\/', '</'))
+        except ValueError:
+            continue
+        for rec in _walk_records(data):
+            items.append({'question': str(rec['question']), 'answer': rec.get('answer'), 'file': path,
+                          'choices': rec.get('choices'), 'verify': rec.get('verify'),
+                          'patch_target': None, 'line': text[:m.start()].count('\n') + 1, 'json_block': True})
     for m in re.finditer(r'<[a-zA-Z][^<>]*\bdata-question\s*=\s*"([^"]*)"[^<>]*>', text):
         tag = m.group(0)
         am = re.search(r'\bdata-answer\s*=\s*"([^"]*)"', tag)
@@ -711,6 +732,19 @@ def extract_source_items(path, text):
                           'answer_span': am.span(1), 'html_attr': True,
                           'line': text[:m.start()].count('\n') + 1})
     return items
+
+
+def _walk_records(node, depth=0):
+    if depth > 6:
+        return
+    if isinstance(node, dict):
+        if node.get('question') and node.get('answer') not in (None, ''):
+            yield node
+        for v in node.values():
+            yield from _walk_records(v, depth + 1)
+    elif isinstance(node, list):
+        for v in node[:2000]:
+            yield from _walk_records(v, depth + 1)
 
 
 def repair_for_item(item, result):

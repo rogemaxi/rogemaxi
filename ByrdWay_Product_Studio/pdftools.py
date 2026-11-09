@@ -64,7 +64,7 @@ def inspect_pdf(path, render_dir=None, dpi=60):
             sizes.add((round(page.rect.width), round(page.rect.height)))
             info = {'page': pno, 'chars': len(text.strip()), 'images': len(imgs),
                     'text_layer': bool(text.strip())}
-            if not text.strip() and imgs:
+            if len(re.sub(r'\s+', '', text)) <= 12 and imgs:   # only a page number/folio
                 info['image_only'] = True
             elif not text.strip() and not imgs and not page.get_drawings():
                 add('pdf.blank_page', 'MAJOR', 'pdf_structure', pno, 'Blank page')
@@ -207,10 +207,13 @@ def propose_text_correction(src_pdf, out_pdf, page_no, old_text, new_text, work_
         if not 1 <= page_no <= doc.page_count:
             raise ValueError('Page out of range')
         page = doc[page_no - 1]
-        if not page.get_text().strip():
+        if len(re.sub(r'\s+', '', page.get_text())) <= 12:
             raise FlattenedPageError('Page has no text layer (flattened/image-only). Refusing to rewrite; '
                                      'approved editable source required.')
         hits = page.search_for(old_text)
+        if not hits and page.get_images():
+            raise FlattenedPageError('Text not present in the text layer (likely flattened artwork). Refusing to '
+                                     'rewrite; approved editable source required.')
         if len(hits) != 1:
             raise ValueError(f'Text must occur exactly once on page {page_no}; found {len(hits)}')
         rect = hits[0]

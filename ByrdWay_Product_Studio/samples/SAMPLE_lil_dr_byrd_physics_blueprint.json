@@ -1,0 +1,30 @@
+{
+  "_notice": "SAMPLE chapter blueprint showing the format only. NOT approved ByrdWay content. The Lil Dr. Byrd image must be registered by the owner as asset 'lil_dr_byrd' (kind mascot); it is never generated.",
+  "series": "Lil Dr. Byrd Explainer",
+  "subject": "Physics",
+  "honors": true,
+  "honors_approved": false,
+  "mascot_asset_id": "lil_dr_byrd",
+  "answers_location": "end_of_chapter",
+  "chapters": [
+    {
+      "title": "SAMPLE Motion in One Dimension",
+      "sections": [
+        {"heading": "Speed is a rate", "paragraphs": ["Average speed tells how much distance is covered per unit of time.", "If you run 100 m in 20 s, every second carries you 5 m on average."],
+         "key_idea": "average speed = distance / time",
+         "worked_examples": [{"question": "A cart rolls 100 m in 5 s. What is its average speed?", "steps": ["v = d / t", "v = 100 m / 5 s"], "answer": "20 m/s",
+                              "verify": {"type": "physics", "formula": "v = d/t", "given": {"d": "100 m", "t": "5 s"}, "find": "v"}}]},
+        {"heading": "Newton's second law", "paragraphs": ["A net force changes motion: F = m a."],
+         "worked_examples": [{"question": "What net force accelerates a 5 kg cart at 9.8 m/s^2?", "steps": ["F = m a", "F = 5 kg × 9.8 m/s^2"], "answer": "49 N",
+                              "verify": {"type": "physics", "formula": "F = m*a", "given": {"m": "5 kg", "a": "9.8 m/s^2"}, "find": "F"}}]},
+        {"heading": "Honors: kinetic energy", "honors": true, "paragraphs": ["Kinetic energy grows with the square of speed: K = ½ m v²."]}
+      ],
+      "practice": [
+        {"question": "A 2 kg ball accelerates at 3 m/s^2. What net force acts on it?", "answer": "6 N",
+         "verify": {"type": "physics", "formula": "F = m*a", "given": {"m": "2 kg", "a": "3 m/s^2"}, "find": "F"}, "explanation": "F = 2 kg × 3 m/s² = 6 N"},
+        {"question": "How long does it take to travel 150 m at 30 m/s?", "answer": "5 s",
+         "verify": {"type": "physics", "formula": "v = d/t", "given": {"d": "150 m", "v": "30 m/s"}, "find": "t"}}
+      ]
+    }
+  ]
+}
