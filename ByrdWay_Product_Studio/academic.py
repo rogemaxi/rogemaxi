@@ -662,13 +662,62 @@ def extract_qa_pairs(text):
     return out
 
 
-_KEY_Q = r'(?:question|q|prompt|problem)'
-_KEY_A = r'(?:answer|ans|correctAnswer|solution)'
+_KEY_Q = r'(?:question|q|prompt|problem|questionText|stem|text)'
+_KEY_A = r'(?:answer|ans|correctAnswer|correct_answer|solution|key|expected)'
+_KEY_CHOICES = r'(?:choices|options|answers|answerChoices|alternatives)'
+_KEY_CORRECT = r'(?:correct|correctIndex|correct_index|answerIndex|answer_index|correctOption|correctChoice)'
+
+
+def object_spans(text, limit=20000, comments=None):
+    """(start, end) of every {...} object at any depth, skipping strings and comments.
+    If `comments` is a list, comment spans are appended to it."""
+    spans, stack, i, n = [], [], 0, len(text)
+    while i < n and len(spans) < limit:
+        c = text[i]
+        if c in '"\'`':
+            q = c
+            i += 1
+            while i < n and text[i] != q:
+                if text[i] == '\\':
+                    i += 1
+                elif text[i] == '\n' and q != '`':
+                    break
+                i += 1
+        elif c == '/' and i + 1 < n and text[i + 1] == '/':
+            j = text.find('\n', i)
+            j = n if j < 0 else j
+            if comments is not None:
+                comments.append((i, j))
+            i = j
+        elif c == '/' and i + 1 < n and text[i + 1] == '*':
+            j = text.find('*/', i + 2)
+            j = n if j < 0 else j + 2
+            if comments is not None:
+                comments.append((i, j))
+            i = j - 1
+        elif c == '{':
+            stack.append(i)
+        elif c == '}' and stack:
+            spans.append((stack.pop(), i + 1))
+        i += 1
+    return spans
+
+
+def _mask_nested(obj):
+    """Blank out nested {...} so only the object's own top-level keys are matched (offsets preserved)."""
+    out, comments = list(obj), []
+    for a, b in object_spans(obj[1:-1], comments=comments) + comments:
+        for k in range(a + 1, b + 1):
+            out[k] = ' '
+    return ''.join(out)
 _VAL = r'''("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|-?\d+(?:\.\d+)?)'''
+_VAL_T = r'''("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\$]|\\.)*`|-?\d+(?:\.\d+)?)'''
 
 
 def _unq(v):
     v = v.strip()
+    if v[:1] == '`':
+        return v[1:-1].replace('\\`', '`')
     if v[:1] == '"':
         try:
             return json.loads(v)            # decodes \u00d7 etc. exactly like JS
@@ -691,24 +740,32 @@ def extract_source_items(path, text):
     items = []
     json_spans = [m.span(1) for m in re.finditer(
         r'<script[^>]*type=["\']application/json["\'][^>]*>(.*?)</script>', text, re.S | re.I)]
-    for m in re.finditer(r'\{[^{}]{0,2000}\}', text):
-        if any(a <= m.start() < b for a, b in json_spans):
-            continue                       # parsed structurally below
-        obj = m.group(0)
-        qm = re.search(r'''["']?\b''' + _KEY_Q + r'''\b["']?\s*:\s*''' + _VAL, obj)
-        am = re.search(r'''["']?\b''' + _KEY_A + r'''\b["']?\s*:\s*''' + _VAL, obj)
-        cm = re.search(r'''["']?\bchoices\b["']?\s*:\s*\[([^\]]*)\]''', obj)
-        km = re.search(r'''["']?\bcorrect\b["']?\s*:\s*(\d+|"[A-Da-d]"|'[A-Da-d]')''', obj)
+    for start, end in object_spans(text):
+        if end - start > 20000 or any(a <= start < b for a, b in json_spans):
+            continue                       # JSON blocks are parsed structurally below
+        obj = text[start:end]
+        top = _mask_nested(obj)
+        K = lambda keys: r'''(?<![\w$])["']?''' + keys + r'''["']?\s*:\s*'''
+        qm = re.search(K(_KEY_Q) + _VAL_T, top)
+        am = re.search(K(_KEY_A) + _VAL_T, top)
+        cm = re.search(K(_KEY_CHOICES) + r'\[([^\]]*)\]', top)
+        km = re.search(K(_KEY_CORRECT) + r'''(\d+|"[A-Ha-h]"|'[A-Ha-h]')''', top)
+        if am and cm and re.fullmatch(r'\d+', am.group(1)) and not km:
+            opts = [_unq(c) for c in re.findall(_VAL_T, cm.group(1))]
+            if int(am.group(1)) < len(opts) and am.group(1) not in opts:
+                km, am = am, None          # `answer: 2` beside options = an index, not a value
         if not qm or not (am or (cm and km)):
             continue
+        if not re.search(r'[\d=+\-*/^×÷√π]', _unq(qm.group(1))) and not (am and re.search(r'\d', am.group(1))):
+            continue                       # not a math item (e.g. a menu config)
         item = {'question': _unq(qm.group(1)), 'file': path, 'patch_target': obj,
-                'line': text[:m.start()].count('\n') + 1}
+                'line': text[:start].count('\n') + 1}
         if am:
             item['answer'] = _unq(am.group(1))
             item['answer_literal'] = am.group(1)
             item['answer_span'] = am.span(1)
         if cm:
-            item['choices'] = [_unq(c) for c in re.findall(_VAL, cm.group(1))]
+            item['choices'] = [_unq(c) for c in re.findall(_VAL_T, cm.group(1))]
         if km:
             item['correct'] = _unq(km.group(1))
             item['correct_literal'] = km.group(1)

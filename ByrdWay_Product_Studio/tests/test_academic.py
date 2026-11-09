@@ -97,3 +97,50 @@ class TestVerifier(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class RealWorldFormats(unittest.TestCase):
+    """Answer keys stored the way hand-built Power Tools commonly store them."""
+
+    def items(self, src):
+        return extract_source_items('tool.js', src)
+
+    def test_nested_objects_and_comments(self):
+        js = '''// unit 1
+        const bank = { unit: "Algebra", items: [
+          { id: 1, prompt: 'Solve 3x - 4 = 11', meta: { level: 2, tags: ["linear"] }, correctAnswer: 'x = 5' },
+          /* { prompt: "What is 1 + 1?", answer: "3" } commented out */
+          { id: 2, questionText: `What is 12 ÷ 4?`, solution: `3` },
+        ]};'''
+        its = self.items(js)
+        self.assertEqual(sorted(i['question'] for i in its), ['Solve 3x - 4 = 11', 'What is 12 ÷ 4?'])
+        self.assertTrue(all(verify_item(i)['status'] == CORRECT for i in its))
+
+    def test_options_with_correct_index_aliases(self):
+        for key in ('correctIndex', 'answerIndex', 'correct_index', 'correctOption'):
+            js = f'{{"question": "What is 9 × 9?", "options": ["72", "81", "99"], "{key}": 2}}'
+            it = self.items(js)[0]
+            r = verify_item(it)
+            self.assertEqual(r['status'], INCORRECT, key)
+            self.assertEqual(r['correct_choice_index'], 1)
+            self.assertIn(f'"{key}": 1', repair_for_item(it, r)['replace'])
+
+    def test_answer_index_vs_value(self):
+        idx = self.items('{q: "What is 2 + 3?", options: ["4", "5", "6"], answer: 1}')[0]
+        self.assertEqual(verify_item(idx)['status'], CORRECT)
+        val = self.items('{q: "What is 2 + 3?", options: ["4", "5", "6"], answer: 5}')[0]
+        self.assertEqual(val['answer'], '5')
+        self.assertEqual(verify_item(val)['status'], CORRECT)
+
+    def test_letter_answer(self):
+        it = self.items("{q: 'What is 3 × 4?', choices: ['10', '12', '14'], correct: 'C'}")[0]
+        r = verify_item(it)
+        self.assertEqual(r['status'], INCORRECT)
+        self.assertIn("correct: 'B'", repair_for_item(it, r)['replace'])
+
+    def test_non_math_config_ignored(self):
+        self.assertEqual(self.items('{text: "Next", key: "btn-next"} {prompt: "Your name?", answer: "Ann"}'), [])
+
+    def test_braces_inside_strings_do_not_break_scanner(self):
+        js = '{q: "Simplify {x^2 - 1}/(x - 1)", answer: "x + 1", note: "}{"}'
+        self.assertEqual(len(self.items(js)), 1)
