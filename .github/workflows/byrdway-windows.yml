@@ -1,0 +1,83 @@
+name: ByrdWay Studio - Windows verification
+
+on:
+  push:
+    paths: ['ByrdWay_Product_Studio/**', '.github/workflows/byrdway-windows.yml']
+  workflow_dispatch:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: ByrdWay_Product_Studio
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pinned dependencies (same as install_windows.bat)
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-build.txt
+          python -m playwright install chromium
+
+      - name: Full automated test suite (96 tests incl. desktop UI)
+        run: |
+          python -m unittest discover -s tests -v 2>&1 | Tee-Object -FilePath test_results_windows.txt
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          if (Select-String -Path test_results_windows.txt -Pattern "skipped 'tkinter") { Write-Error "UI test was skipped"; exit 1 }
+
+      - name: Source self-test (full pipeline, planted defects)
+        run: |
+          python app.py --selftest
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          Move-Item selftest_report.json selftest_report_source.json
+
+      - name: Build Windows executable (PyInstaller)
+        run: pyinstaller --noconfirm byrdway_studio.spec
+
+      - name: Packaged .exe self-test
+        run: |
+          $p = Start-Process -FilePath "dist\ByrdWayStudio\ByrdWayStudio.exe" -ArgumentList "--selftest" -Wait -PassThru -WorkingDirectory "$PWD"
+          Get-Content selftest_report.json
+          if ($p.ExitCode -ne 0) { Write-Error "exe self-test failed ($($p.ExitCode))"; exit 1 }
+          Move-Item selftest_report.json selftest_report_exe.json
+
+      - name: Packaged .exe GUI launch smoke test
+        run: |
+          $env:BYRDWAY_WORKSPACE = "$env:RUNNER_TEMP\byrdway_ws"
+          $p = Start-Process -FilePath "dist\ByrdWayStudio\ByrdWayStudio.exe" -PassThru
+          Start-Sleep -Seconds 20
+          if ($p.HasExited) { Write-Error "GUI exited early with code $($p.ExitCode)"; exit 1 }
+          if (-not (Test-Path "$env:BYRDWAY_WORKSPACE\settings.json")) { Write-Error "workspace not created"; exit 1 }
+          Stop-Process -Id $p.Id -Force
+          "GUI started, stayed running 20s, workspace created" | Tee-Object -FilePath gui_smoke.txt
+
+      - name: Package release ZIP
+        if: always()
+        run: |
+          if (Test-Path dist\ByrdWayStudio) {
+            Copy-Item USER_GUIDE.md, KNOWN_LIMITATIONS.md, QUALITY_SCORING.md, SECURITY_REVIEW.md dist\ByrdWayStudio\
+            Compress-Archive -Path dist\ByrdWayStudio -DestinationPath ByrdWayStudio_Windows_exe.zip -Force
+          }
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: byrdway-windows-evidence
+          path: |
+            ByrdWay_Product_Studio/test_results_windows.txt
+            ByrdWay_Product_Studio/selftest_report_*.json
+            ByrdWay_Product_Studio/selftest_report.json
+            ByrdWay_Product_Studio/gui_smoke.txt
+
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: ByrdWayStudio-Windows-exe
+          path: ByrdWay_Product_Studio/ByrdWayStudio_Windows_exe.zip

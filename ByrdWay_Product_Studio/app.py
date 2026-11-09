@@ -6,6 +6,11 @@ Long operations run on a worker thread; owner decisions (API spend, approval)
 are always modal dialogs on the UI thread.
 """
 import json, os, queue, subprocess, sys, threading, traceback
+
+if __name__ == '__main__' and '--selftest' in sys.argv:      # headless: no GUI libraries needed
+    import selftest
+    sys.exit(selftest.main())
+
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, simpledialog
 from pathlib import Path

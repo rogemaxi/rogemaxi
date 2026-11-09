@@ -8,7 +8,7 @@ hidden = [m for m in (collect_submodules('sympy') + collect_submodules('pymupdf'
           + collect_submodules('openai')) if _keep(m)] + ['keyring.backends.Windows']
 datas = collect_data_files('playwright') + [('samples', 'samples')]
 
-a = Analysis(['app.py'], pathex=['.'], hiddenimports=hidden, datas=datas,
+a = Analysis(['app.py'], pathex=['.'], hiddenimports=hidden + ['selftest', 'selftest_fixtures'], datas=datas,
              excludes=['tests', 'matplotlib', 'IPython', 'notebook'])
 pyz = PYZ(a.pure)
 exe = EXE(pyz, a.scripts, [], exclude_binaries=True, name='ByrdWayStudio', console=False)
