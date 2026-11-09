@@ -15,6 +15,14 @@ from joblog import JobLog
 from orchestrator import Orchestrator, ReleaseQAAgent
 
 
+def _refresh_report(root, job):
+    try:
+        import report
+        report.write_job_report(root, job)
+    except Exception:
+        pass
+
+
 def attest(root, job_id, item_key, owner_name, note):
     """Owner attests they reviewed an unverifiable academic item (or 'ALL')."""
     if not owner_name or not note:
@@ -66,6 +74,7 @@ def owner_approve(root, job_id, owner_name, explicit_approval=False, visual_revi
                        'qa_score': qa.get('score'), 'visual_reviewed': bool(visual_reviewed)}
     o.save_job(job)
     JobLog(root, job_id).info('Release QA', f'Owner approval recorded: {owner_name}')
+    _refresh_report(root, job)
     return job
 
 
@@ -78,6 +87,7 @@ def owner_reject(root, job_id, owner_name, reason):
     job['rejection'] = {'owner': owner_name, 'reason': reason, 'at': utcnow()}
     o.save_job(job)
     JobLog(root, job_id).info('Release QA', f'Owner rejected: {reason}')
+    _refresh_report(root, job)
     return job
 
 
@@ -100,7 +110,14 @@ def export_approved(root, job_id, dest_dir=None):
     jd = root / 'jobs' / job_id
     trail = out / 'audit_trail'
     trail.mkdir(exist_ok=True)
-    for f in ('job.json', 'REPORT.md', 'changes.diff', 'baseline_findings.json', 'final_findings.json'):
+    _refresh_report(root, job)                                   # shows the owner approval
+    for png in list((jd / 'evidence').rglob('*.png')) + list((jd / 'qa').rglob('*.png')):
+        if 'candidate' in png.relative_to(jd).parts or 'original' in png.relative_to(jd).parts:
+            continue                                             # product copies are not evidence images
+        dst = trail / png.relative_to(jd)
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(png, dst)
+    for f in ('job.json', 'REPORT.md', 'report.html', 'changes.diff', 'baseline_findings.json', 'final_findings.json'):
         if (jd / f).exists():
             shutil.copy2(jd / f, trail / f)
     if (jd / 'qa' / 'qa_result.json').exists():
@@ -121,6 +138,7 @@ def export_approved(root, job_id, dest_dir=None):
     job['export'] = {'path': str(product_out), 'sha256': sha256(product_out), 'at': utcnow(), 'dir': str(out)}
     o.save_job(job)
     JobLog(root, job_id).info('Release QA', f'Exported to {out} (local only; nothing published)')
+    _refresh_report(root, job)
     return out
 
 

@@ -218,7 +218,7 @@ class Orchestrator:
 
     # --------------------------------------------------------------------
     def run_repair_job(self, pid, ai_enabled=False, approver=None, ai_client=None, run_browser=True,
-                       progress=None):
+                       progress=None, authorization=None):
         """Full bounded quality loop. Returns the job record."""
         r = self.settings['repair']
         job_id = time.strftime('%Y%m%d%H%M%S') + '_' + uuid.uuid4().hex[:6]
@@ -231,7 +231,9 @@ class Orchestrator:
                'product_type': manifest.get('product_type'), 'original_sha256': manifest['sha256'],
                'created_at': utcnow(), 'status': 'BASELINE', 'iterations': [], 'stop_reason': None,
                'limits': dict(r), 'ai_enabled': bool(ai_enabled), 'escalations': [], 'attestations': [],
-               'roles_used': [ROLE_ORCH, ROLE_AV, ROLE_QA]}
+               'roles_used': [ROLE_ORCH, ROLE_AV, ROLE_QA],
+               'repair_authorization': authorization or {'by': 'not recorded (direct engine call)'},
+               'prior_diagnosis': self._latest_diagnosis(pid)}
         self.save_job(job)
         say(f'Job {job_id} started for {manifest["name"]} ({manifest.get("product_type")})')
         t0 = time.time()
@@ -398,6 +400,19 @@ class Orchestrator:
         JobLog(self.root, diag_id).info(ROLE_ORCH, f'Diagnosis of {manifest["name"]}: {len(findings)} findings, '
                                         f'{result["proposed_corrections"]} correctable automatically')
         return result
+
+    def _latest_diagnosis(self, pid):
+        best = None
+        for p in (self.root / 'reports').glob('diag_*/diagnosis.json'):
+            try:
+                d = read_json(p)
+            except ValueError:
+                continue
+            if d.get('product_id') == pid and (best is None or d['created_at'] >= best['created_at']):
+                best = {'id': d['id'], 'created_at': d['created_at'], 'findings': len(d['findings']),
+                        'proposed_corrections': d['proposed_corrections'],
+                        'report': str(p.parent / 'diagnosis.html')}
+        return best
 
     def _ai_patches(self, job_id, wc, unresolved, approver, client, log):
         from ai_roles import propose_patches

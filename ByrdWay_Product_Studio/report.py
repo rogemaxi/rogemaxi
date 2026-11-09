@@ -63,6 +63,16 @@ def write_job_report(root, job):
          f'<tr><td>{E(str(status))}</td><td>{E(str(qa.get("decision")))}</td><td>{E(str(qa.get("score")))}'
          f' / 100 (target {E(str(qa.get("target", 99.9)))})</td><td>{E(str(job.get("stop_reason")))}</td>'
          f'<td>{"YES (SHA-256 re-checked)" if job.get("original_intact") else "<b>NO - STOP</b>"}</td></tr></table>']
+    pd, au = job.get('prior_diagnosis'), job.get('repair_authorization') or {}
+    b.append('<p><b>Findings documented before repair:</b> ' + (
+        f'diagnosis {E(pd["id"])} ({pd["findings"]} findings, {pd["proposed_corrections"]} proposed corrections) at {E(pd["created_at"])}'
+        if pd else 'baseline findings recorded at job start (no separate diagnosis was run)') +
+        f'<br><b>Repair of a copy authorized by:</b> {E(str(au.get("by")))} — {E(str(au.get("method", "")))} '
+        f'{E(str(au.get("at", "")))}</p>')
+    if job.get('approval'):
+        ap = job['approval']
+        b.append(f'<p><b>Release approved by:</b> {E(ap["owner"])} at {E(ap["at"])} '
+                 f'(visual review confirmed: {ap.get("visual_reviewed")})</p>')
     if qa.get('reasons'):
         b.append('<h2>Why it is not ready</h2><ul>' + ''.join(f'<li>{E(r)}</li>' for r in qa['reasons']) + '</ul>')
     corr = job.get('corrections') or []

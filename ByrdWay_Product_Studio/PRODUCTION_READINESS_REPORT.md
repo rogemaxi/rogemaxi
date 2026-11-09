@@ -1,44 +1,48 @@
-# Production Readiness Report — ByrdWay Product Engineering Studio v0.4.0
+# Production Readiness Report — ByrdWay Product Engineering Studio v0.4.1
 
-Date 2026-11-09. Evidence: Windows CI run https://github.com/rogemaxi/rogemaxi/actions/runs/42663089124 (commit
-faa30e9, Microsoft Windows Server 2025, Python 3.12) plus local runs (Linux, Python 3.12 + Tk, Python 3.13).
+## How a release is identified (no hand-copied numbers)
+Every Windows CI run on a pushed commit writes **VERIFICATION_MANIFEST.txt** into the draft GitHub release
+"ByrdWay Product Engineering Studio v0.4.1". It states the commit, the workflow run URL, the Windows version, the test
+count, the result of the self-test run **from the downloadable .exe ZIP itself**, and the SHA-256 of every downloadable
+file. After uploading, the workflow downloads every asset back and fails unless the checksums are identical.
+Check a download yourself: PowerShell `Get-FileHash <file> -Algorithm SHA256` must equal the manifest line.
 
 ## Verdict
-* **Studio software acceptance criteria: PASS** — every workflow below was exercised end to end on Windows,
-  including the real desktop window, with no skipped tests accepted.
-* **Production certification for ByrdWay products: BLOCKED** — one criterion cannot be completed without the
-  owner: running one *real* ByrdWay Power Tool and one *real* Explainer through the Studio
-  (CLAUDE.md acceptance test). All product results so far use representative fixtures with planted defects.
-  I am therefore **not** certifying production readiness.
+| Area | Status |
+|---|---|
+| Commit 0d20eaa (v0.4.0) as a release | **FAIL** — tests passed, but its draft release contained an **empty source ZIP** (R16). Superseded by v0.4.1; the 0.4.0 draft is removed automatically |
+| Studio software, v0.4.1 | **PASS** when its manifest shows: all tests OK with no skips, downloadable-.exe self-test passed, checksums verified |
+| Production certification with real ByrdWay products | **BLOCKED** — needs one real Power Tool and one real Explainer from the owner |
 
-## Workflow status
+## Workflow status (v0.4.1)
 | Workflow / criterion | Status | Evidence |
 |---|---|---|
-| One consistent version | **PASS** | `version.py` = 0.4.0; title, Help → About, `--version`, self-test, installer/build banners, release name; CI: "Packaged exe version 0.4.0 matches version.py"; `test_v040.Version` |
-| Windows install (pinned deps) | **PASS** (Windows Server 2025) | CI step "Install pinned dependencies" (same commands as `install_windows.bat`) |
-| Windows startup, packaged .exe launch | **PASS** (Windows Server 2025) | "GUI started, stayed running 20s, workspace created"; .exe self-test 14/14 |
-| Windows 11 desktop specifically | **NOT DIRECTLY TESTED** | GitHub provides no Windows 11 machines; Server 2025 shares the Windows 11 core. Owner check: Help → Run self-test (1 minute) |
-| Every primary button works or explains why not | **PASS** | `test_every_button_is_wired`, `test_buttons_without_selection_explain_instead_of_failing` (16 buttons), all workflow tests below |
-| Products: import → protected copy → diagnose → repair → readable report → before/after | **PASS** | `test_import_diagnose_repair_review_approve_export` (real window, Windows) |
-| Import of supported formats (ZIP, HTML, PDF) | **PASS** with fixtures · **BLOCKED** for real owner files | 14 malicious-ZIP cases rejected; corrupted/mislabeled files refused with a logged, readable error |
-| Jobs: inspect, diff, evidence, re-run QA, approve, reject, export | **PASS** | same test + `test_release_gate_blocks_and_reject_works` |
-| Release gate blocks unverified / unapproved changes | **PASS** | approval refused for BLOCKED job (visible error), export refused without approval |
-| Builders: create blueprint (form), validate, drafts/resume, build unit, review, approve, assemble, verify | **PASS** | 6 real-window builder tests incl. form → Windows-verified PASS candidate; wrong answer blocks unit with plain message |
-| Approved assets: template, Lil Dr. Byrd image (never substituted) | **PASS** | `test_lil_dr_byrd_missing_mascot_then_registered`; asset tamper detection |
-| Sample content never passes as approved material | **PASS** | `test_sample_content_blocks_release` (Release QA CRITICAL) |
-| Repair engine states: detected / suspected / proposed / applied / verified / awaiting approval | **PASS** | `test_v040.Diagnosis` (incl. NOT_AUTO_FIXABLE reported, not faked) |
-| Supported defects corrected on working copies; originals unchanged | **PASS** | wrong answers, wrong MC index, broken handler, missing asset, broken link, lang/viewport, PDF arithmetic; SHA-256 re-checked after export |
-| Quality checks & regression tests | **PASS** | 127 tests on Windows; rollback-on-regression test |
-| Backup and restore | **PASS** | GUI test `test_backup_and_restore`; damaged backup refused |
-| API spending safeguards | **PASS** (mock client) | 19 cost/AI tests; Costs tab shows "AI processing: DISABLED — reason" |
-| Live OpenAI call | **NOT TESTED (by design)** | no authorized key/funding; no charges incurred |
-| Errors logged and recoverable | **PASS** | every UI error written to tab 6 (`test_bad_import_is_explained_and_logged`); Tk thread-abort defect fixed |
-| Save/export permissions, working directories | **PASS** (Windows) | exports/workspace created and verified in CI temp folders |
-| Antivirus compatibility | **NOT TESTABLE HERE** | unsigned .exe will trigger SmartScreen once; code signing requires a purchased certificate (owner decision) |
-| Windows .exe + source release packaged | **PASS** | draft GitHub release "ByrdWay Product Engineering Studio v0.4.0" with `ByrdWayStudio_v0.4.0_Windows_exe.zip` and `ByrdWay_Product_Studio_v0.4.0_source.zip` (owner publishes) |
-| Limitations documented | **PASS** | KNOWN_LIMITATIONS.md |
+| One version everywhere (0.4.1) | PASS | `version.py`; CI fails if the downloadable .exe reports another version; `test_v040.Version` |
+| Commit ↔ CI run ↔ downloadable files correspond | PASS (per manifest) | manifest + download-back checksum comparison |
+| Windows install / startup / .exe launch | PASS on Windows Server 2025 | CI; GUI started from the downloadable ZIP |
+| Windows 11 desktop specifically | NOT TESTED | no Windows 11 CI machines; owner: Help → Run self-test (1 minute) |
+| **Explainer end to end**: import → diagnosis documented → owner authorizes repair → repair copy → independent verification → owner approval (with visual review) → export | **PASS** | `tests/test_e2e_explainer.py` in the real window on Windows; evidence ZIP `E2E_Explainer_Evidence_v0.4.1.zip` in the release (diagnosis report, repair report, before/after page images, exported PDF + audit trail) |
+| Explainer defect that cannot be safely auto-corrected (answer key) | PASS (correctly refused) | detected → NOT_AUTO_FIXABLE → approval and export refused |
+| Power Tool end to end | PASS | `test_import_diagnose_repair_review_approve_export` (real window) |
+| Originals preserved | PASS | SHA-256 of locked original and of the owner's own file re-checked after export |
+| Findings documented before repair; approval before release | PASS | job records `prior_diagnosis`, `repair_authorization`, `approval` (shown in report and audit trail) |
+| Release gate (no export without QA PASS + named owner approval) | PASS | GUI tests |
+| Builders (form, drafts, approvals, assets, assemble, verify) | PASS | 6 real-window builder tests |
+| Spending controls | PASS | 22 tests: 8 denial paths make no request and no ledger entry; recorded spend never exceeds a cap |
+| Live OpenAI call | NOT TESTED (by design) | no authorized key/funding; no charges incurred |
+| Backup / restore, error log | PASS | GUI tests |
+| Antivirus / code signing | NOT TESTED / not done | unsigned .exe (certificate = purchase, owner decision) |
 
-## To move "BLOCKED" to PASS
-Upload one real Power Tool (ZIP/HTML) and one real Explainer/Concept Tiles PDF (with editable source if available).
-I will run them through Diagnose → Repair → Release QA and report the measured result, adapting the answer-key
-reader if your files use a format it does not yet recognise.
+## Fully operational vs. partial vs. unverified
+* **Fully operational (tested end to end):** import with integrity locking; read-only diagnosis; repair on copies with
+  rollback; independent Release QA with history replay and visual comparison; owner approval and export with audit
+  trail; builders with approved-asset enforcement; backup/restore; spending guard; Windows .exe.
+* **Partial by design (see KNOWN_LIMITATIONS.md support matrix):** PDF corrections only for arithmetic statements on
+  text-layer pages; answer-key, structural, image-only and artwork issues are detected but need the editable source
+  or manual work; no DOCX/PPTX/Canva editor; no OCR.
+* **Unverified:** real ByrdWay products (BLOCKED on files), Windows 11 desktop itself, live OpenAI calls, antivirus.
+
+## To clear BLOCKED
+Upload one real Power Tool (ZIP/HTML) and one real Explainer PDF (plus editable source if available). They will be
+imported (originals locked), diagnosed with findings documented, repaired only after your authorization, verified,
+and released only after your approval. No approved content will be changed without that approval.

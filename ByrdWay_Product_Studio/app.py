@@ -296,7 +296,11 @@ class App(tk.Tk):
             rep = self.studio.job_evidence_dir(job['id']) / 'report.html'
             if rep.exists():
                 self.opener(rep)
+        from engine import utcnow
+        auth = {'by': os.environ.get('USERNAME') or os.environ.get('USER') or 'owner',
+                'method': 'owner confirmed "Repair a copy" dialog', 'at': utcnow()}
         self.run_bg('Repair & verify', lambda: self.studio.run_job(pid, ai_enabled=ai, approver=self.approver,
+                                                                  authorization=auth,
                                                                   progress=self.progress), done)
 
     def open_latest_report(self):
@@ -496,6 +500,10 @@ class App(tk.Tk):
         if any(h.get('replace_file') for h in j.get('history', [])):
             visual = messagebox.askyesno('Visual review', 'This candidate contains reconstructed PDF regions.\n'
                                          'Have you personally reviewed the before/after page images?')
+            if not visual:
+                return messagebox.showinfo('Review the pages first',
+                                           'Open the Readable Report (or Evidence Folder) and compare the BEFORE and '
+                                           'AFTER page images of the corrected pages, then approve again.')
         if not messagebox.askyesno('Confirm approval', f'Approve candidate {Path(j["candidate"]).name}\n'
                                    f'QA score {qa.get("score")}\nfor export? (Nothing is published.)'):
             return

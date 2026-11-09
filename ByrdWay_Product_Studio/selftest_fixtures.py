@@ -89,3 +89,45 @@ def explainer_pdf(path, wrong=True, image_only=False):
         p.insert_text((300, 800), str(i + 1), fontsize=10)
     doc.save(str(path))
     return Path(path)
+
+
+def representative_explainer_pdf(path, worked_example_error=True, answer_key_error=False):
+    """A representative Explainer-style PDF (TEST FIXTURE - not ByrdWay content):
+    title page with an embedded illustration, clickable table of contents (PDF outline),
+    two chapters with worked examples, an answer key with Q/A pairs, printed page numbers.
+    Planted defects: worked example '7 × 8 = 54' (auto-correctable statement on a text page) and,
+    optionally, a wrong answer-key entry 'A: 64' for 9 × 7 (detected; NOT auto-correctable)."""
+    import pymupdf as fitz
+    doc = fitz.open()
+
+    def page(lines, pno):
+        p = doc.new_page()
+        y = 90
+        for text, size in lines:
+            p.insert_text((72, y), text, fontsize=size)
+            y += size + 12
+        p.insert_text((300, 805), str(pno), fontsize=10)
+        return p
+    p1 = page([('TEST FIXTURE Explainer: Multiplication and Area', 20),
+               ('(not ByrdWay content - representative structure only)', 10),
+               ('Contents', 14), ('Chapter 1  Multiplication facts ........ 2', 11),
+               ('Chapter 2  Area of rectangles ........... 3', 11), ('Answer key ............................ 4', 11)], 1)
+    pix = fitz.Pixmap(fitz.csRGB, fitz.IRect(0, 0, 120, 80), False)
+    pix.clear_with(180)
+    p1.insert_image(fitz.Rect(72, 330, 312, 490), pixmap=pix)          # protected illustration
+    page([('Chapter 1: Multiplication facts', 16),
+          ('Multiplication is repeated addition: 3 groups of 4 is 4 + 4 + 4.', 11),
+          ('Worked example 1: 7 × 8 = 54' if worked_example_error else 'Worked example 1: 7 × 8 = 56', 12),
+          ('Worked example 2: 6 × 9 = 54', 12),
+          ('Tip: check by skip-counting.', 11)], 2)
+    page([('Chapter 2: Area of rectangles', 16),
+          ('Area = length × width, measured in square units.', 11),
+          ('Worked example 3: 5 × 4 = 20', 12),
+          ('Worked example 4: 12 ÷ 3 = 4', 12)], 3)
+    page([('Answer key', 16),
+          ('Q1: What is 9 × 7?', 12), ('A: 64' if answer_key_error else 'A: 63', 12),
+          ('Q2: What is 8 × 8?', 12), ('A: 64', 12)], 4)
+    doc.set_toc([[1, 'Chapter 1  Multiplication facts', 2], [1, 'Chapter 2  Area of rectangles', 3],
+                 [1, 'Answer key', 4]])
+    doc.save(str(path))
+    return Path(path)

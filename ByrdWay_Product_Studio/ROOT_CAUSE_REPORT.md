@@ -1,4 +1,4 @@
-# Root Cause Report — ByrdWay Product Engineering Studio v0.4.0
+# Root Cause Report — ByrdWay Product Engineering Studio v0.4.1
 
 Scope: Studio software only. Each entry: **file / function — cause — impact — correction — proof**.
 Accountability note: earlier messages stated the system was *not yet* production-ready, but the release I
@@ -63,3 +63,12 @@ delivered as "v0.3" had a wrong label and an unusable builder workflow. Both wer
 | R13 | `app.py` `_poll` | Errors were shown in a dialog only → every error is also written to the Activity & Error Log (tab 6) |
 | R14 | `builders._apply_template` | A template registered after a blueprint was created was ignored → default approved template id `byrdway_template` is used automatically |
 | R15 | Costs tab | AI on/off state was implicit → explicit "AI processing: ENABLED/DISABLED — reason" line |
+
+## Final acceptance review (v0.4.1)
+| # | Where | Cause | Impact | Correction | Proof |
+|---|---|---|---|---|---|
+| R16 | `.github/workflows/byrdway-windows.yml`, release step | `git archive HEAD:ByrdWay_Product_Studio` ran *inside* the app folder, so Git resolved the path relative to that folder and archived nothing | The v0.4.0 draft release's source ZIP was **176 bytes (empty)**; commit 0d20eaa therefore FAILED as a release although its tests passed | archive built from the repository root; workflow refuses a source ZIP with < 50 entries or without `version.py`; release assets are downloaded back and SHA-256-compared; superseded drafts removed | VERIFICATION_MANIFEST.txt in the v0.4.1 draft release |
+| R17 | `costs.estimate_cost` / `BudgetGuard.authorize` | Caps were checked against an *estimate* (≈3.5 characters per token × 1.5). Symbol-heavy or non-English text uses more tokens, so a recorded charge could exceed a cap after the call. The daily-cap test used a mock reply larger than the requested output limit and did not detect this | A cap could be crossed by one call | Caps are now checked against a **guaranteed maximum**: input tokens ≤ UTF-8 bytes, output ≤ `max_output_tokens`. If OpenAI ever reports more, the entry is flagged `exceeded_authorized` and AI is stopped for that job | `test_recorded_charge_never_exceeds_authorized_maximum`, `test_daily_cap_accumulates_and_is_never_exceeded`, `test_usage_above_maximum_halts_ai_for_the_job` |
+| R18 | `costs.BudgetGuard.paid_call`, tests | Denial paths were correct (refusal before any request) but tests only proved "no request", not "no ledger charge"; failed calls were recorded as `FAILED` with `charged_usd`, which read like a confirmed charge | Spending evidence was ambiguous | Every denial path tested for **no request and no ledger entry**; failed calls now `FAILED_ASSUMED_MAX`, `confirmed_charge: false` (the maximum stays reserved against caps) | `test_every_denial_makes_no_call_and_records_nothing` (8 denial paths), loop tests assert empty ledger |
+| R19 | `orchestrator.run_repair_job`, `app.App.run_job` | The owner's "Repair a copy" confirmation and the preceding diagnosis were not recorded in the job | Audit trail could not show findings were documented and repair was authorized before changes | Job records `prior_diagnosis` and `repair_authorization`; report and exported audit trail show both, plus the release approval | `tests/test_e2e_explainer.py` |
+| R20 | `app.App.approve` | Answering "No" to "Have you reviewed the page images?" still led to the final confirmation, then failed | Confusing approval flow | Stops immediately and tells the owner what to review | same test |

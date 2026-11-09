@@ -36,9 +36,11 @@ class Studio:
                 if p.get('status') != 'MANIFEST_CORRUPTED'}
 
     # jobs
-    def run_job(self, pid, ai_enabled=False, approver=None, progress=None, run_browser=True, ai_client=None):
+    def run_job(self, pid, ai_enabled=False, approver=None, progress=None, run_browser=True, ai_client=None,
+                authorization=None):
         return Orchestrator(self.root).run_repair_job(pid, ai_enabled=ai_enabled, approver=approver,
-                                                      progress=progress, run_browser=run_browser, ai_client=ai_client)
+                                                      progress=progress, run_browser=run_browser, ai_client=ai_client,
+                                                      authorization=authorization)
 
     def jobs(self):
         return Orchestrator(self.root).list_jobs()

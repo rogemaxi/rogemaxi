@@ -67,7 +67,8 @@ def run_review(root, pid, role, model=None, max_output_tokens=None, approver=Non
     result = guard.paid_call(job_id or f'review_{pid}', role, model,
                              len(instructions) + len(payload), max_output_tokens, approver,
                              lambda: c.responses.create(model=model, max_output_tokens=max_output_tokens,
-                                                        instructions=instructions, input=payload))
+                                                        instructions=instructions, input=payload),
+                             input_bytes=len((instructions + payload).encode('utf-8')))
     return result.output_text
 
 
@@ -105,7 +106,8 @@ def propose_patches(root, job_id, files, defects, approver, client=None, model=N
     resp = guard.paid_call(job_id, 'Power Tool Repair', model, len(instructions) + len(payload),
                            max_out, approver,
                            lambda: c.responses.create(model=model, max_output_tokens=max_out,
-                                                      instructions=instructions, input=payload))
+                                                      instructions=instructions, input=payload),
+                           input_bytes=len((instructions + payload).encode('utf-8')))
     return parse_patch_json(getattr(resp, 'output_text', '') or '')
 
 

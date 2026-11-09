@@ -1,4 +1,4 @@
-# ByrdWay Product Engineering Studio — Installation & User Guide (v0.4.0)
+# ByrdWay Product Engineering Studio — Installation & User Guide (v0.4.1)
 
 Owner: Genesis 2 & 7, LLC · ByrdWay Mathematics & Science. Runs locally on Windows 11. No Claude/Anthropic
 account is needed. OpenAI is optional and only used when you allow it.

@@ -67,11 +67,18 @@ def price_for(settings, model):
     return float(p['input_per_1m']), float(p['output_per_1m'])
 
 
-def estimate_cost(settings, model, input_chars, max_output_tokens):
+def estimate_cost(settings, model, input_chars, max_output_tokens, input_bytes=None):
+    """GUARANTEED maximum cost of one call (not a guess).
+
+    * input: every token is at least one UTF-8 byte, so tokens <= bytes. When only a character count is
+      known, 4 bytes/char (the UTF-8 maximum) is assumed.
+    * output: the API never returns more than max_output_tokens (reasoning tokens included).
+    Authorizing against this bound means a recorded charge can never cross a cap.
+    """
     pin, pout = price_for(settings, model)
-    tin = estimate_tokens(input_chars)
-    raw = tin * pin / 1e6 + int(max_output_tokens) * pout / 1e6
-    return round(raw * float(settings['budget']['estimate_safety_factor']), 6)
+    tin_max = int(input_bytes) if input_bytes is not None else 4 * int(input_chars)
+    raw = tin_max * pin / 1e6 + int(max_output_tokens) * pout / 1e6
+    return round(raw * float(settings['budget']['estimate_safety_factor']) + 1e-6, 6)
 
 
 def actual_cost(settings, model, usage):
@@ -140,6 +147,9 @@ class BudgetGuard:
 
     def authorize(self, job_id, estimate_usd):
         b = self.settings['budget']
+        if any(e.get('job_id') == job_id and e.get('exceeded_authorized') for e in self.ledger.entries()):
+            raise BudgetExceeded('A previous call in this job reported more usage than its authorized maximum; '
+                                 'AI is stopped for this job. No API call made.')
         today = time.strftime('%Y-%m-%d', time.gmtime())
         funded = float(b['funded_usd'])
         if funded <= 0:
@@ -156,13 +166,14 @@ class BudgetGuard:
             raise BudgetExceeded(f'Daily cap ${float(b["max_daily_usd"]):.2f} would be exceeded')
         return True
 
-    def paid_call(self, job_id, role, model, input_chars, max_output_tokens, approver, send):
+    def paid_call(self, job_id, role, model, input_chars, max_output_tokens, approver, send, input_bytes=None):
         """Run `send()` only if estimated, authorized and owner-approved.
 
         approver(dict) -> bool : owner confirmation (UI dialog). Required.
         send() -> response with optional .usage
         """
-        est = estimate_cost(self.settings, model, input_chars, max_output_tokens)
+        # Every refusal below happens BEFORE send(): no request, no ledger entry, no charge.
+        est = estimate_cost(self.settings, model, input_chars, max_output_tokens, input_bytes)
         self.authorize(job_id, est)
         info = {'job_id': job_id, 'role': role, 'model': model, 'estimate_usd': est,
                 'input_chars': input_chars, 'max_output_tokens': max_output_tokens}
@@ -171,18 +182,24 @@ class BudgetGuard:
         try:
             resp = send()
         except Exception as e:
-            self.ledger.record(job_id=job_id, role=role, model=model, status='FAILED',
-                               estimate_usd=est, charged_usd=est,
-                               note='Call failed; conservatively charged at estimate',
+            # The request may or may not have reached OpenAI. Count the authorized maximum against the
+            # caps (safe side) but label it as ASSUMED, not as a confirmed charge.
+            self.ledger.record(job_id=job_id, role=role, model=model, status='FAILED_ASSUMED_MAX',
+                               estimate_usd=est, charged_usd=est, confirmed_charge=False,
+                               note='Call failed. Authorized maximum is reserved against your caps; OpenAI may '
+                                    'not have billed anything. Check the OpenAI usage page.',
                                error=f'{type(e).__name__}: {str(e)[:200]}')
             raise
         usage = getattr(resp, 'usage', None)
         if usage is not None:
             cost, tin, tout = actual_cost(self.settings, model, usage)
-            self.ledger.record(job_id=job_id, role=role, model=model, status='OK',
-                               estimate_usd=est, charged_usd=cost, input_tokens=tin,
-                               output_tokens=tout, basis='response.usage x configured price')
+            over = cost > est + 1e-9
+            self.ledger.record(job_id=job_id, role=role, model=model, status='OK' if not over else 'OK_EXCEEDED_MAX',
+                               estimate_usd=est, charged_usd=cost, input_tokens=tin, confirmed_charge=True,
+                               output_tokens=tout, basis='response.usage x configured price',
+                               exceeded_authorized=over)
         else:
             self.ledger.record(job_id=job_id, role=role, model=model, status='OK_NO_USAGE',
-                               estimate_usd=est, charged_usd=est, basis='estimate (no usage returned)')
+                               estimate_usd=est, charged_usd=est, confirmed_charge=False,
+                               basis='authorized maximum (API returned no usage)')
         return resp

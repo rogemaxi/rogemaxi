@@ -99,12 +99,55 @@ class Guard(Base):
         with self.assertRaises(BudgetExceeded):
             g.paid_call('j', 'r', 'gpt-6-astra', 40000, 4000, YES, lambda: Resp('x'))
 
-    def test_daily_cap_accumulates(self):
+    def test_daily_cap_accumulates_and_is_never_exceeded(self):
+        # realistic usage: input tokens <= bytes, output tokens <= max_output_tokens (here 1000)
         g = self.fund(job=5, daily=0.02)
-        g.paid_call('a', 'r', 'gpt-6.1-terra', 1000, 1000, YES, lambda: Resp('x', Usage(1000, 3000)))
         with self.assertRaises(BudgetExceeded):
-            for i in range(5):
-                g.paid_call(f'b{i}', 'r', 'gpt-6.1-terra', 1000, 1000, YES, lambda: Resp('x', Usage(1000, 3000)))
+            for i in range(10):
+                g.paid_call(f'b{i}', 'r', 'gpt-6.1-terra', 1000, 1000, YES, lambda: Resp('x', Usage(1000, 1000)),
+                            input_bytes=1000)
+        self.assertLessEqual(Ledger(self.ws).spent(), 0.02, 'recorded spend crossed the daily cap')
+
+    def test_every_denial_makes_no_call_and_records_nothing(self):
+        cases = {
+            'unfunded': (dict(funded=0), YES, 'gpt-6-luna'),
+            'reserve': (dict(funded=1.0, reserve=1.0), YES, 'gpt-6-luna'),
+            'job cap': (dict(job=0.000001), YES, 'gpt-6-luna'),
+            'daily cap': (dict(daily=0.000001), YES, 'gpt-6-luna'),
+            'owner said no': ({}, NO, 'gpt-6-luna'),
+            'no approver': ({}, None, 'gpt-6-luna'),
+            'truthy but not True': ({}, lambda i: 'yes', 'gpt-6-luna'),
+            'unknown price': ({}, YES, 'model-without-price'),
+        }
+        for name, (limits, approver, model) in cases.items():
+            with self.subTest(name):
+                led = self.ws / 'logs' / 'api_ledger.jsonl'
+                if led.exists():
+                    led.unlink()
+                g = self.fund(**limits) if limits.get('funded', 1) else self.fund(funded=0)
+                sent = []
+                with self.assertRaises((BudgetExceeded, SpendNotApproved, PriceUnknown)):
+                    g.paid_call('j', 'r', model, 1000, 500, approver, lambda: sent.append(1) or Resp('x'))
+                self.assertEqual(sent, [], f'{name}: request was sent')
+                self.assertEqual(Ledger(self.ws).entries(), [], f'{name}: ledger entry written')
+
+    def test_recorded_charge_never_exceeds_authorized_maximum(self):
+        g = self.fund(job=5, daily=5)
+        text = 'Solve 2x + 3 = 11 × ÷ √ π ² ³ ∫ ≤ ≥ ' * 40          # symbol-heavy, many bytes per char
+        b = len(text.encode('utf-8'))
+        g.paid_call('j', 'r', 'gpt-6.1-sol', len(text), 800, YES, lambda: Resp('x', Usage(b, 800)), input_bytes=b)
+        e = Ledger(self.ws).entries()[-1]
+        self.assertLessEqual(e['charged_usd'], e['estimate_usd'])
+        self.assertTrue(e['confirmed_charge'])
+
+    def test_usage_above_maximum_halts_ai_for_the_job(self):
+        g = self.fund(job=5, daily=5)
+        g.paid_call('j', 'r', 'gpt-6-luna', 100, 100, YES, lambda: Resp('x', Usage(10_000, 10_000)), input_bytes=100)
+        self.assertTrue(Ledger(self.ws).entries()[-1]['exceeded_authorized'])
+        sent = []
+        with self.assertRaises(BudgetExceeded):
+            g.paid_call('j', 'r', 'gpt-6-luna', 100, 100, YES, lambda: sent.append(1) or Resp('x'))
+        self.assertEqual(sent, [])
 
     def test_reserve_never_spent(self):
         g = self.fund(funded=1.02, reserve=1.0, job=5, daily=5)
@@ -116,8 +159,9 @@ class Guard(Base):
         with self.assertRaises(TimeoutError):
             g.paid_call('j', 'r', 'gpt-6-luna', 1000, 500, YES, lambda: (_ for _ in ()).throw(TimeoutError('t')))
         e = Ledger(self.ws).entries()[0]
-        self.assertEqual(e['status'], 'FAILED')
-        self.assertGreater(e['charged_usd'], 0)
+        self.assertEqual(e['status'], 'FAILED_ASSUMED_MAX')
+        self.assertGreater(e['charged_usd'], 0, 'authorized maximum stays reserved against the caps')
+        self.assertFalse(e['confirmed_charge'], 'a failed call is not reported as a confirmed charge')
 
     def test_summary_never_claims_verified_balance(self):
         self.assertIn('NOT verified', Ledger(self.ws).summary(self.s)['balance_note'])
@@ -200,12 +244,14 @@ class AIInLoop(Base):
         job = self._job(c, YES, fund=False)
         self.assertEqual(job['stop_reason'], 'BUDGET_LIMIT')
         self.assertEqual(c.calls, [])
+        self.assertEqual(Ledger(self.ws).entries(), [], 'denied spending must leave no ledger charge')
 
     def test_declined_spend_stops_without_call(self):
         c = MockClient('{"patches":[]}')
         job = self._job(c, NO)
         self.assertEqual(job['stop_reason'], 'SPEND_NOT_APPROVED')
         self.assertEqual(c.calls, [])
+        self.assertEqual(Ledger(self.ws).entries(), [], 'denied spending must leave no ledger charge')
 
     def test_api_error_handled(self):
         c = MockClient(fail=ConnectionError('network down'))

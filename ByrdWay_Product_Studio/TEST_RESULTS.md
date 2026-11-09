@@ -1,19 +1,27 @@
-# Test execution results — ByrdWay Product Engineering Studio v0.4.0
+# Test execution results — ByrdWay Product Engineering Studio v0.4.1
 
-Windows results: GitHub Actions run https://github.com/rogemaxi/rogemaxi/actions/runs/42663089124 (commit faa30e9).
-The workflow fails if ANY test is skipped on Windows, if the packaged .exe self-test fails, or if the .exe version
-differs from `version.py`.
+Authoritative Windows evidence for a given build is **VERIFICATION_MANIFEST.txt** in the matching draft GitHub
+release (commit, run URL, test count, downloadable-.exe self-test, SHA-256 of each download). The workflow fails on any
+skipped test, a failed self-test of the downloadable .exe, a version mismatch, an incomplete source ZIP, or a release
+asset whose checksum differs after download.
 
-| Environment | Command | Result |
+History: v0.4.0 commit 0d20eaa — 127 tests passed on Windows (runs 42663089124, 42664267659) but its release was
+**defective** (empty source ZIP, see ROOT_CAUSE_REPORT R16). Superseded by v0.4.1.
+
+| Environment (v0.4.1) | Command | Result |
 |---|---|---|
-| **Windows Server 2025** (windows-2025-vs2026), Python 3.12 | `python -m unittest discover -s tests -v` | **Ran 127 tests — OK, 0 skipped** (incl. 15 real-window GUI tests) |
-| **Windows**, source | `python app.py --selftest` | **14/14 passed**, version 0.4.0 |
-| **Windows**, packaged | `pyinstaller byrdway_studio.spec` → `ByrdWayStudio.exe --selftest` | **14/14 passed**, version 0.4.0 = version.py |
-| **Windows**, packaged GUI | launch `ByrdWayStudio.exe` | window started, ran 20 s, workspace created |
-| Linux, Python 3.12 + Tk + Xvfb | `xvfb-run -a python -m unittest discover -s tests -v` | Ran 127 tests — OK, 0 skipped |
-| Linux, Python 3.13 (no Tk) | `python -m unittest discover -s tests` | Ran 127 tests — OK, 15 skipped (GUI tests need Tk; they run on Windows) |
+| Windows Server 2025, Python 3.12 | CI workflow | see VERIFICATION_MANIFEST.txt |
+| Linux, Python 3.12 + Tk + Xvfb | `xvfb-run -a python -m unittest discover -s tests -v` | Ran 132 tests — OK, 0 skipped |
 
-## Real-window GUI tests (tests/test_gui_workflows.py) — all PASS on Windows
+## Explainer end-to-end acceptance (tests/test_e2e_explainer.py)
+Representative 4-page Explainer (title page with illustration, clickable contents, two chapters, answer key, page
+numbers; TEST FIXTURE, not ByrdWay content) driven through the real window: import → diagnosis documented (1
+finding, proposed correction, nothing changed) → declining repair changes nothing → authorized repair of a copy →
+Release QA PASS 100.0, only page 2 changed, pages 1/3/4 pixel-identical, contents and illustration preserved →
+approval refused until visual review confirmed → approved → exported, checksums verified, original unchanged.
+Negative path: wrong answer-key entry detected, NOT_AUTO_FIXABLE, approval and export refused.
+
+## Real-window GUI tests (tests/test_gui_workflows.py)
 Products & Jobs: import → diagnose (read-only report) → repair copy → report with before/after → approve → export →
 original byte-identical · release gate refuses approval/export of a BLOCKED job, reject works · bad import explained
 and logged · 16 buttons explain when nothing is selected · every button wired.
