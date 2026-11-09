@@ -546,7 +546,7 @@ _NUM_LIST = r'(-?\d+(?:\.\d+)?(?:\s*,\s*-?\d+(?:\.\d+)?)+)'
 def classify(question):
     """Infer a verification spec from question text. Returns spec or None."""
     q = normalize(question)
-    # "Solve x^2 - 9x + 18 = 0 by factoring." -> the method phrase is instruction, not mathematics
+    # "Solve x^2 - 5x + 6 = 0 by factoring." -> the method phrase is instruction, not mathematics
     q = re.sub(r'\s+(?:by|using|with)\s+(?:the\s+)?(?:factoring|completing the square|quadratic formula|square[- ]root(?:s| method)?|'
                r'inverse operations|the zero[- ]product property|zero[- ]product property)\b.*$', '', q, flags=re.I).strip().rstrip('.')
     ql = q.lower()

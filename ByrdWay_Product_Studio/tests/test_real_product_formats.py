@@ -11,36 +11,36 @@ from browsertest import playwright_available, run_browser_tests, browser_checks
 class AnswerKeyFormats(unittest.TestCase):
     def test_q_a_keys_in_nested_json_data(self):
         js = '''const AREAS = [{"id": "x", "testMe": {"foundation": [
-            {"q": "Solve: 4x + 9 = 33", "a": "x = 6", "explain": "..."},
+            {"q": "Solve: 5x + 7 = 42", "a": "x = 7", "explain": "..."},
             {"q": "Solve: 2x + 1 = 9", "a": "x = 5", "explain": "..."}]},
             "cheatSheet": {"a": 1, "b": 2}}];'''
         items = extract_source_items('tool.html', js)
-        self.assertEqual([i['question'] for i in items], ['Solve: 4x + 9 = 33', 'Solve: 2x + 1 = 9'])
+        self.assertEqual([i['question'] for i in items], ['Solve: 5x + 7 = 42', 'Solve: 2x + 1 = 9'])
         self.assertEqual([verify_item(i)['status'] for i in items], [CORRECT, INCORRECT])
 
     def test_proof_items_are_never_dropped(self):
-        js = '{"q": "Prove that the slope between two points is independent of the points chosen.", "a": "Proof by AA similarity"}'
+        js = '{"q": "Prove that the sum of two even numbers is even.", "a": "2m + 2n = 2(m + n)"}'
         items = extract_source_items('t.html', js)
         self.assertEqual(len(items), 1, 'a real question/answer pair must reach the owner review list')
         self.assertEqual(verify_item(items[0])['status'], UNSUPPORTED)
 
     def test_method_phrases_are_not_mathematics(self):
-        for q, a in [('Solve x² − 9x + 18 = 0 by factoring.', 'x = 3 or x = 6'),
-                     ('Solve 3x² − 2x − 1 = 0 using the quadratic formula.', 'x = 1 or x = −1/3'),
-                     ('Solve x² = 81 using the square root method.', 'x = ±9'),
-                     ('Solve x² + 8x + 3 = 0 by completing the square.', 'x = −4 ± √13')]:
+        for q, a in [('Solve x² − 11x + 24 = 0 by factoring.', 'x = 3 or x = 8'),
+                     ('Solve 2x² − 3x − 2 = 0 using the quadratic formula.', 'x = 2 or x = −1/2'),
+                     ('Solve x² = 49 using the square root method.', 'x = ±7'),
+                     ('Solve x² + 6x + 2 = 0 by completing the square.', 'x = −3 ± √7')]:
             with self.subTest(q=q):
                 self.assertEqual(verify_item({'question': q, 'answer': a})['status'], CORRECT)
-        self.assertEqual(verify_item({'question': 'Solve x² = 81 using the square root method.',
-                                      'answer': 'x = 9'})['status'], INCORRECT, 'missing the negative root')
+        self.assertEqual(verify_item({'question': 'Solve x² = 49 using the square root method.',
+                                      'answer': 'x = 7'})['status'], INCORRECT, 'missing the negative root')
 
     def test_alternative_form_in_parentheses(self):
-        self.assertEqual(verify_item({'question': 'Simplify: (2^3)^2', 'answer': '64 (or 2^6)'})['status'], CORRECT)
+        self.assertEqual(verify_item({'question': 'Simplify: (3^2)^2', 'answer': '81 (or 3^4)'})['status'], CORRECT)
 
     def test_prose_questions_are_unsupported_not_parse_errors(self):
-        for q in ('Find the slope of the line through (1, 4) and (5, 12).',
-                  'Write 0.00047 in scientific notation.',
-                  'Prove that replacing equation (2) with (2) + k·(1) gives an equivalent system.'):
+        for q in ('Find the slope of the line through (2, 3) and (6, 11).',
+                  'Write 0.0062 in scientific notation.',
+                  'Explain why adding two equations of a system keeps its solutions.'):
             self.assertEqual(verify_item({'question': q, 'answer': 'anything'})['status'], UNSUPPORTED, q)
         self.assertEqual(verify_item({'question': 'What is 9^9^9', 'answer': '1'})['status'], PARSE_ERROR,
                          'hostile input must still be reported as rejected')
