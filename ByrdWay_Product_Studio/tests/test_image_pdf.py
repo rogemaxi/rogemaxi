@@ -80,6 +80,23 @@ class Reader(Base):
         self.assertFalse(same('320+400', '760'))
         self.assertEqual(imageread._term_readings('Area of the garden', {}), [], 'prose is not math')
 
+    def test_text_layer_patterns_never_accused(self):
+        # flattened exponents, percents, thousands separators, contradictions and run-on statements in extracted text
+        lines = ['Join powers: 105 × 10-8 = 105 - 8 = 10-3', 'Answer: 3 × 105 = 300,000', 'Check: 1.8/9 = 0.20 = 20%',
+                 'Subtract the equations: 0 = 5', '(−3)(−3)(−3)(−3) = 81', 'Evaluate g(2). g(2) = (2)² + 1 (2)² = 4 = 5',
+                 '2001 - 12 = 40,000 - 1 = 39,999', 'Simplify: 3(x + 2) - x', '= 3x + 6 - x', '= 2x + 6']
+        ln = [{'text': t, 'conf': 1.0, 'rect': (100, 20 * i, 500, 20 * i + 14)} for i, t in enumerate(lines)]
+        items = imageread.check_worked_steps(ln, ln) + [
+            {'status': st, 'statement': f'{l} = {r}'} for x in ln for st, l, r, _, _ in imageread.check_line(x)]
+        bad = [i['statement'] for i in items if i['status'] == imageread.STATUS_ERR]
+        self.assertEqual(bad, [], 'correct text must never be accused')
+        self.assertTrue(any(i['statement'].startswith('3x + 6 - x') and i['status'] == imageread.STATUS_OK for i in items))
+        wrong = [{'text': t, 'conf': 1.0, 'rect': (100, 20 * i, 500, 20 * i + 14)} for i, t in
+                 enumerate(['Simplify: 3(x + 2) - x', '= 3x + 6 - x', '= 2x + 8', 'Check: 1.8/9 = 0.25'])]
+        bad = [i['statement'] for i in imageread.check_worked_steps(wrong, wrong) if i['status'] == imageread.STATUS_ERR]
+        bad += [f'{l} = {r}' for x in wrong for st, l, r, _, _ in imageread.check_line(x) if st == imageread.STATUS_ERR]
+        self.assertEqual(sorted(set(bad)), ['1.8/9 = 0.25', '3x + 6 - x = 2x + 8'], 'real errors are still caught')
+
     def test_ocr_confusions(self):
         self.assertIn('3x-5=16', [r.replace(' ', '') for r in imageread._equation_readings('3x : 5=16')])
         self.assertIn('x^2-5x-24=0', imageread._equation_readings('x2-5x-24=0'))

@@ -135,6 +135,7 @@ def check_line(line):
 
 def _check_text(t):
     out = []
+    t = re.sub(r'(?<![\d.,])\d{1,3}(?:,\d{3})+(?![\d.,])', lambda m: m.group(0).replace(',', ''), t)  # 10,000 -> 10000
     for c in academic.extract_arithmetic_claims(t):
         lhs, rhs = c['question'], c['answer']
         if re.search(r'\d\s*[xX]\s*\d', c['location']['text']):
@@ -142,9 +143,18 @@ def _check_text(t):
         start = c['location']['offset']
         before = t[:start].rstrip()
         # OCR: a claim glued to a variable or operator ("x2-4x-5=0" -> "4x-5=0") is part of an equation
-        if re.search(r'[A-Za-z]', lhs.replace('×', '')) or (before and before[-1] in '+-×÷*/^=(' + 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'):
+        if re.search(r'[A-Za-z]', lhs.replace('×', '')) or (before and before[-1] in '+-×÷*/^=()' + 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'):
             continue
+        after = t[start + len(c['location']['text']):start + len(c['location']['text']) + 2]
+        if after.lstrip().startswith('%'):
+            rhs = f'({rhs}/100)'                                             # "30/100 = 30%"
         r = _verify_arith(lhs, rhs)
+        if r['status'] == academic.INCORRECT:
+            ra, rb = _term_readings(lhs, {}), _term_readings(rhs, {})
+            alt = next((sa for sa, ea in ra for sb, eb in rb if _same(ea, eb)), None)
+            if alt:                                                          # lost superscript: 4 × 104 = 40,000
+                out.append((STATUS_MISREAD, lhs, rhs, r, alt))
+                continue
         if r['status'] == academic.CORRECT:
             out.append((STATUS_OK, lhs, rhs, r, None))
             continue
@@ -238,7 +248,8 @@ def check_solved_equations(lines):
 #          = 11                        = 27x6
 # Each "= ..." line below an expression continues it. Every step must equal the step before it.
 _ARROW = re.compile(r'\s*(?:-?→|->|⇒|=>)\s*')
-_LABEL = re.compile(r'^(?:[A-Za-z][A-Za-z\'’]+[\s,]*)+:\s*|^(?:so|then|thus|check|hence|now)\b[\s,]*', re.I)
+# bounded, no nested quantifiers (a nested form backtracks exponentially on long prose sentences)
+_LABEL = re.compile(r'^[A-Za-z][A-Za-z\'’ ,]{0,40}?:\s*|^(?:so|then|thus|check|hence|now)\b[\s,]*', re.I)
 _FDEF = re.compile(r'(?<![A-Za-z])([A-Za-z])\(\s*([a-z])\s*\)\s*=\s*([^=,;:]+?)\s*(?:[,;:].*)?$')
 _FCALL = re.compile(r'(?<![A-Za-z])([A-Za-z])\(\s*(-?\d+(?:\.\d+)?)\s*\)')
 _BAD = re.compile(r'[?？@#$%&_\[\]{}<>≤≥≠~"“”|]|[^\x00-\x7F×÷·−–—√π²³]')
@@ -246,6 +257,8 @@ _BAD = re.compile(r'[?？@#$%&_\[\]{}<>≤≥≠~"“”|]|[^\x00-\x7F×÷·−�
 
 def _norm_term(t):
     t = t.replace('−', '-').replace('–', '-').replace('—', '-').replace('·', '×').strip()
+    t = re.sub(r'(\d+(?:\.\d+)?)\s*%', r'(\1/100)', t)                       # 30% -> (30/100)
+    t = re.sub(r'(?<![\d.,])\d{1,3}(?:,\d{3})+(?![\d.,])', lambda m: m.group(0).replace(',', ''), t)  # 420,000 -> 420000
     return t.strip(' .,;')
 
 
@@ -270,6 +283,9 @@ def _term_readings(t, funcs):
         lambda s: re.sub(r'(?<![\d.^])(\d)([2-9])(?=\()', r'\1^\2', s),                 # 33(x) -> 3^3(x)
         lambda s: s.replace('X', 'x'),
         lambda s: re.sub(r'(?<![A-Za-z])V(?=\s*\d)', '√', s),                          # V36 -> √36
+        lambda s: re.sub(r'(?<![\d.^])10(-?\d)\s*([-+])\s*(\d)(?![\d.])', r'10^(\1\2\3)', s),  # 104 - 7 -> 10^(4-7)
+        lambda s: re.sub(r'(?<![\d.^(])10(-?\d)(?![\d.]|\s*[-+]\s*\d)', r'10^(\1)', s),         # 104 × 10-7 -> 10^4 × 10^-7
+        lambda s: re.sub(r'(-\d+)((?:\s+-\d+)+)', lambda m: '(' + ')('.join(m.group(0).split()) + ')', s),  # -2 -2 -2 -> (-2)(-2)(-2)
         lambda s: re.sub(r'(?<![\d.^])([2-9])([2-9])(?![\d.(])', r'\1^\2', s),           # 52 -> 5^2, 24 -> 2^4
         lambda s: re.sub(r'(?<=\d)\.(?=\d(?!\d))', '×', s),                             # 6·3 read as 6.3
     ]
@@ -313,6 +329,8 @@ def _same(a, b):
         return False
     if any(abs(x - y) > 1e-7 * max(1, abs(x)) for x, y in zip(fa, fb)):
         return False
+    if a.has(academic.sp.Float) or b.has(academic.sp.Float):
+        return True                       # decimals: exact simplify leaves 1e-17 residue; 3-point numeric match decides
     try:
         return academic.sp.simplify(a - b) == 0
     except Exception:
@@ -395,7 +413,7 @@ def check_worked_steps(lines, other_pass=()):
                 best[1]['terms'] += [(p, ln, True) for p in parts]
             continue
         raw = clean(ln['text'])
-        first_is_label = bool(re.match(r'^\s*(?:[A-Za-z]{2,}\s*)+=', raw))      # "Area = (x+5)(x-2)"
+        first_is_label = bool(re.match(r'^\s*[A-Za-z]{2,}(?:\s+[A-Za-z]{2,}){0,4}\s*=', raw))  # "Area = (x+5)(x-2)"
         defn = _FDEF.search(raw)
         terms = [(p, ln, False) for p in parts]
         if first_is_label or (defn and parts and re.fullmatch(r'\s*[A-Za-z]\(\s*[a-z]\s*\)\s*', parts[0])):
@@ -444,6 +462,13 @@ def check_worked_steps(lines, other_pass=()):
             if match:
                 out.append(_step_item(STATUS_OK, pa, pb, la, lb, ra[0][1],
                                       f'step equal to the previous step (read as {match[0]} = {match[1]})'))
+                continue
+            if all(re.fullmatch(r'\s*-?\d+(?:\.\d+)?\s*', x) for x in (pa, pb)):
+                continue                               # "0 = 2": a stated contradiction, not a computation step
+            runon = re.compile(r'[\d)²³]\s+[(\d√]|\d\s+[A-Za-z]\(|[A-Za-z]{2,}')
+            if runon.search(_norm_term(pa)) or runon.search(_norm_term(pb)):
+                out.append(_step_item(STATUS_UNREADABLE, pa, pb, la, lb, ra[0][1],
+                                      'two statements appear run together in the text - not separable reliably'))
                 continue
             # clear = read the same way in BOTH passes (independent resolutions) with reasonable confidence
             clear = (min(la['conf'], lb['conf']) >= 0.6 and
