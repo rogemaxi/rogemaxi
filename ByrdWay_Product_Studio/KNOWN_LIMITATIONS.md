@@ -5,9 +5,9 @@ Labels: **IMPLEMENTED+TESTED** · **IMPLEMENTED, NOT VERIFIED ON TARGET** · **P
 ## Not yet verified (owner action required)
 | Item | Status | What is needed |
 |---|---|---|
-| Real owner Power Tool | **BLOCKED — owner file needed** | Supply one original ByrdWay Power Tool ZIP/HTML with known defects. All results so far come from controlled fixtures. |
-| Real owner Explainer / Concept Tiles + editable source | **BLOCKED — owner file needed** | Supply one real Explainer PDF and its editable source (Canva/PPTX/DOCX export). |
-| Windows runtime | **VERIFIED on Windows Server 2025 (v0.5.0, run 42663089124)** (CI run https://github.com/rogemaxi/rogemaxi/actions/runs/42544542267) | Same Windows core as Windows 11. Still run `install_windows.bat` + the 2-minute smoke test (USER_GUIDE §6) on your own PC once. |
+| Real owner Power Tool | **TESTED (Algebra 1 + Honors v2), owner review pending** | 64 screens clean, 100 answers read, 16 machine-verified, 0 wrong; 84 need owner review + attestation. |
+| Real owner Explainer (Algebra 1 + Honors, flattened) | **TESTED, owner decisions pending** | 10 image findings (1 math, 9 spelling) await Confirm/Dismiss; then fix in the editable source, re-import, re-verify, attest. |
+| Windows runtime | **VERIFIED on Windows Server 2025 (v0.5.0)** — see VERIFICATION_MANIFEST.txt in the release for the exact run | Same Windows core as Windows 11. Still run `install_windows.bat` + the 2-minute smoke test (USER_GUIDE §6) on your own PC once. |
 | Windows .exe | **VERIFIED on Windows Server 2025** | Built by CI; full self-test passes inside the .exe; GUI launches. Not code-signed (Windows SmartScreen will warn: More info → Run anyway). |
 | Chromium OS sandbox on Windows | IMPLEMENTED; tests pass on Windows | The CI log does not record which sandbox mode was used (the runner is an administrator account). |
 | Live OpenAI calls | IMPLEMENTED, NOT VERIFIED ON TARGET | All AI paths tested with a mock client; no real API call was made (no key, no spend authorized). Uses the official `openai` SDK Responses API. |
@@ -66,8 +66,8 @@ missing alt text, unnamed buttons, duplicate ids, external CDN dependencies, mob
 * **Flattened PDFs** cannot be edited losslessly. Region text replacement works only on text-layer pages, uses
   Helvetica (font may differ), is marked RECONSTRUCTED_REGION and requires your visual approval.
   Image-only pages are never rewritten.
-* **PDF arithmetic extraction** checks statements of the form `a op b = c` and `Q:/A:` pairs from the text layer.
-  Equations embedded as images or complex layouts are not read (no OCR).
+* **PDF arithmetic extraction** checks statements of the form `a op b = c` and `Q:/A:` pairs from the text layer;
+  image-only pages are read by the local page reader (OCR, v0.5.0) - see the support matrix for what it cannot see.
 * **Editable-source correction** (DOCX/PPTX/Canva) is detected and preferred, but no editor for those formats is
   implemented yet — **NOT IMPLEMENTED**. Text sources (HTML/MD/JSON/JS/CSS) inside ZIPs are fully editable.
 * **Browser tests** click every visible control and catch exceptions, broken images and mobile overflow; they do
@@ -77,7 +77,8 @@ missing alt text, unnamed buttons, duplicate ids, external CDN dependencies, mob
 * **No hard timeout** on a single SymPy simplification (see SECURITY_REVIEW).
 * **Single-user, single-machine**; no concurrent job execution.
 
-* **Windows 11 desktop** itself was not available for testing (GitHub has no Windows 11 runners).
+* **Windows 11 desktop**: v0.4.3 confirmed on the owner's Windows 11 PC (self-test 14/14). v0.5.0 not yet confirmed there
+  (owner: Help → Run self-test, expect 16/16).
 * **Code signing**: the .exe is unsigned (a certificate is a purchase — owner decision). SmartScreen warns once.
 * **Antivirus** behaviour could not be tested in CI.
 
