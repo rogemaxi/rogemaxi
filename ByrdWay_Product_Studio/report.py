@@ -49,6 +49,55 @@ def _pair(title, before, after, base):
             f'</figcaption><img src="{E(_rel(after, base))}" alt="after"></figure></div>')
 
 
+_VERDICT = {'VERIFIED_CORRECT': ('Correct', 's-VERIFIED'), 'SUSPECTED_ERROR': ('Possible error', 's-FAIL'),
+            'LIKELY_OCR_MISREAD': ('Unclear reading - correct if read as shown', 's-SUSPECTED'),
+            'NOT_CHECKABLE': ('Could not check', 's-NOT-RUN'), 'SUSPECTED_TYPO': ('Possible spelling error', 's-FAIL')}
+
+
+def page_by_page(image_review):
+    """Full detail for image-only pages: per-page coverage, every statement read with its verdict and
+    the reason when it could not be checked, and the complete text the reader saw on the page."""
+    b = []
+    for rel, rv in (image_review or {}).items():
+        pages, items = rv.get('pages') or {}, rv.get('items') or []
+        tot = lambda k: sum(int(v.get(k) or 0) for v in pages.values())
+        b.append(f'<h2>Page-by-page reading: {E(rel)}</h2><p>{len(pages)} page(s) read by {E(str(rv.get("engine")))} '
+                 f'- {tot("lines_read")} text lines, {tot("math_lines")} lines containing math. '
+                 f'{tot("verified")} math statements and worked steps verified correct, {tot("errors")} possible '
+                 f'error(s), {tot("not_checkable")} could not be checked (reason given), {tot("typos")} possible '
+                 f'spelling error(s).</p><table><tr><th>Page</th><th>Lines read</th><th>Math lines</th>'
+                 f'<th>Checked</th><th>Correct</th><th>Possible errors</th><th>Could not check</th><th>Spelling</th></tr>')
+        for pno in sorted(pages, key=lambda k: int(k)):
+            v = pages[pno]
+            b.append(f'<tr><td>{pno}</td><td>{v.get("lines_read", 0)}</td><td>{v.get("math_lines", "")}</td>'
+                     f'<td>{v.get("statements", 0)}</td><td>{v.get("verified", 0)}</td><td>{v.get("errors", "")}</td>'
+                     f'<td>{v.get("not_checkable", "")}</td><td>{v.get("typos", "")}</td></tr>')
+        b.append('</table><p><small>Lines with math that are not listed below are definitions, single values, '
+                 'formulas without a worked step, or text the reader could not separate from the artwork - your '
+                 'page confirmation covers them.</small></p>')
+        for pno in sorted(pages, key=lambda k: int(k)):
+            mine = [i for i in items if str(i.get('page')) == str(pno)]
+            b.append(f'<details><summary><b>Page {pno}</b>: {len(mine)} item(s) checked</summary>')
+            if mine:
+                b.append('<table><tr><th>What was read</th><th>Type</th><th>Verdict</th><th>Detail</th></tr>')
+                for i in mine:
+                    lab, cls = _VERDICT.get(i['status'], (i['status'], ''))
+                    det = i.get('reason') or ''
+                    if i['status'] in ('SUSPECTED_ERROR', 'SUSPECTED_TYPO') and i.get('expected'):
+                        det = f'expected: {i["expected"]}'
+                    if i.get('alternative_reading'):
+                        det = f'read as {i["alternative_reading"]}'
+                    b.append(f'<tr><td>{E(str(i.get("statement")))}</td><td>{E(str(i.get("kind")))}</td>'
+                             f'<td><span class="pill {cls}">{E(lab)}</span></td><td>{E(str(det))}</td></tr>')
+                b.append('</table>')
+            tr = (pages[pno] or {}).get('transcript') or []
+            if tr:
+                b.append(f'<p><small>Full text read on page {pno} ({len(tr)} lines):</small></p><pre>' +
+                         E('\n'.join(tr)) + '</pre>')
+            b.append('</details>')
+    return ''.join(b)
+
+
 def write_job_report(root, job):
     from controller import next_action
     root = Path(root)
@@ -97,6 +146,7 @@ def write_job_report(root, job):
                          f'<td>{E(str((decided.get(iid) or {}).get("correction") or f.get("proposal") or ""))}</td>'
                          f'<td>{E(dec)}</td></tr>')
             b.append('</table>')
+    b.append(page_by_page(qa.get('image_review')))
     un = qa.get('unverified_items') or []
     if un:
         b.append(f'<h2>Questions that need your review ({len(un)})</h2><p>The verifier cannot check these '
@@ -182,6 +232,7 @@ def write_diagnosis_report(root, d):
     if d['academic_needs_human']:
         b.append('<h2>Answers the verifier cannot check</h2><ul>' + ''.join(
             f'<li>{E(str(a["question"]))} - {E(a["evidence"])}</li>' for a in d['academic_needs_human']) + '</ul>')
+    b.append(page_by_page(d.get('image_review')))
     ev = dd / 'evidence'
     for name in ('baseline_desktop.png', 'baseline_mobile.png'):
         if (ev / name).exists():

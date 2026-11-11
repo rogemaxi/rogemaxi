@@ -231,6 +231,250 @@ def check_solved_equations(lines):
     return out
 
 
+# ------------------------------------------------------------------ worked steps (v0.6.0)
+# A worked example on a page is a CHAIN of equal expressions:
+#     f(4) = 2(4) + 3          Simplify: (3x2)3          7,500,000 = 7.5 × 106
+#          = 8 + 3                     = 33(x2)3
+#          = 11                        = 27x6
+# Each "= ..." line below an expression continues it. Every step must equal the step before it.
+_ARROW = re.compile(r'\s*(?:-?→|->|⇒|=>)\s*')
+_LABEL = re.compile(r'^(?:[A-Za-z][A-Za-z\'’]+[\s,]*)+:\s*|^(?:so|then|thus|check|hence|now)\b[\s,]*', re.I)
+_FDEF = re.compile(r'(?<![A-Za-z])([A-Za-z])\(\s*([a-z])\s*\)\s*=\s*([^=,;:]+?)\s*(?:[,;:].*)?$')
+_FCALL = re.compile(r'(?<![A-Za-z])([A-Za-z])\(\s*(-?\d+(?:\.\d+)?)\s*\)')
+_BAD = re.compile(r'[?？@#$%&_\[\]{}<>≤≥≠~"“”|]|[^\x00-\x7F×÷·−–—√π²³]')
+
+
+def _norm_term(t):
+    t = t.replace('−', '-').replace('–', '-').replace('—', '-').replace('·', '×').strip()
+    return t.strip(' .,;')
+
+
+def _term_readings(t, funcs):
+    """Plausible readings of one OCR'd step (literal first). Known OCR losses: superscripts
+    (x2 -> x^2, )3 -> )^3, 33(x2) -> 3^3(x^2), ×106 -> ×10^6), thousands separators (7.500,000)."""
+    t = _norm_term(t)
+    if not t or _BAD.search(t) or len(t) > 80:
+        return []
+    t = re.sub(r'(?<=[\d)])\s*[xX]\s*(?=10\s*-?\d)', '×', t)
+    t = re.sub(r'(?<=\d)\s*[Vv✓✔]\s*$', '', t)            # 7.5x106 -> 7.5×106
+    for name, (var, body) in funcs.items():                              # f(4) -> (2(4)+3)
+        t = re.sub(rf'(?<![A-Za-z]){name}\(\s*(-?\d+(?:\.\d+)?)\s*\)',
+                   lambda m: '(' + re.sub(rf'(?<![A-Za-z]){var}(?![A-Za-z])', f'({m.group(1)})', body) + ')', t)
+    if _FCALL.search(t) or re.search(r'[A-Za-z]{2,}', t.replace('sqrt', '')):
+        return []                                                        # unknown function / prose
+    rules = [
+        lambda s: re.sub(r'(?<=\d)[.,](?=\d{3}(?:[.,]\d{3})*(?!\d))', '', s),          # 7.500,000 -> 7500000
+        lambda s: re.sub(r'(×\s*10)\s*(-?\d{1,2})(?![\d.])', r'\1^(\2)', s),           # ×106 -> ×10^(6)
+        lambda s: re.sub(r'([a-zA-Z])([2-9])(?![\d.])', r'\1^\2', s),                   # x2 -> x^2
+        lambda s: re.sub(r'\)\s*([2-9])(?![\d.])', r')^\1', s),                          # )3 -> )^3
+        lambda s: re.sub(r'(?<![\d.^])(\d)([2-9])(?=\()', r'\1^\2', s),                 # 33(x) -> 3^3(x)
+        lambda s: s.replace('X', 'x'),
+        lambda s: re.sub(r'(?<![A-Za-z])V(?=\s*\d)', '√', s),                          # V36 -> √36
+        lambda s: re.sub(r'(?<![\d.^])([2-9])([2-9])(?![\d.(])', r'\1^\2', s),           # 52 -> 5^2, 24 -> 2^4
+        lambda s: re.sub(r'(?<=\d)\.(?=\d(?!\d))', '×', s),                             # 6·3 read as 6.3
+    ]
+    outs = []
+    for mask in range(1 << len(rules)):
+        s = t
+        for i, rule in enumerate(rules):
+            if mask >> i & 1:
+                s = rule(s)
+        if s not in outs:
+            outs.append(s)
+    parsed = []
+    import warnings
+    for s in outs[:96]:
+        try:
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore')
+                e = academic.safe_parse(s)
+        except Exception:
+            continue
+        if isinstance(e, academic.sp.Expr):
+            parsed.append((s, e))
+    return parsed
+
+
+def _fingerprint(e):
+    syms = sorted(e.free_symbols, key=str)
+    vals = []
+    for k, x in enumerate((0.37, 1.13, -0.83)):
+        try:
+            v = complex(academic.sp.N(e.subs({s: x + 0.11 * i for i, s in enumerate(syms)})))
+        except Exception:
+            return None
+        vals.append(v)
+    return vals
+
+
+def _same(a, b):
+    fa, fb = _fingerprint(a), _fingerprint(b)
+    if fa is None or fb is None:
+        return False
+    if any(abs(x - y) > 1e-7 * max(1, abs(x)) for x, y in zip(fa, fb)):
+        return False
+    try:
+        return academic.sp.simplify(a - b) == 0
+    except Exception:
+        return False
+
+
+def _split_steps(text):
+    """'Simplify: (3x2)3 = 33(x2)3 = 27x6' -> ['(3x2)3', '33(x2)3', '27x6']; leading '=' kept as a marker."""
+    t = clean(text)
+    cont = t.lstrip().startswith('=')
+    t = _LABEL.sub('', t.lstrip(' =')) if not cont else t.lstrip(' =')
+    parts = [p for p in re.split(r'\s*=\s*', t)]
+    return cont, [p for p in parts if p.strip()]
+
+
+def _function_defs(lines):
+    """[(line, name, var, body)] for every 'f(x) = ...' definition on the page."""
+    defs = []
+    for ln in lines:
+        m = _FDEF.search(clean(ln['text']))
+        if m and m.group(1) != m.group(2):
+            body = _norm_term(m.group(3))
+            try:
+                academic.safe_parse(re.sub(r'([a-zA-Z])([2-9])(?!\d)', r'\1^\2', body))
+            except Exception:
+                continue
+            defs.append((ln, m.group(1), m.group(2), re.sub(r'([a-zA-Z])([2-9])(?!\d)', r'\1^\2', body)))
+    return defs
+
+
+def _funcs_for(defs, ln):
+    """The definition in force for a line: the nearest one above it (same column preferred)."""
+    out = {}
+    x0, y0 = ln['rect'][0], ln['rect'][1]
+    for d, name, var, body in sorted(defs, key=lambda t: (t[0]['rect'][1])):
+        if d['rect'][1] <= y0 + 1:
+            col = abs(d['rect'][0] - x0) < 250
+            if name not in out or col or not out[name][2]:
+                out[name] = (var, body, col)
+    return {k: (v[0], v[1]) for k, v in out.items()}
+
+
+def check_worked_steps(lines, other_pass=()):
+    """Verify every step of worked examples (chains of '=' within a line and '= ...' lines below it).
+    Returns items with status VERIFIED_CORRECT, SUSPECTED_ERROR or NOT_CHECKABLE (+ reason).
+    A step is only called an error when it was read clearly (confidence >= 0.85, same text in both
+    OCR passes), fails under EVERY plausible reading, and does not match any other expression on the
+    page (which would mean the two lines belong to different examples)."""
+    chains = []                                   # [{'lines': [...], 'terms': [(text, line)], 'cont': bool}]
+    defs = _function_defs(lines)
+    for ln in lines:
+        t = clean(ln['text'])
+        if _ARROW.search(t):
+            continue
+        if '=' not in t:
+            # a bare expression ("Simplify: (3x2)3", "3x(x2-4x+5)") can start a chain continued below
+            body = _LABEL.sub('', t)
+            if re.search(r'[\d)]', body) and _term_readings(body, _funcs_for(defs, ln)):
+                chains.append({'lines': [ln], 'terms': [(body, ln, False)]})
+            continue
+        if _ARROW.search(t):
+            continue                              # equation steps with arrows: handled by solved-equation check
+        cont, parts = _split_steps(t)
+        if not parts:
+            continue
+        if cont:
+            x0, y0, x1, y1 = ln['rect']
+            h = max(4.0, y1 - y0)
+            best = None
+            for ch in chains:
+                last = ch['lines'][-1]['rect']
+                first = ch['lines'][0]['rect']
+                gap = y0 - last[3]
+                if -0.5 * h <= gap <= 2.2 * h and first[0] - 2.5 * h <= x0 <= first[2] + h:
+                    d = abs(x0 - first[0]) + gap
+                    if best is None or d < best[0]:
+                        best = (d, ch)
+            if best:
+                best[1]['lines'].append(ln)
+                best[1]['terms'] += [(p, ln, True) for p in parts]
+            continue
+        raw = clean(ln['text'])
+        first_is_label = bool(re.match(r'^\s*(?:[A-Za-z]{2,}\s*)+=', raw))      # "Area = (x+5)(x-2)"
+        defn = _FDEF.search(raw)
+        terms = [(p, ln, False) for p in parts]
+        if first_is_label or (defn and parts and re.fullmatch(r'\s*[A-Za-z]\(\s*[a-z]\s*\)\s*', parts[0])):
+            terms = terms[1:]                                                       # a name or definition, not a step
+        if parts and re.fullmatch(r'\s*[a-zA-Z]\s*', parts[0]):
+            terms = terms[1:]                                                       # "y = 2x + 1" defines y
+        chains.append({'lines': [ln], 'terms': terms})
+    page_exprs = []
+    for ch in chains:
+        for p, ln, _ in ch['terms']:
+            r = _term_readings(p, _funcs_for(defs, ln))
+            if r:
+                page_exprs.append((p, r))
+    other_texts = [re.sub(r'\s+', '', clean(o['text'])) for o in other_pass]
+    out = []
+    for ch in chains:
+        terms = [(p, ln, c, _term_readings(p, _funcs_for(defs, ln))) for p, ln, c in ch['terms']]
+        skip = set()
+        for k, ((pa, la, ca, ra), (pb, lb, cb, rb)) in enumerate(zip(terms, terms[1:])):
+            if k in skip:
+                continue
+            if k + 2 < len(terms) and terms[k + 2][1] is lb and ra and rb:
+                # OCR reads '-' as '=' ("= 3x3 + 4x = 14" for "= 3x3 + 4x - 14"): try the joined reading
+                pc = terms[k + 2][0]
+                for op in ('-', '+'):
+                    rj = _term_readings(f'{pb} {op} {pc}', _funcs_for(defs, lb))
+                    if rj and any(_same(ea, ej) for _, ea in ra[:8] for _, ej in rj[:8]):
+                        out.append(_step_item(STATUS_OK, pa, f'{pb} {op} {pc}', la, lb, ra[0][1],
+                                              f'equal to the previous step when "=" is read as "{op}"'))
+                        skip |= {k + 1}
+                        break
+                if k + 1 in skip:
+                    continue
+            if not ra or not rb:
+                continue                               # prose, an unknown function or an unreadable step
+            if re.sub(r'[\s()]', '', pa) == re.sub(r'[\s()]', '', pb):
+                continue                               # "(x) = x": nothing to check
+            has_var = any(e.free_symbols for _, e in ra + rb)
+            if has_var and la is lb and not cb:
+                # an '=' inside one line between expressions with variables may be an EQUATION to solve,
+                # not a simplification step: verify if it is an identity, never accuse.
+                if any(_same(ea, eb) for _, ea in ra[:6] for _, eb in rb[:6]):
+                    out.append(_step_item(STATUS_OK, pa, pb, la, lb, ra[0][1], 'identity holds'))
+                continue
+            match = next(((sa, sb) for sa, ea in ra for sb, eb in rb if _same(ea, eb)), None)
+            if match:
+                out.append(_step_item(STATUS_OK, pa, pb, la, lb, ra[0][1],
+                                      f'step equal to the previous step (read as {match[0]} = {match[1]})'))
+                continue
+            # clear = read the same way in BOTH passes (independent resolutions) with reasonable confidence
+            clear = (min(la['conf'], lb['conf']) >= 0.6 and
+                     all(any(re.sub(r'\s+', '', _norm_term(x)) in o for o in other_texts) for x in (pa, pb)))
+            elsewhere = any(q not in (pa, pb) and any(_same(eb, eq) for _, eb in rb[:4] for _, eq in rq[:4])
+                            for q, rq in page_exprs)
+            if clear and not elsewhere:
+                out.append(_step_item(STATUS_ERR, pa, pb, la, lb, ra[0][1],
+                                      'this step does not equal the step before it under any plausible reading'))
+            else:
+                why = ('read with low confidence or differently in the second pass' if not clear else
+                       'matches another expression on the page - the lines may belong to different examples')
+                out.append(_step_item(STATUS_UNREADABLE, pa, pb, la, lb, ra[0][1], why))
+    return out
+
+
+def _step_item(status, pa, pb, la, lb, prev, why):
+    rect = (min(la['rect'][0], lb['rect'][0]), min(la['rect'][1], lb['rect'][1]),
+            max(la['rect'][2], lb['rect'][2]), max(la['rect'][3], lb['rect'][3]))
+    try:
+        exp = str(academic.sp.expand(prev)) if prev.free_symbols else str(academic.sp.nsimplify(prev))
+    except Exception:
+        exp = str(prev)
+    exp = re.sub(r'(?<=[\d)])\*(?=[A-Za-z(])', '', exp).replace('*', '×')
+    return {'status': status, 'kind': 'worked step', 'statement': f'{_norm_term(pa)} = {_norm_term(pb)}',
+            'shown': _norm_term(pb), 'expected': exp.replace('**', '^') if status == STATUS_ERR else None,
+            'rect': rect, 'conf': min(la['conf'], lb['conf']), 'methods': ['symbolic simplify(previous - step) == 0',
+            'numeric spot checks at 3 points', 'OCR re-readings (lost superscripts, separators)'],
+            'evidence': why, 'reason': why if status == STATUS_UNREADABLE else None, 'line': lb['text']}
+
+
 # ------------------------------------------------------------------ typos
 _MATH_WORDS = set('''pemdas gcf lcm lcd sqrt abs coeff vertex axis parabola quadratic polynomial binomial trinomial
 monomial integers integer rational irrational reciprocal exponent exponents radicand radical asymptote
@@ -304,7 +548,7 @@ def typo_candidates(pass_a, pass_b):
 
 
 # ------------------------------------------------------------------ page + document
-READER_VERSION = 1
+READER_VERSION = 1          # OCR cache format (the reading itself); checks run fresh every time
 
 
 def proposal(f):
@@ -318,6 +562,10 @@ def proposal(f):
         target = f'{v} = {exp}' if exp else 'the correct solution'
         return (f'Change "{f["shown"]}" to "{target}", then re-check every later step and the final '
                 f'solution that use this value.')
+    if f['status'] == STATUS_ERR and f['kind'] == 'worked step':
+        prev = f['statement'].rsplit(' = ', 1)[0]
+        return (f'The step "{f["shown"]}" does not equal the step before it ("{prev}"); the previous step '
+                f'simplifies to "{f.get("expected")}". Correct this step and every later step that uses it.')
     if f['status'] == 'SUSPECTED_TYPO':
         hint = f' (dictionary suggestion: "{f["expected"]}" - confirm against the context)' if f.get('expected') else ''
         return f'Correct the spelling of "{f["shown"]}"{hint}.'
@@ -374,6 +622,10 @@ def review_pdf(pdf_path, pages=None, crop_dir=None, progress=None, cache_dir=Non
                                for o in passes[0]):
                         f['status'] = STATUS_UNREADABLE
                 found.append(f)
+            seen = {re.sub(r'\s+', '', f['statement']) for f in found}
+            for f in check_worked_steps(lines, passes[0]):
+                if re.sub(r'\s+', '', f['statement']) not in seen:
+                    found.append(f)
             found += typo_candidates(passes[0], passes[1])
             for f in found:
                 f['page'] = pno
@@ -381,8 +633,14 @@ def review_pdf(pdf_path, pages=None, crop_dir=None, progress=None, cache_dir=Non
                 f['proposal'] = proposal(f)
                 if crop_dir and f['status'] in (STATUS_ERR, 'SUSPECTED_TYPO', STATUS_MISREAD):
                     f['crop'] = _crop(page, f['rect'], Path(crop_dir) / f'{f["id"]}.png')
-            page_stats[pno] = {'lines_read': len(lines), 'statements': sum(1 for f in found if f['kind'] != 'spelling'),
-                               'verified': sum(1 for f in found if f['status'] == STATUS_OK)}
+            math_lines = [l for l in lines if re.search(r'\d', l['text']) and re.search(r'[=+×÷*/^]|\d\s*[a-zA-Z]', l['text'])]
+            page_stats[pno] = {'lines_read': len(lines), 'math_lines': len(math_lines),
+                               'statements': sum(1 for f in found if f['kind'] != 'spelling'),
+                               'verified': sum(1 for f in found if f['status'] == STATUS_OK),
+                               'errors': sum(1 for f in found if f['status'] == STATUS_ERR),
+                               'not_checkable': sum(1 for f in found if f['status'] == STATUS_UNREADABLE),
+                               'typos': sum(1 for f in found if f['status'] == 'SUSPECTED_TYPO'),
+                               'transcript': [l['text'] for l in lines]}
             items += found
     stats = {s: sum(1 for i in items if i['status'] == s)
              for s in (STATUS_OK, STATUS_ERR, STATUS_MISREAD, STATUS_UNREADABLE, 'SUSPECTED_TYPO')}

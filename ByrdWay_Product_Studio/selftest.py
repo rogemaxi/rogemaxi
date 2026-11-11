@@ -70,6 +70,10 @@ def run(report_path=None, browser=True):
                 rc = imageread.review_pdf(cp)
                 check('image_pdf_reader_no_false_accusation', rc['stats']['SUSPECTED_ERROR'] == 0
                       and rc['stats']['VERIFIED_CORRECT'] >= 5, rc['stats'])
+                steps = [s_['statement'] for s_ in rv['items'] if s_['kind'] == 'worked step' and s_['status'] == imageread.STATUS_ERR]
+                ok_steps = [s_ for s_ in rc['items'] if s_['kind'] == 'worked step' and s_['status'] == imageread.STATUS_OK]
+                check('image_pdf_reader_checks_worked_steps', any('2x + 14' in s_ for s_ in steps) and len(ok_steps) >= 5,
+                      {'errors': steps, 'verified_clean_steps': len(ok_steps)})
             else:
                 check('image_pdf_reader_available', False, 'page reader (OCR) not installed')
             bad = d / 'evil.zip'

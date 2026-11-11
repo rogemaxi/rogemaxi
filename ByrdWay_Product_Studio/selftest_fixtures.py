@@ -135,9 +135,10 @@ def representative_explainer_pdf(path, worked_example_error=True, answer_key_err
 
 def image_only_explainer_pdf(path, with_errors=True):
     """A FLATTENED Explainer (every page one picture, no text layer) - TEST FIXTURE, not ByrdWay content.
-    Planted: '7 × 8 = 54' (wrong), '3x − 5 = 16 → x = 8' (wrong, x = 7), typo 'Equasion'.
+    Planted: '7 × 8 = 54' (wrong), '3x − 5 = 16 → x = 8' (wrong, x = 7), typo 'Equasion',
+    worked step '4x + 12 - 2x = 2x + 14' (wrong, 2x + 12).
     Traps that must NOT be reported as errors: '6 × 9 = 54', '(−18) ÷ (−3) = 6' (OCR often reads ÷ as +),
-    '2x + 3 = 11 → x = 4'."""
+    '2x + 3 = 11 → x = 4', the chain 'f(5) = 3(5) + 2 = 15 + 2 = 17', '8(40) + 5(80) = 320 + 400 = 720'."""
     import pymupdf as fitz
     pages = [
         [('Chapter 1: Multiplication and Signs', 20), ('Worked example 1:  ' + ('7 × 8 = 54' if with_errors else '7 × 8 = 56'), 18),
@@ -145,13 +146,16 @@ def image_only_explainer_pdf(path, with_errors=True):
          ('Essential Vocabulary: an ' + ('equasion' if with_errors else 'equation') + ' states that two expressions are equal.', 15)],
         [('Chapter 2: Solving Equations', 20), ('Solve: 2x + 3 = 11', 18), ('2x = 8', 18), ('x = 4', 18),
          ('Solve: 3x − 5 = 16', 18), ('3x = 21', 18), ('x = 8' if with_errors else 'x = 7', 18)],
+        [('Chapter 3: Worked Steps', 20), ('Given f(x) = 3x + 2, find f(5):', 18), ('f(5) = 3(5) + 2', 18),
+         ('= 15 + 2', 18, 110), ('= 17', 18, 110), ('Simplify: 4(x + 3) - 2x', 18), ('= 4x + 12 - 2x', 18, 110),
+         ('= 2x + 14' if with_errors else '= 2x + 12', 18, 110), ('Tickets: 8(40) + 5(80) = 320 + 400 = 720', 18)],
     ]
     text_doc = fitz.open()
     for lines in pages:
         p = text_doc.new_page(width=842, height=595)
         y = 70
-        for text, size in lines:
-            p.insert_text((60, y), text, fontsize=size)
+        for text, size, *x in lines:
+            p.insert_text((x[0] if x else 60, y), text, fontsize=size)
             y += size + 22
     out = fitz.open()
     for p in text_doc:

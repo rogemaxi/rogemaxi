@@ -1,4 +1,4 @@
-"""v0.5.0: reading and verifying IMAGE-ONLY (flattened) PDFs.
+"""v0.5.0/v0.6.0: reading and verifying IMAGE-ONLY (flattened) PDFs, including every worked step.
 Controlled fixtures only (selftest_fixtures.image_only_explainer_pdf) - no owner content."""
 import os, sys, tempfile, unittest, warnings
 from pathlib import Path
@@ -53,6 +53,33 @@ class Reader(Base):
         self.assertIn('(-18) ÷ (-3) = 6', ok, 'the ÷-read-as-: trap must verify, not be accused')
         self.assertGreaterEqual(len(ok), 6)
 
+    def test_worked_steps_every_step_checked(self):
+        p = fx.image_only_explainer_pdf(self.d / 'f.pdf')
+        rv = imageread.review_pdf(p, crop_dir=self.d / 'crops')
+        steps = [i for i in rv['items'] if i['kind'] == 'worked step']
+        bad = [i for i in steps if i['status'] == imageread.STATUS_ERR]
+        self.assertEqual([i['statement'] for i in bad], ['4x + 12 - 2x = 2x + 14'])
+        self.assertEqual(bad[0]['page'], 3)
+        self.assertEqual(bad[0]['expected'], '2x + 12')
+        self.assertTrue(Path(bad[0]['crop']).exists())
+        self.assertIn('2x + 12', bad[0]['proposal'])
+        ok = {i['statement'] for i in steps if i['status'] == imageread.STATUS_OK}
+        for s in ('f(5) = 3(5) + 2', '15 + 2 = 17', '320 + 400 = 720'):
+            self.assertIn(s, ok, 'a correct step (incl. a function value) must verify')
+        pg = rv['pages'][3]
+        self.assertGreaterEqual(pg['verified'], 5)
+        self.assertTrue(any('Simplify' in t for t in pg['transcript']), 'full page text is kept for the report')
+
+    def test_step_readings_do_not_hide_or_invent_errors(self):
+        same = lambda a, b: any(imageread._same(x, y) for _, x in imageread._term_readings(a, {})
+                                for _, y in imageread._term_readings(b, {}))
+        self.assertTrue(same('(3x2)3', '27x6'), 'lost superscripts')
+        self.assertTrue(same('7.500,000', '7.5×106'), 'scientific notation with OCR separators')
+        self.assertTrue(same('(2x)2 - 52', '4x2-25'))
+        self.assertFalse(same('4x + 12 - 2x', '2x + 14'), 'a 1-based power reading must not hide an error')
+        self.assertFalse(same('320+400', '760'))
+        self.assertEqual(imageread._term_readings('Area of the garden', {}), [], 'prose is not math')
+
     def test_ocr_confusions(self):
         self.assertIn('3x-5=16', [r.replace(' ', '') for r in imageread._equation_readings('3x : 5=16')])
         self.assertIn('x^2-5x-24=0', imageread._equation_readings('x2-5x-24=0'))
@@ -94,7 +121,13 @@ class Workflow(Base):
         img = [f for f in d['findings'] if f.get('image_item')]
         self.assertGreaterEqual(len(img), 3)
         self.assertTrue(all(f['proposed_correction'] and f.get('crop') for f in img))
-        self.assertIn('Signs_Anime_Explainer.pdf', (self.ws / 'reports' / d['id'] / 'diagnosis.html').read_text(encoding='utf-8'))
+        diag_html = (self.ws / 'reports' / d['id'] / 'diagnosis.html').read_text(encoding='utf-8')
+        self.assertIn('Signs_Anime_Explainer.pdf', diag_html)
+        self.assertIn('Page-by-page reading', diag_html)
+        self.assertIn('4x + 12 - 2x = 2x + 14', diag_html)
+        job_html = (self.ws / 'jobs' / j['id'] / 'report.html').read_text(encoding='utf-8')
+        self.assertIn('Page-by-page reading', job_html)
+        self.assertIn('Full text read on page 3', job_html)
         self.assertEqual(j['status'], 'NOT_VERIFIED')
         self.assertIn('need your decision', j['qa']['reasons'][0])
         self.assertEqual(j['changes']['changed'], [], 'a flattened PDF is never edited')

@@ -460,6 +460,11 @@ class Orchestrator:
                   'proposed_corrections': len([f for f in findings if f['proposed_correction']]),
                   'needs_person': len([f for f in findings if not f['proposed_correction'] and f['state'] == 'DETECTED']),
                   'image_findings': len([f for f in findings if f.get('image_item')]),
+                  'image_review': {rel: {'pages': v['pages'], 'stats': v['stats'], 'engine': v['engine'],
+                                         'items': [{k: i.get(k) for k in ('id', 'page', 'status', 'kind', 'statement',
+                                                                          'expected', 'reason', 'alternative_reading')}
+                                                   for i in v['items']]}
+                                   for rel, v in st.get('image_review', {}).items()},
                   'original_intact': verify_original(self.root, pid)}
         write_json(out / 'diagnosis.json', result)
         try:
@@ -661,7 +666,10 @@ class ReleaseQAAgent:
             result['reasons'].insert(0, f'{len(pending)} image finding(s) need your decision '
                                         f'(tab 2: Review Image Findings…)')
         result['image_findings'] = [f for f in state['findings'] if f.get('image_item')]
-        result['image_review'] = {rel: {'pages': v['pages'], 'stats': v['stats'], 'engine': v['engine']}
+        result['image_review'] = {rel: {'pages': v['pages'], 'stats': v['stats'], 'engine': v['engine'],
+                                        'items': [{k: i.get(k) for k in ('id', 'page', 'status', 'kind', 'statement',
+                                                                         'expected', 'reason', 'alternative_reading')}
+                                                  for i in v['items']]}
                                   for rel, v in state.get('image_review', {}).items()}
         result['unverified_items'] = [{'key': _item_key(r), 'file': r.get('file'), 'question': r.get('question'),
                                        'status': r['status'], 'evidence': r['evidence']} for r in unverified]
