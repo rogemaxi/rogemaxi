@@ -49,3 +49,30 @@ Do not stop at planning or create empty agent wrappers. Implement code, run test
 
 ## Immediate command
 Start by reading the existing files and running `python -m unittest discover -s tests -v`. Then implement milestone A, verify, and continue milestone-by-milestone without discarding previous work. Ask for the first original Power Tool ZIP/HTML and editable Explainer sources when integration tests need them.
+
+## MASTER PLAN — SSOI 2.0 (governs all future sessions; read this first)
+The Studio is ONE product factory with two operations: (A) receive → read → diagnose → repair → re-verify existing
+products; (B) approved blueprint → build unit by unit → read → diagnose → repair → verify → assemble. Version stays
+0.5.0 until the SSOI 2.0 acceptance tests pass (Power Tool, Explainer, Concept Tiles, new Physics product, all real).
+
+Agent pipeline (logical roles in one app, deterministic tools first, paid AI only with owner authorization):
+1. Reader (Product Intelligence) — reads every page/screen (OCR on picture pages and on images inside Power Tools);
+   writes ONE Observation Record that every later agent uses. Never repairs.
+2. Diagnostician — works only from the Observation Record; defect register with page, evidence, severity, proposal;
+   every requirement PASS / FAIL / NOT VERIFIED / NOT APPLICABLE.
+3. Surgeon (repair) — smallest safe fix on a copy, per file type; flattened art is never rewritten (correction sheet).
+4. Builder — approved blueprint → complete product, one unit at a time, each unit through 1–3 and 5 before the next.
+5. Chief Judge — independent final gate: score >= 99.9/100 (9.99/10) AND zero critical/major defects AND nothing
+   mandatory unverified; otherwise SENDS THE WORK BACK to 3 or 4 with the exact list (bounded rounds, no-progress stop).
+6. Owner approval — nothing is FINAL APPROVED or published without it.
+
+Product families: Power Tools (HTML), Lil Dr. Byrd / Anime Explainers (PDF), Concept Tiles (PDF), Exam Engines
+(proposed family #4: verified problem banks, unlimited versions, diagnostics). Subjects are plug-in SUBJECT PACKS
+(math middle school → graduate, physics, chemistry, biology, engineering, medical calculations); adding a subject
+must never require rebuilding the app. Graduate-level proofs/reasoning are never labeled machine-verified.
+
+Order of work: (1) Observation Record + Chief Judge send-back loop; (2) verifier coverage (inequalities, systems,
+slope, word-problem setups); (3) Concept Tiles test on a real product; (4) PPTX adapter; (5) Builder loop + Concept
+Tiles builder; (6) science/physics subject packs; (7) Exam Engine family.
+Owner products, mascot art, sales figures and the product roadmap are PRIVATE: never commit them (repo is public).
+Fix before commercial use: Jordan logo on the mascot's sneakers; Bentley-like winged-B emblem in brand video.
