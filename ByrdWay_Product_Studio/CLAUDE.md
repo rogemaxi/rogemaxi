@@ -76,3 +76,16 @@ slope, word-problem setups); (3) Concept Tiles test on a real product; (4) PPTX 
 Tiles builder; (6) science/physics subject packs; (7) Exam Engine family.
 Owner products, mascot art, sales figures and the product roadmap are PRIVATE: never commit them (repo is public).
 Fix before commercial use: Jordan logo on the mascot's sneakers; Bentley-like winged-B emblem in brand video.
+
+### Owner decisions (2026-11-11)
+- All future "Anime Explainers" are **Lil Dr. Byrd Explainers** (approved mascot assets only).
+- Concept Tiles: one idea per tile; a course set does not need 136+ tiles (about 100 for a full physics course is fine).
+- Power Tools must be an experience better than a classroom. **ByrdWay Mastery Experience standard** (the Builder
+  generates it, the Chief Judge checks each item; missing item = FAIL):
+  1. placement diagnostic first → personal path; 2. mastery gate (≥ 90 % on a check) before the next skill, with
+  spaced review of earlier skills; 3. instant step-by-step feedback and a misconception-specific hint for every wrong
+  answer; 4. worked example → faded example → independent practice, Lil Dr. Byrd at the hard step; 5. focused
+  session blocks adding up to a complete ~2-hour session, visible progress, streaks; 6. interactive simulations where
+  the subject allows (physics, functions, statistics); 7. unlimited generated practice with verified answers;
+  8. progress report a student can show a parent or teacher (stored locally, no account, works offline);
+  9. accessible, mobile, single-file, no paid service needed to run.
