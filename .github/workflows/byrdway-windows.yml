@@ -111,8 +111,11 @@ jobs:
           foreach ($f in $files) { $m += "$((Get-FileHash $f -Algorithm SHA256).Hash.ToLower())  $f" }
           $m | Tee-Object -FilePath VERIFICATION_MANIFEST.txt
 
+      # A push only TESTS (full suite, build, self-test of the exact .exe, evidence artifact).
+      # A draft release is created only when the owner starts the workflow by hand (Actions -> Run workflow),
+      # so work in progress never replaces an existing numbered release.
       - name: Draft GitHub release, then download it back and compare checksums
-        if: github.event_name == 'push'
+        if: github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
