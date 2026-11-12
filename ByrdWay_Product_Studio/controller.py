@@ -74,8 +74,12 @@ class Studio:
     def image_findings(self, job_id):
         return release.image_findings(self.root, job_id)
 
-    def decide_image_finding(self, job_id, item_id, verdict, owner, correction=None):
-        return release.decide_image_finding(self.root, job_id, item_id, verdict, owner, correction)
+    def decide_image_finding(self, job_id, item_id, verdict, owner, correction=None, replacement=None):
+        return release.decide_image_finding(self.root, job_id, item_id, verdict, owner, correction,
+                                            replacement=replacement)
+
+    def repair_image_findings(self, job_id, owner, explicit=False, progress=None):
+        return release.repair_confirmed_image_findings(self.root, job_id, owner, explicit, progress)
 
     def export_correction_sheet(self, job_id, owner, explicit=False, dest=None):
         return release.export_correction_sheet(self.root, job_id, owner, explicit, dest)
@@ -268,8 +272,10 @@ def next_action(job):
                 f'and confirm or dismiss each one (a picture of each is shown).')
     if st == 'BLOCKED' and any(f.get('image_item') and f.get('decision') == 'confirmed'
                                for f in qa.get('image_findings') or []):
-        return ('You confirmed error(s) on image pages. Click "Export Correction Sheet…", correct them in your '
-                'editable source (Canva/PPTX), export a new PDF and import it to verify.')
+        return ('You confirmed error(s) on image pages. Best: click "Export Correction Sheet…" and correct them in '
+                'your editable source (Canva/PPTX), then import the new PDF. Or click "Repair Confirmed on a Copy…" '
+                'to have the Studio draw the corrections on a protected copy (checked by the Repair Reviewer and '
+                'Release QA; you approve each corrected spot).')
     if st == 'NOT_VERIFIED':
         if qa.get('unverified_items'):
             return (f'{len(qa["unverified_items"])} question(s) cannot be checked automatically. Review them '

@@ -394,6 +394,7 @@ class App(tk.Tk):
         bar.pack(fill='x')
         for text, cmd in [('Open Readable Report', self.open_job_report), ('Before / After Diff', self.show_diff), ('Open Evidence Folder', self.open_evidence),
                           ('Re-run Release QA', self.rerun_qa), ('Review Image Findings…', self.review_image_findings),
+                          ('Repair Confirmed on a Copy…', self.repair_confirmed),
                           ('Export Correction Sheet…', self.export_correction_sheet),
                           ('Attest Unverifiable Item…', self.attest),
                           ('APPROVE for release…', self.approve), ('Reject…', self.reject),
@@ -457,6 +458,35 @@ class App(tk.Tk):
                                                          'in this job (or the product has no image pages).')
         self.image_dialog = ImageFindingsDialog(self, jid, items)
         return self.image_dialog
+
+    def repair_confirmed(self, done=None):
+        try:
+            jid = self.selected_job()
+        except ValueError as e:
+            return messagebox.showinfo('Select', str(e))
+        if not any(i['decision'] == 'confirmed' for i in self.studio.image_findings(jid)):
+            return messagebox.showinfo('Repair', 'Confirm at least one finding in "Review Image Findings…" first.')
+        owner = simpledialog.askstring('Repair on a copy', 'Your name (authorizes this repair):')
+        if not owner:
+            return
+        if not messagebox.askyesno('Authorize repair', 'Correct the CONFIRMED findings on a protected COPY?\n\n'
+                                   'Your original file is never changed. Each correction is drawn over the picture '
+                                   '(Helvetica - the original font cannot be reproduced without the editable source), '
+                                   'checked by an independent Repair Reviewer and by Release QA. You review every '
+                                   'corrected spot before approving.'):
+            return
+
+        def finished(j):
+            self.refresh_jobs()
+            if self.jtree.exists(j['id']):
+                self.jtree.selection_set(j['id'])
+                self.show_job()
+            rv = j.get('repair_reviews') or []
+            self.log_line(f'Repair job {j["id"]}: {sum(1 for r in rv if r["accepted"])} corrected, '
+                          f'{sum(1 for r in rv if not r["accepted"])} blocked; QA {j.get("qa", {}).get("decision")}')
+            done and done(j)
+        self.run_bg('Repairing confirmed findings on a copy',
+                    lambda: self.studio.repair_image_findings(jid, owner, True, progress=self.progress), finished)
 
     def export_correction_sheet(self):
         try:
@@ -993,6 +1023,10 @@ class ImageFindingsDialog(tk.Toplevel):
         ttk.Label(right, text='Correction (edit if needed):').pack(anchor='w')
         self.corr = tk.StringVar()
         ttk.Entry(right, textvariable=self.corr, width=80).pack(anchor='w', fill='x')
+        ttk.Label(right, text='Exact characters that should appear on the page (used by "Repair Confirmed on a Copy"; '
+                              'for a spelling error type the correct word):', wraplength=560).pack(anchor='w', pady=(6, 0))
+        self.repl = tk.StringVar()
+        ttk.Entry(right, textvariable=self.repl, width=30).pack(anchor='w')
         bar = ttk.Frame(right)
         bar.pack(anchor='w', pady=8)
         ttk.Button(bar, text='Confirm error', command=lambda: self.decide('confirmed')).pack(side='left', padx=2)
@@ -1022,6 +1056,7 @@ class ImageFindingsDialog(tk.Toplevel):
             return
         self.detail.config(text=f'{it["detail"]}\n\nProposed: {it.get("proposal") or "-"}')
         self.corr.set(it.get('correction') or it.get('proposal') or '')
+        self.repl.set(it.get('replacement') or ('' if it['kind'] == 'typo' else (it.get('expected') or '')))
         self._img = None
         if it.get('crop') and Path(it['crop']).exists():
             try:
@@ -1041,7 +1076,8 @@ class ImageFindingsDialog(tk.Toplevel):
             if not self.owner:
                 return
         try:
-            self.app.studio.decide_image_finding(self.job_id, it['id'], verdict, self.owner, self.corr.get().strip() or None)
+            self.app.studio.decide_image_finding(self.job_id, it['id'], verdict, self.owner, self.corr.get().strip() or None,
+                                                 replacement=self.repl.get().strip() or None)
         except Exception as e:
             return self.app.error('Decision not recorded', e)
         self.items = self.app.studio.image_findings(self.job_id)

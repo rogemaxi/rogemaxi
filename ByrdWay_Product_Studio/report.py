@@ -104,6 +104,51 @@ def page_by_page(image_review):
     return ''.join(b)
 
 
+def _repairs_section(root, job, jd):
+    """Corrections made on the protected copy: before/after picture of every corrected spot + Reviewer checks."""
+    rv = job.get('repair_reviews') or []
+    if not rv:
+        return ''
+    out = ['<h2>Corrections made on a protected copy (Repair Engineer → Repair Reviewer)</h2>'
+           '<p>Each correction is drawn over the page picture (RECONSTRUCTED REGION, Helvetica: the original font '
+           'cannot be reproduced without the editable source). Your original file is unchanged. Look at every '
+           '"after" picture before approving.</p><table><tr><th>Item</th><th>Before</th><th>After</th>'
+           '<th>Repair Reviewer</th></tr>']
+    try:
+        import imageread
+        from engine import original_file
+        fitz = imageread._fitz()
+        orig = original_file(root, job['product_id'])[0]
+        cand = job.get('candidate')
+        ev = jd / 'evidence' / 'repairs'
+        ev.mkdir(parents=True, exist_ok=True)
+    except Exception:
+        orig = cand = None
+    for r in rv:
+        pics = ['', '']
+        acc = r.get('accepted')
+        if isinstance(acc, dict) and orig and cand and Path(str(cand)).exists():
+            box = acc['box']
+            clip = fitz.Rect(box[0] - 80, box[1] - 30, box[2] + 80, box[3] + 30)
+            for k, src in enumerate((orig, cand)):
+                try:
+                    with fitz.open(src) as d:
+                        f = ev / f'{r["item"]}_{"before" if k == 0 else "after"}.png'
+                        d[acc['page'] - 1].get_pixmap(dpi=150, clip=clip & d[acc['page'] - 1].rect).save(str(f))
+                        pics[k] = f'<img style="max-width:330px" src="{E(_rel(f, jd))}" alt="{E(f.name)}">'
+                except Exception:
+                    pass
+        last = (r.get('attempts') or [{}])[-1].get('review') or {}
+        checks = ''.join(f'<li>{"✔" if c["passed"] else "✖"} {E(c["check"])}</li>' for c in last.get('checks', []))
+        head = (f'ACCEPTED: "{E(str(r.get("old")))}" → "{E(str(r.get("new")))}" (attempt {len(r.get("attempts", []))})'
+                if isinstance(acc, dict) else f'BLOCKED: {E(str(r.get("blocked")))}')
+        out.append(f'<tr><td>{E(r["item"])}</td><td>{pics[0]}</td><td>{pics[1]}</td><td>{head}<ul>{checks}</ul></td></tr>')
+    sb = job.get('qa_sendbacks') or []
+    out.append('</table>' + (f'<p>Release QA sent work back to repair {len(sb)} time(s): '
+                             f'{E(str(sb))}</p>' if sb else '<p>Release QA did not need to send any work back.</p>'))
+    return ''.join(out)
+
+
 def write_job_report(root, job):
     from controller import next_action
     root = Path(root)
@@ -152,6 +197,7 @@ def write_job_report(root, job):
                          f'<td>{E(str((decided.get(iid) or {}).get("correction") or f.get("proposal") or ""))}</td>'
                          f'<td>{E(dec)}</td></tr>')
             b.append('</table>')
+    b.append(_repairs_section(root, job, jd))
     b.append(page_by_page(qa.get('image_review')))
     un = qa.get('unverified_items') or []
     if un:

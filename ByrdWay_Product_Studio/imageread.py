@@ -237,7 +237,8 @@ def check_solved_equations(lines):
         rect = (min(x0, best[0]['rect'][0]), y0, max(x1, best[0]['rect'][2]), best[0]['rect'][3])
         out.append({'status': status, 'kind': 'solved equation', 'statement': f'{eq}  →  ' + ' or '.join(f'{v} = {x}' for x in shown),
                     'shown': ' or '.join(f'{v} = {x}' for x in shown), 'expected': r.get('expected'), 'rect': rect,
-                    'conf': min(ln['conf'], best[0]['conf']), 'methods': r['methods'], 'evidence': r['evidence']})
+                    'conf': min(ln['conf'], best[0]['conf']), 'methods': r['methods'], 'evidence': r['evidence'],
+                    'line': best[0]['text'], 'line_rect': tuple(best[0]['rect']), 'token': shown[-1]})
     return out
 
 
@@ -499,7 +500,8 @@ def _step_item(status, pa, pb, la, lb, prev, why):
             'shown': _norm_term(pb), 'expected': exp.replace('**', '^') if status == STATUS_ERR else None,
             'rect': rect, 'conf': min(la['conf'], lb['conf']), 'methods': ['symbolic simplify(previous - step) == 0',
             'numeric spot checks at 3 points', 'OCR re-readings (lost superscripts, separators)'],
-            'evidence': why, 'reason': why if status == STATUS_UNREADABLE else None, 'line': lb['text']}
+            'evidence': why, 'reason': why if status == STATUS_UNREADABLE else None, 'line': lb['text'],
+            'line_rect': tuple(lb['rect']), 'token': _norm_term(pb)}
 
 
 # ------------------------------------------------------------------ relation chains (v0.6.0)
@@ -702,7 +704,8 @@ def typo_candidates(pass_a, pass_b):
             sugg = sp.correction(wl)
             out.append({'status': 'SUSPECTED_TYPO', 'kind': 'spelling', 'statement': w,
                         'shown': w, 'expected': sugg if sugg and sugg != wl else None,
-                        'rect': ln['rect'], 'conf': ln['conf'], 'line': ln['text']})
+                        'rect': ln['rect'], 'conf': ln['conf'], 'line': ln['text'], 'line_rect': tuple(ln['rect']),
+                        'token': w})
     return out
 
 
@@ -739,8 +742,8 @@ def _stable_id(pno, f):
 def _cached_passes(pdf_path, page, pno, cache_dir):
     if not cache_dir:
         return [ocr_page(page, dpi) for dpi in OCR_DPIS]
-    h = hashlib.sha256(Path(pdf_path).read_bytes()).hexdigest()[:20]
-    p = Path(cache_dir) / f'{h}_p{pno}_v{READER_VERSION}.json'
+    h = hashlib.sha256(page.get_pixmap(dpi=72).samples).hexdigest()[:20]       # same picture -> same reading
+    p = Path(cache_dir) / f'px_{h}_v{READER_VERSION}.json'
     if p.exists():
         try:
             return json.loads(p.read_text(encoding='utf-8'))
@@ -773,7 +776,8 @@ def review_pdf(pdf_path, pages=None, crop_dir=None, progress=None, cache_dir=Non
                     found.append({'status': status, 'kind': 'arithmetic', 'statement': f'{lhs} = {rhs}',
                                   'shown': rhs, 'expected': r.get('expected'), 'rect': ln['rect'],
                                   'conf': ln['conf'], 'methods': r['methods'], 'evidence': r['evidence'],
-                                  'alternative_reading': alt, 'line': ln['text']})
+                                  'alternative_reading': alt, 'line': ln['text'], 'line_rect': tuple(ln['rect']),
+                                  'token': rhs})
             for f in check_solved_equations(lines):
                 if f['status'] == STATUS_ERR:
                     val = f['shown'].split('=')[-1].strip()

@@ -269,14 +269,16 @@ def image_findings(root, job_id):
         out.append({'id': iid, 'page': f.get('page'), 'kind': 'typo' if f['check'] == 'image.typo' else 'math',
                     'statement': f.get('statement'), 'detail': f['detail'], 'proposal': f.get('proposal'),
                     'crop': f.get('crop'), 'rect': f.get('rect'), 'expected': f.get('expected'),
-                    'decision': d.get('verdict'), 'decided_by': d.get('owner'), 'correction': d.get('correction')})
+                    'decision': d.get('verdict'), 'decided_by': d.get('owner'), 'correction': d.get('correction'),
+                    'replacement': d.get('replacement')})
     for iid, d in dec.items():                      # dismissed items drop out of QA findings; keep them listed
         if iid not in items and d.get('snapshot'):
             out.append({**d['snapshot'], 'decision': d.get('verdict'), 'decided_by': d.get('owner')})
     return sorted(out, key=lambda x: (x.get('page') or 0, x['id']))
 
 
-def decide_image_finding(root, job_id, item_id, verdict, owner, correction=None, note=''):
+def decide_image_finding(root, job_id, item_id, verdict, owner, correction=None, note='', replacement=None,
+                         repair_authorized=False):
     """Owner decision on one image finding: 'confirmed' (a real error, fix it in the source) or
     'dismissed' (not an error, e.g. the reader misread the picture). Then Release QA re-evaluates."""
     if verdict not in ('confirmed', 'dismissed'):
@@ -293,7 +295,9 @@ def decide_image_finding(root, job_id, item_id, verdict, owner, correction=None,
     snap = {k: known[item_id][k] for k in ('id', 'page', 'kind', 'statement', 'detail', 'proposal', 'crop', 'rect', 'expected')}
     job.setdefault('image_decisions', {})[item_id] = {'verdict': verdict, 'owner': owner.strip(), 'at': utcnow(),
                                                      'correction': (correction or known[item_id].get('proposal')),
-                                                     'note': note, 'snapshot': snap}
+                                                     'note': note, 'snapshot': snap,
+                                                     'replacement': (replacement or '').strip() or None,
+                                                     'repair_authorized': bool(repair_authorized) and verdict == 'confirmed'}
     qa = ReleaseQAAgent(o.root, o.settings).evaluate(job, run_browser=False) if _pdf_only(job) else \
         ReleaseQAAgent(o.root, o.settings).evaluate(job)
     job['qa'] = qa
@@ -372,3 +376,24 @@ def export_correction_sheet(root, job_id, owner, explicit_approval=False, dest_d
     o.save_job(job)
     JobLog(root, job_id).info('Explainer Repair', f'Correction sheet exported by {owner}: {len(confirmed)} item(s)')
     return out
+
+
+def repair_confirmed_image_findings(root, job_id, owner, explicit_approval=False, progress=None):
+    """Owner-authorized repair of CONFIRMED image findings on a protected copy (new job):
+    Repair Engineer -> Repair Reviewer -> re-diagnosis -> Release QA (sends failures back) -> owner approval.
+    Every corrected region is RECONSTRUCTED_REGION and needs the owner's visual approval before release."""
+    if explicit_approval is not True:
+        raise PermissionError('Explicit owner authorization required')
+    if not owner or not owner.strip():
+        raise ValueError('Your name is required')
+    o = Orchestrator(root)
+    job = o.load_job(job_id)
+    dec = {k: dict(v) for k, v in (job.get('image_decisions') or {}).items()}
+    todo = [k for k, v in dec.items() if v['verdict'] == 'confirmed']
+    if not todo:
+        raise PermissionError('No confirmed findings to repair')
+    for k in todo:
+        dec[k]['repair_authorized'] = True
+    return o.run_repair_job(job['product_id'], run_browser=False, progress=progress, decisions=dec,
+                            authorization={'by': owner.strip(), 'method': 'repair confirmed image findings',
+                                           'at': utcnow(), 'from_job': job_id, 'items': todo})

@@ -190,6 +190,46 @@ class Workflow(Base):
         from controller import next_action
         self.assertIn('Correction Sheet', next_action(s.job(j['id'])))
 
+    def test_confirmed_errors_repaired_on_copy_reviewed_reverified_then_approved(self):
+        import release, pymupdf
+        s, m, d, j, h, p = self._job()
+        with self.assertRaises(PermissionError):
+            s.repair_image_findings(j['id'], 'Owner', True)                   # nothing confirmed yet
+        for it in s.image_findings(j['id']):
+            s.decide_image_finding(j['id'], it['id'], 'confirmed', 'Owner',
+                                   replacement='equation' if it['kind'] == 'typo' else None)
+        with self.assertRaises(PermissionError):
+            s.repair_image_findings(j['id'], 'Owner', False)                  # explicit authorization required
+        j2 = s.repair_image_findings(j['id'], 'Owner', True)
+        reviews = j2['repair_reviews']
+        self.assertTrue(reviews and all(r['accepted'] for r in reviews), reviews)
+        self.assertTrue(all(r['reviewer'].startswith('Repair Reviewer') for r in reviews))
+        self.assertEqual(j2['qa'].get('image_findings'), [], 'independent re-diagnosis finds no remaining error')
+        self.assertEqual(sha256(original_file(self.ws, m['id'])[0]), h, 'original untouched')
+        self.assertEqual(sha256(p), h)
+        with pymupdf.open(j2['candidate']) as doc:
+            txt = imageread.review_pdf(j2['candidate'])
+        self.assertEqual(txt['stats']['SUSPECTED_ERROR'], 0, 'the repaired copy verifies')
+        self.assertEqual(txt['stats']['SUSPECTED_TYPO'], 0)
+        self.assertTrue(any('2x + 12' == i['statement'].split(' = ', 1)[-1] for i in txt['items']))
+        with self.assertRaises(PermissionError):
+            s.approve(j2['id'], 'Owner', True)                                # pages not yet confirmed
+        j3 = release.attest(self.ws, j2['id'], 'ALL', 'Owner', 'checked every page and every correction')
+        self.assertEqual(j3['qa']['decision'], 'PASS', j3['qa']['reasons'])
+        with self.assertRaises(PermissionError):
+            s.approve(j2['id'], 'Owner', True)                                # reconstructed regions: visual review
+        s.approve(j2['id'], 'Owner', True, visual_reviewed=True)
+        out = s.export(j2['id'])
+        self.assertEqual(release.verify_export(out), [])
+
+    def test_spelling_repair_needs_the_owners_word(self):
+        s, m, d, j, h, p = self._job()
+        for it in s.image_findings(j['id']):
+            s.decide_image_finding(j['id'], it['id'], 'confirmed' if it['kind'] == 'typo' else 'dismissed', 'Owner')
+        j2 = s.repair_image_findings(j['id'], 'Owner', True)
+        self.assertEqual(j2['changes']['changed'], [], 'no word is guessed on the owner\'s behalf')
+        self.assertTrue(any('must type the correct word' in str(x) for it in j2['iterations'] for x in it['rejected']))
+
     def test_dismissed_misread_then_attested_can_pass(self):
         s, m, d, j, h, p = self._job()
         for it in s.image_findings(j['id']):
@@ -251,6 +291,15 @@ class ReviewScreen(unittest.TestCase):
             with mock.patch.object(appmod.simpledialog, 'askstring', return_value='Owner'):
                 app.export_correction_sheet()
             self.assertEqual(t.opened[-1].name, 'correction_sheet.html')
+            before = set(app.studio.jobs() and [x['id'] for x in app.studio.jobs()])
+            with mock.patch.object(appmod.simpledialog, 'askstring', return_value='Owner'), \
+                    mock.patch.object(appmod.messagebox, 'askyesno', return_value=True):
+                app.repair_confirmed()
+                t.pump()
+            new = [x for x in app.studio.jobs() if x['id'] not in before]
+            self.assertEqual(len(new), 1, 'Repair Confirmed on a Copy created one repair job')
+            j2 = app.studio.job(new[0]['id'])
+            self.assertTrue(any(r['accepted'] for r in j2.get('repair_reviews', [])), j2.get('repair_reviews'))
             self.assertEqual(t.errors, [])
         finally:
             t.tearDown()

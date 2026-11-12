@@ -130,12 +130,19 @@ class AcademicVerifierAgent:
             if not verdict:
                 results.append({'status': 'PENDING_OWNER_DECISION', 'file': rel, 'page': pno,
                                 'question': f'Image finding {iid}: {it["statement"]}', 'evidence': ev})
+            fix = None
+            if verdict == 'confirmed' and d.get('repair_authorized'):
+                fix = {'type': 'image_patch', 'file': rel, 'reason': f'owner-confirmed correction of {iid}',
+                       'item': {k: it.get(k) for k in ('id', 'page', 'kind', 'statement', 'shown', 'expected', 'rect',
+                                                        'line', 'line_rect', 'token')},
+                       'decision': {k: d.get(k) for k in ('replacement', 'owner', 'at')},
+                       'find': iid, 'replace': d.get('replacement') or it.get('expected')}
             what = 'spelling' if typo else f'"{it["statement"]}" appears incorrect (verified value: {it.get("expected")})'
             findings.append({'id': iid, 'check': 'image.typo' if typo else 'image.math_error', 'severity': sev,
                              'category': 'typography' if typo else 'academic', 'file': rel, 'page': pno, 'line': None,
                              'detail': f'Page {pno}: {what}' + (f' "{it["statement"]}"' if typo else '') +
                                        (' - CONFIRMED by owner' if verdict == 'confirmed' else ' - read from the page image'),
-                             'evidence': ev, 'fix': None, 'proposal': it.get('proposal'), 'crop': it.get('crop'),
+                             'evidence': ev, 'fix': fix, 'proposal': it.get('proposal'), 'crop': it.get('crop'),
                              'image_item': iid, 'decision': verdict, 'rect': it['rect'], 'statement': it['statement'],
                              'expected': it.get('expected')})
         for pno, st in review['pages'].items():
@@ -190,6 +197,24 @@ class ExplainerRepairAgent:
         evidence = {k: v for k, v in ev.items() if k != 'comparison'}
         evidence['changed_pages'] = ev['changed_pages']
         return wc.replace_file_bytes(fix['file'], out.read_bytes(), fix['reason'], 'deterministic:pdf_region', evidence)
+
+    def apply_image_patch(self, wc, fix, work_dir, job=None):
+        """Repair Engineer <-> Repair Reviewer on the working copy of a flattened page (RECONSTRUCTED_REGION)."""
+        import imagerepair
+        try:
+            out, ev = imagerepair.repair_with_review(wc.path(fix['file']), Path(work_dir) / fix['item']['id'],
+                                                     fix['item'], fix['decision'])
+        except imagerepair.RepairBlocked as e:
+            if job is not None:
+                job.setdefault('repair_reviews', []).append({'item': fix['item']['id'], 'accepted': False,
+                                                             'attempts': e.attempts, 'blocked': str(e)})
+            raise PatchError(str(e))
+        if job is not None:
+            job.setdefault('repair_reviews', []).append({'item': fix['item']['id'], 'accepted': True, **ev})
+        return wc.replace_file_bytes(fix['file'], out.read_bytes(), fix['reason'], 'deterministic:image_region',
+                                     {'changed_pages': ev['changed_pages'], 'patch': ev['accepted'],
+                                      'reviewer_checks': ev['attempts'][-1]['review']['checks'],
+                                      'status': 'RECONSTRUCTED_REGION_AWAITING_VISUAL_APPROVAL'}, defect_id=fix['item']['id'])
 
 
 # ============================================================== detection
@@ -287,7 +312,7 @@ class Orchestrator:
 
     # --------------------------------------------------------------------
     def run_repair_job(self, pid, ai_enabled=False, approver=None, ai_client=None, run_browser=True,
-                       progress=None, authorization=None):
+                       progress=None, authorization=None, decisions=None):
         """Full bounded quality loop. Returns the job record."""
         r = self.settings['repair']
         job_id = time.strftime('%Y%m%d%H%M%S') + '_' + uuid.uuid4().hex[:6]
@@ -303,6 +328,8 @@ class Orchestrator:
                'roles_used': [ROLE_ORCH, ROLE_AV, ROLE_QA],
                'repair_authorization': authorization or {'by': 'not recorded (direct engine call)'},
                'prior_diagnosis': self._latest_diagnosis(pid)}
+        if decisions:
+            job['image_decisions'] = decisions
         self.save_job(job)
         say(f'Job {job_id} started for {manifest["name"]} ({manifest.get("product_type")})')
         t0 = time.time()
@@ -310,7 +337,8 @@ class Orchestrator:
             wc = WorkingCopy.create(self.root, pid, job_id)
             cp = wc.checkpoint('baseline')
             shots = jd / 'evidence'
-            state = detect_all(self.settings, wc.files, shots, 'baseline', run_browser)
+            dkw = {'decisions': decisions, 'progress': progress} if decisions else {}
+            state = detect_all(self.settings, wc.files, shots, 'baseline', run_browser, **dkw)
             job['roles_used'] += [ROLE_PT] if 'power_tool' in state['types'] else []
             job['roles_used'] += [ROLE_EX] if 'pdf' in state['types'] else []
             job['baseline'] = self._summ(state)
@@ -353,6 +381,9 @@ class Orchestrator:
                     try:
                         if fx.get('type') == 'pdf_text':
                             rec = ExplainerRepairAgent().apply_fix(wc, fx, jd / 'pdf_work')
+                        elif fx.get('type') == 'image_patch':
+                            say(f'Repair Engineer + Repair Reviewer: {fx["item"]["id"]} (page {fx["item"]["page"]})')
+                            rec = ExplainerRepairAgent().apply_image_patch(wc, fx, jd / 'pdf_work', job)
                         else:
                             rec = wc.apply_patch(fx['file'], fx['find'], fx['replace'], fx['reason'],
                                                  source='ai_suggestion' if f['check'] == 'ai.patch' else 'deterministic',
@@ -364,7 +395,7 @@ class Orchestrator:
                         fail_count[_fixkey(f)] += 1
                         rejected.append({'finding': f['id'], 'error': str(e)})
                         wc.rollback(single_cp, f'fix failed: {e}')
-                new_state = detect_all(self.settings, wc.files, shots, f'iter{it}', run_browser)
+                new_state = detect_all(self.settings, wc.files, shots, f'iter{it}', run_browser, **dkw)
                 reg, new_defects = _regressions(state, new_state)
                 rec = {'iteration': it, 'applied': applied, 'rejected': rejected, 'regressions': reg,
                        'new_defects': [_fkey(f) for f in new_defects],
@@ -411,6 +442,32 @@ class Orchestrator:
             job['status'] = 'QA'
             self.save_job(job)
             qa = ReleaseQAAgent(self.root, self.settings).evaluate(job, run_browser)
+            for qround in range(1, int(r.get('qa_sendback_rounds', 2)) + 1):
+                tried = {tuple(x) for x in job.get('qa_sendback_keys', [])}
+                back = [f for f in qa.get('open_findings') or [] if f.get('fix') and
+                        f['severity'] in ('CRITICAL', 'MAJOR') and str(_fixkey(f)) not in tried]
+                if qa['decision'] == 'PASS' or not back:
+                    break
+                say(f'Release QA sent {len(back)} defect(s) back to repair (round {qround})')
+                job.setdefault('qa_sendbacks', []).append({'round': qround, 'defects': [f['id'] for f in back]})
+                job.setdefault('qa_sendback_keys', []).extend([str(_fixkey(f))] for f in back)
+                for f in back:
+                    cp1 = wc.checkpoint(f'before QA send-back {f["id"]}')
+                    try:
+                        if f['fix'].get('type') == 'image_patch':
+                            ExplainerRepairAgent().apply_image_patch(wc, f['fix'], jd / 'pdf_work', job)
+                        elif f['fix'].get('type') == 'pdf_text':
+                            ExplainerRepairAgent().apply_fix(wc, f['fix'], jd / 'pdf_work')
+                        else:
+                            wc.apply_patch(f['fix']['file'], f['fix']['find'], f['fix']['replace'], f['fix']['reason'],
+                                           source='deterministic', defect_id=f['id'])
+                    except Exception as e:
+                        wc.rollback(cp1, f'QA send-back fix failed: {e}')
+                cand = wc.repack(cand_dir / f'{job_id}_{manifest["name"]}')
+                job.update({'candidate': str(cand), 'candidate_sha256': sha256(cand), 'history': wc.meta['history'],
+                            'checkpoints': [{'id': c['id'], 'history_len': c['history_len']} for c in wc.meta['checkpoints']],
+                            'changes': wc.changed_files()})
+                qa = ReleaseQAAgent(self.root, self.settings).evaluate(job, run_browser)
             job['qa'] = qa
             job['status'] = {'PASS': 'AWAITING_OWNER_APPROVAL'}.get(qa['decision'], qa['decision'])
             job['corrections'] = correction_lifecycle(read_json(jd / 'baseline_findings.json'), job, qa)
