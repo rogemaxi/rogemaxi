@@ -89,3 +89,17 @@ Fix before commercial use: Jordan logo on the mascot's sneakers; Bentley-like wi
   the subject allows (physics, functions, statistics); 7. unlimited generated practice with verified answers;
   8. progress report a student can show a parent or teacher (stored locally, no account, works offline);
   9. accessible, mobile, single-file, no paid service needed to run.
+
+### Executive directive (2026-11-12): one integrated operation
+- **Two divisions, one dashboard** (Notion "Byrd Powerhouse AI — Revenue Division", private to the owner): Engineering
+  produces verified products; Revenue markets and sells only products whose Studio QA = PASS and owner-approved.
+  No outreach, publishing, spending, paid lookups or product releases without the owner's approval.
+- **Construction is mandatory scope:** from an owner-approved table of contents the Engineering Division must build
+  COMPLETE Power Tools, Lil Dr. Byrd Explainers and (on request) Concept Tiles: every unit through academic
+  verification, functional tests, visual inspection, repair and independent Loop QA; 100 % of mandatory release
+  checks must pass; no missing chapters, wrong answers or unverified completion claims.
+- **Reliability target 99.997 %**: a measured result (defined denominators, enough real tests), never asserted.
+- **Sales targets (targets, not guarantees):** week 1 = 125 verified paid units; +10 % minimum / +17 % stretch
+  week over week; milestone 1,000+ paid units/week (week 23 on the minimum path, week 15 on the stretch path).
+  Track paid units, gross, fees, refunds, net revenue, conversion; below target -> corrective action recorded.
+- TpT catalog verified 2026-11-12: 30 products (2 store pages). Re-verify every store page on each inventory sync.
