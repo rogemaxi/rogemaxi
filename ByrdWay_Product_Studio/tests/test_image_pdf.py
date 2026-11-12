@@ -66,6 +66,9 @@ class Reader(Base):
         ok = {i['statement'] for i in steps if i['status'] == imageread.STATUS_OK}
         for s in ('f(5) = 3(5) + 2', '15 + 2 = 17', '320 + 400 = 720'):
             self.assertIn(s, ok, 'a correct step (incl. a function value) must verify')
+        self.assertEqual(rv['stats']['coverage']['pages'], 3)
+        self.assertEqual(rv['stats']['coverage']['pages_unverified'], 0)
+        self.assertTrue(all(v['status'] for v in rv['pages'].values()), 'every page gets an explicit status')
         pg = rv['pages'][3]
         self.assertGreaterEqual(pg['verified'], 5)
         self.assertTrue(any('Simplify' in t for t in pg['transcript']), 'full page text is kept for the report')

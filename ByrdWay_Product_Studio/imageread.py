@@ -666,9 +666,19 @@ def review_pdf(pdf_path, pages=None, crop_dir=None, progress=None, cache_dir=Non
                                'not_checkable': sum(1 for f in found if f['status'] == STATUS_UNREADABLE),
                                'typos': sum(1 for f in found if f['status'] == 'SUSPECTED_TYPO'),
                                'transcript': [l['text'] for l in lines]}
+            st_ = page_stats[pno]
+            # never silently omit a page: every page gets an explicit reading status
+            st_['status'] = ('NO TEXT READ - UNVERIFIED' if not lines else
+                             'MATH FOUND, NOTHING CHECKABLE - UNVERIFIED' if st_['math_lines'] and not st_['statements'] else
+                             'NO MATH FOUND - VISUAL CHECK NEEDED' if not st_['math_lines'] else
+                             'PARTIALLY VERIFIED')
             items += found
     stats = {s: sum(1 for i in items if i['status'] == s)
              for s in (STATUS_OK, STATUS_ERR, STATUS_MISREAD, STATUS_UNREADABLE, 'SUSPECTED_TYPO')}
+    ml = sum(v['math_lines'] for v in page_stats.values())
+    stats['coverage'] = {'pages_read': sum(1 for v in page_stats.values() if v['lines_read']), 'pages': len(page_stats),
+                         'math_lines': ml, 'statements_checked': sum(v['statements'] for v in page_stats.values()),
+                         'pages_unverified': sum(1 for v in page_stats.values() if 'UNVERIFIED' in v['status'])}
     return {'pages': page_stats, 'items': items, 'stats': stats, 'engine': 'RapidOCR (local, offline)',
             'dpis': list(OCR_DPIS)}
 

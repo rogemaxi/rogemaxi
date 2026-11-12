@@ -66,12 +66,18 @@ def page_by_page(image_review):
                  f'{tot("verified")} math statements and worked steps verified correct, {tot("errors")} possible '
                  f'error(s), {tot("not_checkable")} could not be checked (reason given), {tot("typos")} possible '
                  f'spelling error(s).</p><table><tr><th>Page</th><th>Lines read</th><th>Math lines</th>'
-                 f'<th>Checked</th><th>Correct</th><th>Possible errors</th><th>Could not check</th><th>Spelling</th></tr>')
+                 f'<th>Checked</th><th>Correct</th><th>Possible errors</th><th>Could not check</th><th>Spelling</th>'
+                 f'<th>Page status</th></tr>')
         for pno in sorted(pages, key=lambda k: int(k)):
             v = pages[pno]
             b.append(f'<tr><td>{pno}</td><td>{v.get("lines_read", 0)}</td><td>{v.get("math_lines", "")}</td>'
                      f'<td>{v.get("statements", 0)}</td><td>{v.get("verified", 0)}</td><td>{v.get("errors", "")}</td>'
-                     f'<td>{v.get("not_checkable", "")}</td><td>{v.get("typos", "")}</td></tr>')
+                     f'<td>{v.get("not_checkable", "")}</td><td>{v.get("typos", "")}</td>'
+                     f'<td>{E(str(v.get("status", "")))}</td></tr>')
+        unv = [k for k, v in pages.items() if 'UNVERIFIED' in str(v.get('status', ''))]
+        if unv:
+            b.append(f'<p class="next warn">UNVERIFIED pages (math present but not machine-checked): '
+                     f'{E(", ".join(sorted(unv, key=int)))} - your visual check is required.</p>')
         b.append('</table><p><small>Lines with math that are not listed below are definitions, single values, '
                  'formulas without a worked step, or text the reader could not separate from the artwork - your '
                  'page confirmation covers them.</small></p>')
