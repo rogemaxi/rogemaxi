@@ -121,15 +121,18 @@ jobs:
         run: |
           $v = $env:VERSION
           $files = "ByrdWayStudio_v${v}_Windows_exe.zip", "ByrdWay_Product_Studio_v${v}_source.zip", "E2E_Explainer_Evidence_v$v.zip", "VERIFICATION_MANIFEST.txt"
-          gh release delete "v$v" --yes --cleanup-tag 2>$null
-          # remove superseded DRAFT releases made by this workflow (never touches published releases)
-          $old = gh release list --limit 50 --json tagName,isDraft,name | ConvertFrom-Json | Where-Object { $_.isDraft -and $_.name -like 'ByrdWay Product Engineering Studio v*' -and $_.tagName -ne "v$v" }
-          foreach ($r in $old) { gh release delete $r.tagName --yes --cleanup-tag; "removed superseded draft $($r.tagName)" }
-          $notes = (Get-Content VERIFICATION_MANIFEST.txt -Raw) + "`nDRAFT: not published. The owner decides when to publish."
-          gh release create "v$v" @files --draft --target $env:GITHUB_SHA --title "ByrdWay Product Engineering Studio v$v" --notes "$notes"
+          # A manual run publishes a TEST BUILD draft named after its commit. Numbered drafts (e.g. v0.5.0) are never
+          # replaced or deleted here; only earlier test-build drafts are removed.
+          $sha = $env:GITHUB_SHA.Substring(0,7)
+          $tag = "v$v-build-$sha"
+          gh release delete $tag --yes --cleanup-tag 2>$null
+          $old = gh release list --limit 50 --json tagName,isDraft,name | ConvertFrom-Json | Where-Object { $_.isDraft -and $_.name -like '*test build*' -and $_.tagName -ne $tag }
+          foreach ($r in $old) { gh release delete $r.tagName --yes --cleanup-tag; "removed superseded test-build draft $($r.tagName)" }
+          $notes = (Get-Content VERIFICATION_MANIFEST.txt -Raw) + "`nTEST BUILD of commit $sha (version stays $v until the owner's acceptance tests pass). DRAFT: not published."
+          gh release create $tag @files --draft --target $env:GITHUB_SHA --title "ByrdWay Product Engineering Studio v$v test build $sha" --notes "$notes"
           if ($LASTEXITCODE -ne 0) { exit 1 }
           $dl = "$env:RUNNER_TEMP\downloaded"
-          gh release download "v$v" --dir $dl
+          gh release download $tag --dir $dl
           if ($LASTEXITCODE -ne 0) { exit 1 }
           foreach ($f in $files) {
             $a = (Get-FileHash $f -Algorithm SHA256).Hash; $b = (Get-FileHash "$dl\$f" -Algorithm SHA256).Hash
