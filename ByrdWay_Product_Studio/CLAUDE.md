@@ -103,3 +103,19 @@ Fix before commercial use: Jordan logo on the mascot's sneakers; Bentley-like wi
   week over week; milestone 1,000+ paid units/week (week 23 on the minimum path, week 15 on the stretch path).
   Track paid units, gross, fees, refunds, net revenue, conversion; below target -> corrective action recorded.
 - TpT catalog verified 2026-11-12: 30 products (2 store pages). Re-verify every store page on each inventory sync.
+
+### The Byrd Powerhouse (owner, 2026-11-12) — never lose the whole while working on a part
+- ONE Windows application (the deliverable is a ZIP the owner installs and runs) housing BOTH divisions:
+  Engineering (12 agents: inspect/diagnose/repair existing Power Tools, Lil Dr. Byrd/Anime Explainers, Concept
+  Tiles; Curriculum Architect + Builders construct new ones; independent Loop QA) and Revenue (marketing, video
+  production, prospecting, sales, CRM/dashboard; today the CRM lives in the owner's Notion, to be connected).
+- **Learning loop:** every defect the Inspection Division confirms becomes a reusable LESSON (pattern + check);
+  Builders must pass every lesson's check before QA. Construction QA reuses the same Reader/Verifier that
+  inspects existing products, so builders are judged by what the repairers learned.
+- Picture-page repair is preview-only; professional fixes go into the editable source (proven 2026-11-12).
+- Marketing may apply publicly published methods of named experts (e.g. Hormozi value equation) but never
+  impersonates them or speaks in their names.
+- Physics + Honors Concept Tiles: 100-tile TOC APPROVED by owner 2026-11-12 (units 1-10 x 10, 11 Honors tiles),
+  owner's existing Concept Tile sections: Meaning & reasoning / Picture the reasoning / Worked examples /
+  Practice & check / Misconceptions & teach it back / Honors: full reasoning; Lil Dr. Byrd on every tile.
+  Product content stays private (not in this public repo).
