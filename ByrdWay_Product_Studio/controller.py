@@ -42,6 +42,18 @@ class Studio:
                                                       progress=progress, run_browser=run_browser, ai_client=ai_client,
                                                       authorization=authorization)
 
+    def powerhouse(self):
+        import powerhouse
+        return powerhouse.organization()
+
+    def lessons(self):
+        import powerhouse
+        return powerhouse.lessons_for_build(self.root)
+
+    def job_timeline(self, job_id):
+        import powerhouse
+        return powerhouse.job_timeline(self.job(job_id))
+
     def jobs(self):
         return Orchestrator(self.root).list_jobs()
 

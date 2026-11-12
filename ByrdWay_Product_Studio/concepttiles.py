@@ -325,7 +325,7 @@ centimeters kilometers vectors scalars displacement equilibrium honors byrdway l
 
 
 # ------------------------------------------------------------------ one unit through the loop
-def build_unit(toc_unit, tiles, mascot_path, out_dir):
+def build_unit(toc_unit, tiles, mascot_path, out_dir, lessons=None):
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     checks = check_structure(toc_unit, tiles)
@@ -346,6 +346,7 @@ def build_unit(toc_unit, tiles, mascot_path, out_dir):
            'checks': [{'check': c[0], 'passed': bool(c[1]), 'detail': c[2]} for c in checks],
            'mandatory_checks': len(checks), 'failed': len(failed),
            'decision': 'PASS' if not failed else 'FAIL - back to the builder',
+           'lessons_held_to': lessons or [],
            'failures': [{'check': c[0], 'detail': c[2]} for c in failed]}
     (out_dir / f'unit_{toc_unit["unit"]:02d}_qa.json').write_text(json.dumps(rep, indent=2), encoding='utf-8')
     return rep

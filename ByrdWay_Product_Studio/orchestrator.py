@@ -476,6 +476,11 @@ class Orchestrator:
             log.error(ROLE_ORCH, 'Job failed', exc=e)
             job['status'] = 'ERROR'
             job['error'] = f'{type(e).__name__}: {e}'
+        try:                                         # Observer (agent 7): learn from this job
+            import powerhouse
+            job['lessons_recorded'] = powerhouse.record_lessons(self.root, job)
+        except Exception as e:
+            log.error(ROLE_ORCH, 'Observer could not record lessons', exc=e)
         job['duration_s'] = round(time.time() - t0, 2)
         job.pop('_ai_stop', None)
         job['original_intact'] = verify_original(self.root, pid)

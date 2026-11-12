@@ -64,7 +64,7 @@ class App(tk.Tk):
         top = ttk.Frame(self, padding=(12, 10))
         top.pack(fill='x')
         ttk.Label(top, text='BYRDWAY PRODUCT ENGINEERING STUDIO', font=('Segoe UI', 16, 'bold')).pack(anchor='w')
-        ttk.Label(top, text='Protected originals • Seven specialist roles • Independent verification • '
+        ttk.Label(top, text='BYRD POWERHOUSE: 12 engineering agents • Protected originals • Independent verification • '
                             'Owner approval • Nothing is ever published automatically').pack(anchor='w')
         self.status = tk.StringVar(value='Ready.')
         ttk.Label(self, textvariable=self.status, relief='sunken', anchor='w', padding=4).pack(side='bottom', fill='x')
@@ -76,6 +76,7 @@ class App(tk.Tk):
         self._costs_tab()
         self._backup_tab()
         self._logs_tab()
+        self._powerhouse_tab()
         self._poll_id = self.after(150, self._poll)
         self.refresh_all()
 
@@ -292,7 +293,7 @@ class App(tk.Tk):
     def progress(self, m):
         self.q.put(('progress', None, m, None))
 
-    def run_job(self):
+    def run_job(self, done_extra=None):
         try:
             pid = self.selected_pid()
         except ValueError as e:
@@ -314,6 +315,7 @@ class App(tk.Tk):
             rep = self.studio.job_evidence_dir(job['id']) / 'report.html'
             if rep.exists():
                 self.opener(rep)
+            done_extra and done_extra(job)
         from engine import utcnow
         auth = {'by': os.environ.get('USERNAME') or os.environ.get('USER') or 'owner',
                 'method': 'owner confirmed "Repair a copy" dialog', 'at': utcnow()}
@@ -978,6 +980,68 @@ class App(tk.Tk):
                                      'A safety backup of the current workspace is made first.'):
             self.run_bg('Restore', lambda: self.studio.restore(f, True),
                         lambda r: messagebox.showinfo('Restored', json.dumps(r, indent=1)))
+
+    def _powerhouse_tab(self):
+        """The Byrd Powerhouse: who the agents are, what each can do today, what they did, what they learned."""
+        f = ttk.Frame(self.nb, padding=8)
+        self.nb.add(f, text='7. Byrd Powerhouse')
+        self.ph_frame = f
+        org = self.studio.powerhouse()
+        ttk.Label(f, text='ENGINEERING DIVISION - 12 agents  (WORKING / PARTIAL / MISSING per product family)',
+                  font=('Segoe UI', 11, 'bold')).pack(anchor='w')
+        cols = ('group', 'agent', 'job', 'Power Tool', 'Lil Dr. Byrd Explainer', 'Concept Tiles')
+        self.ph_tree = ttk.Treeview(f, columns=cols, show='headings', height=12)
+        for c, w in zip(cols, (90, 150, 430, 90, 140, 100)):
+            self.ph_tree.heading(c, text=c)
+            self.ph_tree.column(c, width=w)
+        for group, agents in org['engineering'].items():
+            for a in agents:
+                st = a['status']
+                self.ph_tree.insert('', 'end', iid=f'agent{a["id"]}', values=(
+                    group, f'{a["id"]}. {a["name"]}', a['job'], st['Power Tool'], st['Lil Dr. Byrd Explainer'],
+                    st['Concept Tiles']))
+        self.ph_tree.pack(fill='x')
+        ttk.Label(f, text='REVENUE & MEDIA DIVISION', font=('Segoe UI', 11, 'bold')).pack(anchor='w', pady=(8, 0))
+        self.ph_rev = tk.Text(f, height=6, font=('Segoe UI', 9))
+        self.ph_rev.insert('1.0', '\n'.join(f'{r["status"]:8} {r["name"]}: {r["job"]}  [{r["where"]}]' for r in org['revenue'])
+                           + f'\nTargets: {org["sales_targets"]}   Quality: {org["quality_target"]}')
+        self.ph_rev.pack(fill='x')
+        bar = ttk.Frame(f)
+        bar.pack(fill='x', pady=6)
+        ttk.Button(bar, text='Feed a product to the Powerhouse (import + detect + repair + QA)…',
+                   command=self.powerhouse_feed).pack(side='left')
+        ttk.Button(bar, text='Show what the agents did (selected job)', command=self.powerhouse_timeline).pack(side='left', padx=6)
+        ttk.Button(bar, text='Lessons learned', command=self.powerhouse_lessons).pack(side='left')
+        self.ph_out = tk.Text(f, height=8, font=('Consolas', 9))
+        self.ph_out.pack(fill='both', expand=True)
+
+    def powerhouse_feed(self):
+        """One click: import a product, then run the full detect -> repair -> QA loop on a protected copy."""
+        before = {p['id'] for p in self.studio.products()}
+        self.import_one()
+        new = [p for p in self.studio.products() if p['id'] not in before]
+        if not new:
+            return
+        self.ptree.selection_set(new[0]['id'])
+        self.run_job(done_extra=lambda j: self.powerhouse_timeline(j['id']))
+
+    def powerhouse_timeline(self, job_id=None):
+        try:
+            jid = job_id or self.selected_job()
+        except ValueError as e:
+            return messagebox.showinfo('Select', str(e))
+        self.ph_out.delete('1.0', 'end')
+        for agent, did in self.studio.job_timeline(jid):
+            self.ph_out.insert('end', f'{agent:28} {did}\n')
+        self.nb.select(self.ph_frame)
+
+    def powerhouse_lessons(self):
+        self.ph_out.delete('1.0', 'end')
+        ls = self.studio.lessons()
+        if not ls:
+            self.ph_out.insert('end', 'No lessons yet: feed a product to the Powerhouse first.\n')
+        for l in ls:
+            self.ph_out.insert('end', f'{l["times_seen"]:4}x  {l["lesson"]:28} -> builders held to: {l["guarded_by"]}\n')
 
     def _logs_tab(self):
         f = ttk.Frame(self.nb, padding=8)
