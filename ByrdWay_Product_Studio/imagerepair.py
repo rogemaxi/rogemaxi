@@ -178,11 +178,17 @@ def review_patch(orig_pdf, cand_pdf, patch, item):
     before = imageread.review_pdf(orig_pdf, pages=[pno])
     after = imageread.review_pdf(cand_pdf, pages=[pno])
     probs = lambda rv: [i for i in rv['items'] if i['status'] in (imageread.STATUS_ERR, 'SUSPECTED_TYPO')]
-    still = [i for i in probs(after) if _overlap(i['rect'], box)]
+    # the SAME defect still at this spot (a different word that happens to share the line is not this defect)
+    still = [i for i in probs(after) if _overlap(i['rect'], box) and
+             (_norm(patch['old']) in _norm(i.get('shown') or i['statement']) or i['status'] == imageread.STATUS_ERR)]
     checks.append(('defect no longer detected at this location', not still,
                    f'still flagged: {[i["statement"] for i in still]}' if still else 'not flagged'))
-    new_probs = [i for i in probs(after) if not _overlap(i['rect'], box) and
-                 i['statement'] not in {j['statement'] for j in probs(before)}]
+    # pixels outside the box are proven unchanged above, so only a problem NEAR the patch can be caused by it;
+    # anything further away is the reader seeing an unchanged word differently (recorded, not blamed on the patch)
+    near = (box[0] - 60, box[1] - 30, box[2] + 60, box[3] + 30)
+    new_probs = [i for i in probs(after) if _overlap(i['rect'], near) and
+                 i['statement'] not in {j['statement'] for j in probs(before)} and
+                 _norm(i.get('shown') or i['statement']) != _norm(patch['old'])]
     checks.append(('no new suspected error or typo on the page', not new_probs,
                    f'new: {[i["statement"] for i in new_probs]}' if new_probs else 'none'))
     if item.get('kind') in ('worked step', 'solved equation', 'arithmetic', 'solving step'):
