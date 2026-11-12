@@ -114,24 +114,26 @@ def apply_patch(src_pdf, out_pdf, page_no, line_rect, line_text, old, new, strat
         runs, vert = _ink(page, (line_rect[0] - 2, line_rect[1] - 2, line_rect[2] + 2, line_rect[3] + 2), bg)
         if strategy != 'line':
             box = _snap(box, runs)
-            vert = _ink(page, box, bg)[1] or vert          # height of the OLD glyphs themselves (no descenders)
-        h = box[3] - box[1]
-        size = max(5.0, h * 0.82)
-        baseline = box[3] - h * 0.22
-        if vert and not re.search(r'[gjpqy(),]', old + new):
-            cap = vert[1] - vert[0]                     # printed glyph height = Helvetica cap height (0.72 em)
-            size, baseline = max(5.0, cap / 0.72), vert[1]
-        while size > 5 and fitz.get_text_length(text, 'helv', size) > max(box[2] - box[0], 1) * 1.6:
-            size -= 0.5
-        if strategy == 'line':                          # a rewritten line must fit inside the original line
-            while size > 5 and fitz.get_text_length(text, 'helv', size) > box[2] - box[0] - 2:
-                size -= 0.25
+            vert = _ink(page, box, bg)[1] or vert          # vertical extent of the OLD glyphs themselves
+        if vert:                                           # cover only the old glyphs, never the lines above/below
+            box = (box[0], max(box[1], vert[0] - 1.2), box[2], min(box[3], vert[1] + 1.2))
+        glyph_w = box[2] - box[0]
+        ink_h = (vert[1] - vert[0]) if vert else (box[3] - box[1]) * 0.7
+        tall = bool(re.search(r'[A-Z0-9bdfhklt/]', old))    # old word has caps/ascenders -> ink = cap height
+        size = max(5.0, ink_h / (0.72 if tall else 0.52))
+        baseline = (vert[1] if vert else box[3] - 1) - (0.21 * size if re.search(r'[gjpqy]', old) else 0)
+        # the correction must fit in the space of the old word: never widen the patch over neighbouring text
+        while size > 5 and fitz.get_text_length(text, 'helv', size) > glyph_w + 1:
+            size -= 0.25
+        if strategy != 'line' and size < ink_h / (0.72 if tall else 0.52) * 0.72:
+            raise ValueError(f'"{new}" does not fit in the space of "{old}" without shrinking it more than 28% '
+                             '- correct it in the editable source')
         width = fitz.get_text_length(text, 'helv', size)
-        box = (box[0], box[1], max(box[2], box[0] + width + 2), box[3])
         page.draw_rect(fitz.Rect(box), color=None, fill=bg, overlay=True)
         page.insert_text(fitz.Point(box[0] + 0.8, baseline), text, fontsize=size, fontname='helv', color=ink)
         doc.save(str(out_pdf), garbage=3, deflate=True)
-    return {'page': page_no, 'box': [round(v, 2) for v in box], 'old': old, 'new': new, 'text_drawn': text,
+    return {'page': page_no, 'box': [round(float(v), 2) for v in box], 'old': old, 'new': new, 'text_drawn': text,
+            'font_size': round(size, 2),
             'strategy': strategy, 'font': 'Helvetica (original font cannot be reproduced without the source)',
             'background_rgb': [round(c, 3) for c in bg], 'ink_rgb': [round(c, 3) for c in ink],
             'status': 'RECONSTRUCTED_REGION_AWAITING_VISUAL_APPROVAL'}
@@ -174,6 +176,22 @@ def review_patch(orig_pdf, cand_pdf, patch, item):
             or _norm(patch['old']) in _norm(patch['new'])
         checks.append(('reader sees the corrected text', new_ok, f'read: {reads}'))
         checks.append(('reader no longer sees the wrong text', old_gone, f'read: {reads}'))
+    # every OTHER word on the corrected line must still be there (the patch may not damage neighbours)
+    def _words(t):
+        return {w for w in re.findall(r'[A-Za-z0-9]{2,}', imageread.clean(t).replace('×', ' '))}
+    with fitz.open(orig_pdf) as a_, fitz.open(cand_pdf) as b_:
+        line_box = (box[0] - 250, box[1] - 1, box[2] + 250, box[3] + 1)
+        before_words, after_words = set(), set()
+        for d in imageread.OCR_DPIS:
+            before_words |= _words(' '.join(l['text'] for l in imageread.ocr_page(a_[pno - 1], d)
+                                            if _overlap(l['rect'], box) and _overlap(l['rect'], line_box)))
+            after_words |= _words(' '.join(l['text'] for l in imageread.ocr_page(b_[pno - 1], d)
+                                           if _overlap(l['rect'], box) and _overlap(l['rect'], line_box)))
+    olds = {_norm(w) for w in re.findall(r'[A-Za-z0-9]{2,}', patch['old'])}
+    lost = sorted(w for w in before_words if _norm(w) not in olds and
+                  not any(_norm(w) in _norm(x) or _norm(x) in _norm(w) for x in after_words))
+    checks.append(('neighbouring words on the line are intact', not lost,
+                   f'missing after the patch: {lost}' if lost else f'{len(before_words)} words checked'))
     # the corrected statement must verify and the page must not gain new problems
     before = imageread.review_pdf(orig_pdf, pages=[pno])
     after = imageread.review_pdf(cand_pdf, pages=[pno])
