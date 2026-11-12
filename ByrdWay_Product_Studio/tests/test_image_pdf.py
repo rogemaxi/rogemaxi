@@ -100,6 +100,21 @@ class Reader(Base):
         bad += [f'{l} = {r}' for x in wrong for st, l, r, _, _ in imageread.check_line(x) if st == imageread.STATUS_ERR]
         self.assertEqual(sorted(set(bad)), ['1.8/9 = 0.25', '3x + 6 - x = 2x + 8'], 'real errors are still caught')
 
+    def test_solving_steps_equations_and_inequalities(self):
+        def run(texts):
+            ln = [{'text': t, 'conf': 0.95, 'rect': (100, 22 * i, 300, 22 * i + 14)} for i, t in enumerate(texts)]
+            return imageread.check_relation_chains(ln, ln)
+        ok = run(['3(x - 2) + 5 ≤ 14', '3x - 1 ≤ 14', '3x ≤ 15', 'x ≤ 5'])
+        self.assertEqual([f['status'] for f in ok], [imageread.STATUS_OK] * 3)
+        ok = run(['x2 - 4x - 5 = 0', '(x + 1)(x - 5) = 0', 'x = -1   x = 5'])
+        self.assertEqual([f['status'] for f in ok], [imageread.STATUS_OK] * 2, 'lost superscript + two solutions')
+        bad = run(['2x + 7 > 15', '2x > 8', 'x > 3'])
+        self.assertEqual([f['status'] for f in bad][-1], imageread.STATUS_ERR, 'wrong final inequality is caught')
+        self.assertIn('4', bad[-1]['expected'])
+        self.assertEqual(run(['b > 1', '0 < b < 1']), [], 'parallel statements are not solving steps')
+        part = run(['(x - 8)(x + 3) = 0', 'x = 8'])
+        self.assertEqual(part[0]['status'], imageread.STATUS_UNREADABLE, 'an incomplete reading is never accused')
+
     def test_ocr_confusions(self):
         self.assertIn('3x-5=16', [r.replace(' ', '') for r in imageread._equation_readings('3x : 5=16')])
         self.assertIn('x^2-5x-24=0', imageread._equation_readings('x2-5x-24=0'))

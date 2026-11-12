@@ -257,6 +257,7 @@ _BAD = re.compile(r'[?？@#$%&_\[\]{}<>≤≥≠~"“”|]|[^\x00-\x7F×÷·−�
 
 def _norm_term(t):
     t = t.replace('−', '-').replace('–', '-').replace('—', '-').replace('·', '×').strip()
+    t = re.sub(r',?\s*(?:with\s+)?remainder\s*:?\s*0\s*$', '', t, flags=re.I)                 # "x + 3, remainder 0"
     t = re.sub(r'(\d+(?:\.\d+)?)\s*%', r'(\1/100)', t)                       # 30% -> (30/100)
     t = re.sub(r'(?<![\d.,])\d{1,3}(?:,\d{3})+(?![\d.,])', lambda m: m.group(0).replace(',', ''), t)  # 420,000 -> 420000
     return t.strip(' .,;')
@@ -282,6 +283,7 @@ def _term_readings(t, funcs):
         lambda s: re.sub(r'\)\s*([2-9])(?![\d.])', r')^\1', s),                          # )3 -> )^3
         lambda s: re.sub(r'(?<![\d.^])(\d)([2-9])(?=\()', r'\1^\2', s),                 # 33(x) -> 3^3(x)
         lambda s: s.replace('X', 'x'),
+        lambda s: s.replace(')+(', ')/('),                                                  # ÷ read as +
         lambda s: re.sub(r'(?<![A-Za-z])V(?=\s*\d)', '√', s),                          # V36 -> √36
         lambda s: re.sub(r'(?<![\d.^])10(-?\d)\s*([-+])\s*(\d)(?![\d.])', r'10^(\1\2\3)', s),  # 104 - 7 -> 10^(4-7)
         lambda s: re.sub(r'(?<![\d.^(])10(-?\d)(?![\d.]|\s*[-+]\s*\d)', r'10^(\1)', s),         # 104 × 10-7 -> 10^4 × 10^-7
@@ -500,6 +502,138 @@ def _step_item(status, pa, pb, la, lb, prev, why):
             'evidence': why, 'reason': why if status == STATUS_UNREADABLE else None, 'line': lb['text']}
 
 
+# ------------------------------------------------------------------ relation chains (v0.6.0)
+# Solving steps written one under another, each an equation or inequality in ONE variable:
+#     3(x - 2) + 5 ≤ 14          x² - 4x - 5 = 0
+#     3x - 1 ≤ 14                (x + 1)(x - 5) = 0
+#     x ≤ 5                      x = -1   x = 5
+# Every step must have the SAME solution set as the step above it.
+_REL = re.compile(r'(<=|>=|≤|≥|<|>|=)')
+_SOLFORM = re.compile(r'^\s*(?:-?[\d./]+\s*(?:<=|≤|<)\s*)?[a-z]\s*(?:<=|>=|≤|≥|<|>|=)\s*-?[\d./]+\s*$', re.I)
+
+
+def _rel_text(t):
+    t = clean(t)
+    t = re.sub(r'^.*?(?:solution|answer|solve|so|then)\s*:?\s*', '', t, flags=re.I) if re.search(
+        r'(?i)solution|answer|solve', t) else _LABEL.sub('', t)
+    t = t.replace('×', 'x').replace('X', 'x').replace('<=', '≤').replace('>=', '≥')
+    return t.strip(' .,;')
+
+
+def _rel_readings(t):
+    """Readings of an OCR'd relation: literal, '=' read for '-' inside brackets, ':' for '-', lost superscripts."""
+    outs = [t]
+    outs.append(re.sub(r'\(([a-z])\s*=\s*', r'(\1-', t))                      # 3(x=2)+5 -> 3(x-2)+5
+    outs.append(t.replace(':', '-'))
+    outs += [re.sub(r'([a-z])([2-9])(?![\d.])', r'\1^\2', o) for o in list(outs)]
+    seen, res = set(), []
+    for o in outs:
+        if o not in seen:
+            seen.add(o)
+            res.append(o)
+    return res
+
+
+def _solution_set(t):
+    """Real solution set of a one-variable equation/inequality (incl. 'a < x < b' and 'x = 1  x = 5'), or None."""
+    sp = academic.sp
+    import warnings
+    multi = re.findall(r'(?<![a-z])([a-z])\s*=\s*(-?\d+(?:\.\d+)?(?:/\d+)?)(?![\d.])', t, re.I)
+    if len(multi) >= 2 and len({v.lower() for v, _ in multi}) == 1 and \
+            re.fullmatch(r'(?:\s*[,;]?\s*(?:or|and)?\s*[a-z]\s*=\s*-?[\d./]+)+\s*', t, re.I):
+        try:
+            return sp.Symbol(multi[0][0].lower()), sp.FiniteSet(*[academic.safe_parse(x) for _, x in multi])
+        except Exception:
+            return None
+    parts = _REL.split(t)
+    if len(parts) not in (3, 5):
+        return None
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            exprs = [academic.safe_parse(p) for p in parts[0::2]]
+    except Exception:
+        return None
+    if not all(isinstance(e, academic.sp.Expr) for e in exprs):
+        return None
+    syms = set().union(*[e.free_symbols for e in exprs])
+    if len(syms) != 1:
+        return None
+    v = syms.pop()
+    ops = {'<': sp.Lt, '>': sp.Gt, '≤': sp.Le, '≥': sp.Ge, '=': sp.Eq}
+    sol = sp.S.Reals
+    try:
+        for i, op in enumerate(parts[1::2]):
+            rel = ops[op](exprs[i], exprs[i + 1])
+            if rel in (sp.true, sp.false):
+                return None
+            sol = sol.intersect(sp.solveset(rel, v, domain=sp.S.Reals))
+    except Exception:
+        return None
+    return v, sol
+
+
+def check_relation_chains(lines, other_pass=()):
+    """Verify solving steps (equations/inequalities in one variable) stacked in a column."""
+    rels = []
+    for ln in lines:
+        t = _rel_text(ln['text'])
+        if not _REL.search(t) or _ARROW.search(t) or len(t) > 60:
+            continue
+        sets = [(r, _solution_set(r)) for r in _rel_readings(t)]
+        sets = [(r, s) for r, s in sets if s]
+        if sets:
+            rels.append((ln, t, sets))
+    other = [re.sub(r'\s+', '', _rel_text(o['text'])) for o in other_pass]
+    out = []
+    for i, (ln, t, sets) in enumerate(rels):
+        if _SOLFORM.match(t):
+            continue                    # "b > 1" above "0 < b < 1": parallel statements, not a solving step
+        x0, y0, x1, y1 = ln['rect']
+        h = max(4.0, y1 - y0)
+        nxt = None
+        for ln2, t2, sets2 in rels[i + 1:]:
+            gx0, gy0 = ln2['rect'][0], ln2['rect'][1]
+            if 0 <= gy0 - y1 <= 2.5 * h and x0 - 3 * h <= gx0 <= x1 + h and \
+                    {str(s[1][0]) for s in sets} & {str(s[1][0]) for s in sets2}:
+                nxt = (ln2, t2, sets2)
+                break
+        if not nxt:
+            continue
+        ln2, t2, sets2 = nxt
+        if re.sub(r'\s+', '', t) == re.sub(r'\s+', '', t2):
+            continue
+        match = next(((ra, rb) for ra, (va, sa) in sets for rb, (vb, sb) in sets2 if va == vb and sa == sb), None)
+        rect = (min(x0, ln2['rect'][0]), y0, max(x1, ln2['rect'][2]), ln2['rect'][3])
+        base = {'kind': 'solving step', 'statement': f'{t}  →  {t2}', 'shown': t2, 'rect': rect,
+                'conf': min(ln['conf'], ln2['conf']), 'line': ln2['text'],
+                'methods': ['solution set of each step over the real numbers (SymPy solveset)',
+                            'OCR re-readings (lost signs, superscripts)']}
+        if match:
+            out.append({**base, 'status': STATUS_OK, 'expected': None, 'reason': None,
+                        'evidence': f'same solution set: {sets[0][1][1]}'})
+            continue
+        final = bool(_SOLFORM.match(t2)) or len(re.findall(r'[a-z]\s*=', t2, re.I)) >= 2
+        partial = any(sb.is_subset(sa) and sb != sa for _, (va, sa) in sets for _, (vb, sb) in sets2)
+        if partial:
+            out.append({**base, 'status': STATUS_UNREADABLE, 'expected': None,
+                        'reason': 'only some of the solutions were read on this line - the rest may be nearby',
+                        'evidence': 'shown solutions are correct but incomplete as read'})
+            continue
+        clear = min(ln['conf'], ln2['conf']) >= 0.6 and all(re.sub(r'\s+', '', x) in o for x in (t, t2)
+                                                             for o in [''.join(other)]) if other else True
+        expected = str(sets[0][1][1]).replace('Interval', 'interval ')
+        if final and clear:
+            out.append({**base, 'status': STATUS_ERR, 'expected': expected, 'reason': None,
+                        'evidence': f'the step above has solution set {expected}; this step does not'})
+        else:
+            out.append({**base, 'status': STATUS_UNREADABLE, 'expected': None,
+                        'reason': ('read differently in the second pass' if not clear else
+                                   'intermediate step differs - may belong to another example'),
+                        'evidence': 'not equivalent under any reading'})
+    return out
+
+
 # ------------------------------------------------------------------ typos
 _MATH_WORDS = set('''pemdas gcf lcm lcd sqrt abs coeff vertex axis parabola quadratic polynomial binomial trinomial
 monomial integers integer rational irrational reciprocal exponent exponents radicand radical asymptote
@@ -651,6 +785,9 @@ def review_pdf(pdf_path, pages=None, crop_dir=None, progress=None, cache_dir=Non
             for f in check_worked_steps(lines, passes[0]):
                 if re.sub(r'\s+', '', f['statement']) not in seen:
                     found.append(f)
+            for f in check_relation_chains(lines, passes[0]):
+                if re.sub(r'\s+', '', f['statement']) not in seen:
+                    found.append(f)
             found += typo_candidates(passes[0], passes[1])
             for f in found:
                 f['page'] = pno
@@ -658,7 +795,8 @@ def review_pdf(pdf_path, pages=None, crop_dir=None, progress=None, cache_dir=Non
                 f['proposal'] = proposal(f)
                 if crop_dir and f['status'] in (STATUS_ERR, 'SUSPECTED_TYPO', STATUS_MISREAD):
                     f['crop'] = _crop(page, f['rect'], Path(crop_dir) / f'{f["id"]}.png')
-            math_lines = [l for l in lines if re.search(r'\d', l['text']) and re.search(r'[=+×÷*/^]|\d\s*[a-zA-Z]', l['text'])]
+            math_lines = [l for l in lines if re.search(r'\d', l['text']) and re.search(r'[=<>≤≥+×÷*/^]|\d\s*[a-zA-Z]', l['text'])
+                          and not re.match(r'^\s*\d+(?:\.\d+)?\s*[A-Z][a-z]', l['text'])]   # "2.1 Solving ..." = a heading
             page_stats[pno] = {'lines_read': len(lines), 'math_lines': len(math_lines),
                                'statements': sum(1 for f in found if f['kind'] != 'spelling'),
                                'verified': sum(1 for f in found if f['status'] == STATUS_OK),
