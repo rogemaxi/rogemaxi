@@ -240,6 +240,18 @@ class Studio:
         activity(self.root, 'Concept Tiles Builder', f'built {rep["pdf"]}: {rep["decision"]}', checks=rep['mandatory_checks'], failed=rep['failed'])
         return rep
 
+    def produce_commercial(self, spec_json):
+        """30-second commercial: script -> storyboard -> local draft render -> full review -> scores -> gate.
+        spec_json: {"product": {...}, "assets": {...}, "narration": optional approved-voice WAV}. Nothing is published."""
+        import commercial, time
+        if not commercial.ffmpeg_available():
+            raise RuntimeError('ffmpeg is not installed: install it to render drafts (the commercial was not produced)')
+        spec = json.loads(Path(spec_json).read_text(encoding='utf-8'))
+        out = self.root / 'commercials' / time.strftime('%Y%m%d_%H%M%S')
+        hist = commercial.produce_and_review(spec['product'], spec['assets'], out, narration=spec.get('narration'), root=self.root)
+        activity(self.root, 'Media Division', f'commercial reviewed: {hist[-1]["score"]["decision"]}', overall=hist[-1]['score']['overall_100'])
+        return hist[-1], out
+
     # Revenue & Media Division (drafts and measurement only: nothing is sent, published, priced or paid)
     def sales_daily(self):
         import salesintel

@@ -1066,7 +1066,8 @@ class App(tk.Tk):
         bar.pack(fill='x', pady=4)
         for text, cmd in [("Run today's sales workflow", self.sales_run_daily), ('Revenue dashboard', self.sales_show_dashboard),
                           ('Import TpT sales report (CSV)…', self.sales_import), ('Set Week 1 start date…', self.sales_set_week1),
-                          ('Load product catalog (JSON)…', self.sales_load_catalog), ('Strategy library', self.sales_show_library)]:
+                          ('Load product catalog (JSON)…', self.sales_load_catalog), ('Strategy library', self.sales_show_library),
+                          ('30-second commercial QA…', self.sales_commercial)]:
             ttk.Button(bar, text=text, command=cmd).pack(side='left', padx=2)
         self.rev_out = tk.Text(f, height=30, font=('Consolas', 9), wrap='word')
         self.rev_out.pack(fill='both', expand=True)
@@ -1128,6 +1129,23 @@ class App(tk.Tk):
             s['catalog'] = json.loads(Path(p).read_text(encoding='utf-8'))
             self.studio.sales_save_settings(s)
             self.log_line(f'Catalog loaded: {len(s["catalog"])} products (only QA PASS + owner-approved ones are marketed).')
+
+    def sales_commercial(self):
+        p = filedialog.askopenfilename(title='Commercial spec (.json)', filetypes=[('JSON', '*.json')])
+        if not p:
+            return
+
+        def done(res):
+            last, out = res
+            sc = last['score']
+            L = [f'30-SECOND COMMERCIAL QA - {sc["decision"]}', f'render: {last["render"]["mp4"]} ({last["render"]["voice"]})',
+                 f'overall {sc["overall_100"]}/100 (release needs >= 9 in every category and >= 95)', '']
+            L += [f'  {k:16} {v:>2}/10  {sc["reasons"][k]}' for k, v in sc['scores'].items()]
+            L += ['', 'REPAIR / BLOCKERS:'] + [f'  - {r}' for r in sc['repair_list']]
+            L += ['', f'Platform fit: {sc["platform_fit"]}', f'Voice: {sc["voice_consistency"]}',
+                  'Publishing is manual and needs your approval. Measure retention, clicks and conversions after you publish.']
+            self._rev_print(L)
+        self.run_bg('Commercial QA', lambda: self.studio.produce_commercial(p), done)
 
     def sales_show_library(self):
         lib = self.studio.sales_library()

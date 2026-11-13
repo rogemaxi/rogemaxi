@@ -10,7 +10,7 @@ datas = (collect_data_files('playwright') + collect_data_files('rapidocr_onnxrun
          + collect_data_files('onnxruntime') + [('samples', 'samples'), ('sales_library.json', '.'), ('fonts', 'fonts')])
 binaries = collect_dynamic_libs('onnxruntime')
 
-a = Analysis(['app.py'], pathex=['.'], hiddenimports=hidden + ['selftest', 'selftest_fixtures', 'imageread', 'imagerepair', 'concepttiles', 'powerhouse', 'construction', 'salesintel', 'byrdway_tiles', 'roadmap', 'verifier_algebra'] + collect_submodules('rapidocr_onnxruntime'),
+a = Analysis(['app.py'], pathex=['.'], hiddenimports=hidden + ['selftest', 'selftest_fixtures', 'imageread', 'imagerepair', 'concepttiles', 'powerhouse', 'construction', 'salesintel', 'byrdway_tiles', 'roadmap', 'verifier_algebra', 'commercial'] + collect_submodules('rapidocr_onnxruntime'),
              datas=datas, binaries=binaries,
              excludes=['tests', 'matplotlib', 'IPython', 'notebook'])
 pyz = PYZ(a.pure)
