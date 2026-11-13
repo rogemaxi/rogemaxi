@@ -462,7 +462,9 @@ def _units():
             'ms': u.millisecond, 'min': u.minute, 'h': u.hour, 'kg': u.kilogram, 'g': u.gram,
             'N': u.newton, 'J': u.joule, 'kJ': 1000 * u.joule, 'W': u.watt, 'kW': 1000 * u.watt, 'Pa': u.pascal,
             'Hz': u.hertz, 'C': u.coulomb, 'V': u.volt, 'A': u.ampere, 'ohm': u.ohm, 'Ω': u.ohm,
-            'K': u.kelvin, 'mol': u.mole, 'L': u.liter}
+            'K': u.kelvin, 'mol': u.mole, 'L': u.liter,
+            'T': u.tesla, 'mT': u.tesla / 1000, 'nm': u.nanometer, 'eV': u.electronvolt,
+            'kHz': 1000 * u.hertz, 'MHz': 10 ** 6 * u.hertz, 'MJ': 10 ** 6 * u.joule}
 
 
 _BASE = None
@@ -503,7 +505,7 @@ def _to_base(q):
     from sympy.physics.units.quantities import Quantity
     b = u.convert_to(q, [u.meter, u.kilogram, u.second, u.ampere, u.kelvin, u.mole])
     # SymPy can create distinct-but-equal Quantity objects; compare by unit name
-    return b.subs({a: sp.Symbol('unit_' + str(a.name)) for a in b.atoms(Quantity)})
+    return b.subs({a: sp.Symbol('unit_' + str(a.name), positive=True) for a in b.atoms(Quantity)})
 
 
 def check_physics(formula, given, find, claimed):
@@ -513,7 +515,7 @@ def check_physics(formula, given, find, claimed):
     lhs, rhs = safe_parse(l), safe_parse(r)
     subs = {}
     for k, v in given.items():
-        subs[sp.Symbol(k)] = parse_quantity(v)[0]
+        subs[sp.Symbol(k)] = _to_base(parse_quantity(v)[0])   # base SI first, so mixed units combine
     sol = sp.solve(sp.Eq(lhs, rhs), target)
     if len(sol) != 1:
         sol = [s for s in sol if (s.subs({k: 1 for k in s.free_symbols}) if s.free_symbols else s).is_positive] or sol

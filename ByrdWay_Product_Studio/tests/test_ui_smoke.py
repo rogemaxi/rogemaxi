@@ -27,7 +27,7 @@ class UISmoke(unittest.TestCase):
             app = App(Path(t) / 'ws')
             app.opener = lambda p: None
             try:
-                self.assertEqual(app.nb.index('end'), 7)
+                self.assertEqual(app.nb.index('end'), 8)
                 z = fixtures.broken_power_tool_zip(Path(t) / 'tool.zip')
                 m = app.studio.import_product(z)
                 app.refresh_products()

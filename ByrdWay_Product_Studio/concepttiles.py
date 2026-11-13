@@ -310,7 +310,9 @@ def qa_pdf(pdf, unit, tiles):
             out.append((f'lessons.tile{n}.worked_steps_and_arithmetic', not errs,
                         f'errors: {[e["statement"] if isinstance(e, dict) else e for e in errs]}' if errs else
                         'every step and arithmetic statement on the page verifies'))
-            unbalanced = [l['text'] for l in lines if l['text'].count('(') != l['text'].count(')')]
+            blocks = [' '.join(' '.join(s['text'] for s in l['spans']) for l in b.get('lines', []))
+                      for b in pg.get_text('dict', flags=0)['blocks']]      # a paragraph may wrap inside brackets
+            unbalanced = [t for t in blocks if t.count('(') != t.count(')')]
             out.append((f'lessons.tile{n}.brackets_balanced', not unbalanced,
                         f'unbalanced brackets: {unbalanced}' if unbalanced else 'every bracket is closed'))
             typos = imageread.typo_candidates(lines, lines) if lines else []
@@ -350,3 +352,104 @@ def build_unit(toc_unit, tiles, mascot_path, out_dir, lessons=None):
            'failures': [{'check': c[0], 'detail': c[2]} for c in failed]}
     (out_dir / f'unit_{toc_unit["unit"]:02d}_qa.json').write_text(json.dumps(rep, indent=2), encoding='utf-8')
     return rep
+
+
+# ------------------------------------------------------------------ Assembler (agent 10) + whole-product QA
+def assemble_product(toc, unit_reports, mascot_path, out_pdf, title='ByrdWay Physics + Honors Concept Tiles'):
+    """Join every PASSED unit into one product: cover, table of contents, all tiles, all answer keys, bookmarks.
+    Refuses if any unit is missing, not PASS, or changed since its QA (the file's SHA-256 is re-checked)."""
+    import hashlib
+    fitz = imageread._fitz()
+    by_unit = {r['unit']: r for r in unit_reports}
+    problems = []
+    for u in toc:
+        r = by_unit.get(u['unit'])
+        if not r or r.get('decision') != 'PASS' or not r.get('pdf'):
+            problems.append(f'unit {u["unit"]} has not passed Build QA')
+        elif r.get('pdf_sha256') and hashlib.sha256(Path(r['pdf']).read_bytes()).hexdigest() != r['pdf_sha256']:
+            problems.append(f'unit {u["unit"]} PDF changed after QA')
+    if problems:
+        raise PermissionError('Assembly refused: ' + '; '.join(problems))
+    out = fitz.open()
+    base = Path(mascot_path).parent
+    n_tiles = sum(len(u['tiles']) for u in toc)
+    n_hon = sum(t['honors'] for u in toc for t in u['tiles'])
+    cover = (f'<body><p class="unit">BYRDWAY MATHEMATICS &amp; SCIENCE</p><h1>{E(title)}</h1>'
+             f'<p><img src="{E(Path(mascot_path).name)}" width="160"/></p>'
+             f'<p class="key">{len(toc)} units · {n_tiles} Concept Tiles · {n_hon} Honors tiles · answer key for every unit</p>'
+             f'<p>One idea per tile: Meaning &amp; reasoning · Picture the reasoning · Worked examples · Practice &amp; check · '
+             f'Misconceptions &amp; teach it back · Honors: full reasoning. Lil Dr. Byrd guides every tile.</p></body>')
+    tmp = Path(out_pdf).with_suffix('.front.pdf')
+    w = fitz.DocumentWriter(str(tmp))
+    page = fitz.paper_rect('letter')
+    where = page + (54, 54, -54, -54)
+    starts, p = {}, 0
+    front = 2                                                  # cover + contents (contents fits one page: checked below)
+    p = front
+    for u in toc:
+        starts[u['unit']] = p + 1
+        with fitz.open(by_unit[u['unit']]['pdf']) as d:
+            p += d.page_count
+    rows = ''.join(f'<tr><td>Unit {u["unit"]}</td><td>{E(u["title"])}</td><td>{len(u["tiles"])} tiles</td>'
+                   f'<td>page {starts[u["unit"]]}</td></tr>' for u in toc)
+    contents = f'<body><h1>Contents</h1><table border="1" cellpadding="3">{rows}</table></body>'
+    contents_pages = 0
+    for html in (cover, contents):
+        st = fitz.Story(html=html, user_css=CSS, archive=fitz.Archive(str(base)))
+        more = True
+        while more:
+            dev = w.begin_page(page)
+            more, _ = st.place(where)
+            st.draw(dev)
+            w.end_page()
+            contents_pages += 1
+    w.close()
+    if contents_pages != front:
+        raise ValueError('front matter does not fit two pages')
+    with fitz.open(tmp) as f:
+        out.insert_pdf(f)
+    tmp.unlink()
+    outline = [[1, 'Cover', 1], [1, 'Contents', 2]]
+    for u in toc:
+        with fitz.open(by_unit[u['unit']]['pdf']) as d:
+            s = out.page_count + 1
+            out.insert_pdf(d)
+        outline.append([1, f'Unit {u["unit"]}: {u["title"]}', s])
+        for i, t in enumerate(u['tiles']):
+            outline.append([2, f'{i + 1}. {t["title"]}{" (Honors)" if t["honors"] else ""}', s + i])
+        outline.append([2, f'Unit {u["unit"]} answer key', s + len(u['tiles'])])
+    out.set_toc(outline)
+    out.set_metadata({'title': title, 'author': 'ByrdWay Mathematics & Science', 'subject': 'Physics + Honors'})
+    out.save(str(out_pdf), garbage=3, deflate=True)
+    out.close()
+    return {'pdf': str(out_pdf), 'starts': starts, 'pages': p}
+
+
+def qa_product(toc, assembled, unit_reports):
+    """Independent whole-product QA: every approved tile present, in order, on its own page with its title;
+    bookmarks complete; page count adds up; every unit's QA evidence attached."""
+    fitz = imageread._fitz()
+    checks = []
+    with fitz.open(assembled['pdf']) as doc:
+        bm = doc.get_toc()
+        n_tiles = sum(len(u['tiles']) for u in toc)
+        checks.append(('product.page_count', doc.page_count == assembled['pages'],
+                       f'{doc.page_count} pages (expected {assembled["pages"]})'))
+        checks.append(('product.bookmarks', len(bm) == 2 + len(toc) * 2 + n_tiles,
+                       f'{len(bm)} bookmarks for {len(toc)} units and {n_tiles} tiles'))
+        for u in toc:
+            s = assembled['starts'][u['unit']]
+            for i, t in enumerate(u['tiles']):
+                raw = doc[s - 1 + i].get_text('text', flags=0)
+                norm = lambda x: re.sub(r'[^a-z0-9²₀=+/]', '', x.lower().replace('&', 'and'))
+                ok = norm(t['title'])[:18] in norm(raw) and f'UNIT {u["unit"]}:' in raw
+                checks.append((f'product.unit{u["unit"]}.tile{i + 1}.in_place', ok, f'"{t["title"]}" on page {s + i}'))
+                checks.append((f'product.unit{u["unit"]}.tile{i + 1}.mascot', bool(doc[s - 1 + i].get_images()),
+                               'Lil Dr. Byrd on the page'))
+            key = doc[s - 1 + len(u['tiles'])].get_text('text', flags=0)
+            checks.append((f'product.unit{u["unit"]}.answer_key', f'Unit {u["unit"]} answer key' in key,
+                           f'answer key on page {s + len(u["tiles"])}'))
+    for r in unit_reports:
+        checks.append((f'product.unit{r["unit"]}.build_qa', r['decision'] == 'PASS' and r['failed'] == 0,
+                       f'{r["mandatory_checks"] - r["failed"]}/{r["mandatory_checks"]} unit checks passed'))
+    return checks

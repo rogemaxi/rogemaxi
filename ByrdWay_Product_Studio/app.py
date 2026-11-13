@@ -77,6 +77,7 @@ class App(tk.Tk):
         self._backup_tab()
         self._logs_tab()
         self._powerhouse_tab()
+        self._revenue_tab()
         self._poll_id = self.after(150, self._poll)
         self.refresh_all()
 
@@ -652,7 +653,8 @@ class App(tk.Tk):
         s4.pack(fill='both', expand=True, pady=4)
         bar = ttk.Frame(s4)
         bar.pack(fill='x')
-        for text, cmd in [('Build next unit', self.build_next), ('Open unit to review', self.open_unit),
+        for text, cmd in [('Build next unit', self.build_next), ('Build next unit with QA loop', self.construct_next),
+                          ('Open unit to review', self.open_unit),
                           ('Approve unit…', self.approve_unit), ('Reject unit…', self.reject_unit),
                           ('Edit blueprint (new version)…', self.bp_edit_build),
                           ('Assemble, verify & send to Jobs', self.assemble)]:
@@ -821,6 +823,25 @@ class App(tk.Tk):
                 if self.btree.exists(f'{bid}::{r[0]}'):
                     self.btree.selection_set(f'{bid}::{r[0]}')
         self.run_bg('Build', lambda: self.studio.build_next(bid), done)
+
+    def construct_next(self):
+        """Builder -> independent Build QA (academic, Reader lessons, code, browser, Mastery standard) -> repair ->
+        rebuild -> Chief Judge. A PASS unit still waits for the owner's approval."""
+        try:
+            bid = self._sel_build()[0]
+        except ValueError as e:
+            return messagebox.showinfo('Select', str(e))
+
+        def done(r):
+            if r[0] is None:
+                return self.log_line('All units are approved. Next: "Assemble, verify & send to Jobs".')
+            c = r[1]['construction']
+            j = c['chief_judge']
+            self.log_line(f'{r[0]}: {j["decision"]} - {j["passed"]}/{j["mandatory_checks"]} mandatory checks, '
+                          f'{len(c["rounds"])} round(s).')
+            for f in (c['rounds'][-1].get('failed') or [])[:12]:
+                self.log_line('   SEND BACK: ' + f)
+        self.run_bg('Build with QA loop', lambda: self.studio.construct_next(bid), done)
 
     def open_unit(self):
         try:
@@ -1001,9 +1022,10 @@ class App(tk.Tk):
                     group, f'{a["id"]}. {a["name"]}', a['job'], st['Power Tool'], st['Lil Dr. Byrd Explainer'],
                     st['Concept Tiles']))
         self.ph_tree.pack(fill='x')
-        ttk.Label(f, text='REVENUE & MEDIA DIVISION', font=('Segoe UI', 11, 'bold')).pack(anchor='w', pady=(8, 0))
-        self.ph_rev = tk.Text(f, height=6, font=('Segoe UI', 9))
-        self.ph_rev.insert('1.0', '\n'.join(f'{r["status"]:8} {r["name"]}: {r["job"]}  [{r["where"]}]' for r in org['revenue'])
+        ttk.Label(f, text='REVENUE & MEDIA DIVISION - 10 roles (tab 8)', font=('Segoe UI', 11, 'bold')).pack(anchor='w', pady=(8, 0))
+        self.ph_rev = tk.Text(f, height=11, font=('Segoe UI', 9))
+        self.ph_rev.insert('1.0', '\n'.join(f'{i:2}. {r["status"]:8} {r["name"]}: {r["job"]}  [{r["where"]}]'
+                                             for i, r in enumerate(org['revenue'], 1))
                            + f'\nTargets: {org["sales_targets"]}   Quality: {org["quality_target"]}')
         self.ph_rev.pack(fill='x')
         bar = ttk.Frame(f)
@@ -1014,6 +1036,83 @@ class App(tk.Tk):
         ttk.Button(bar, text='Lessons learned', command=self.powerhouse_lessons).pack(side='left')
         self.ph_out = tk.Text(f, height=8, font=('Consolas', 9))
         self.ph_out.pack(fill='both', expand=True)
+
+    def _revenue_tab(self):
+        """Revenue & Media Division: 10 roles, source-linked methods, daily workflow, dashboard. Drafts only."""
+        f = ttk.Frame(self.nb, padding=8)
+        self.nb.add(f, text='8. Revenue & Media')
+        self.rev_frame = f
+        ttk.Label(f, text='REVENUE & MEDIA DIVISION - 10 roles. The app drafts and measures; YOU approve, send and publish.',
+                  font=('Segoe UI', 11, 'bold')).pack(anchor='w')
+        bar = ttk.Frame(f)
+        bar.pack(fill='x', pady=4)
+        for text, cmd in [("Run today's sales workflow", self.sales_run_daily), ('Revenue dashboard', self.sales_show_dashboard),
+                          ('Import TpT sales report (CSV)…', self.sales_import), ('Set Week 1 start date…', self.sales_set_week1),
+                          ('Load product catalog (JSON)…', self.sales_load_catalog), ('Strategy library', self.sales_show_library)]:
+            ttk.Button(bar, text=text, command=cmd).pack(side='left', padx=2)
+        self.rev_out = tk.Text(f, height=30, font=('Consolas', 9), wrap='word')
+        self.rev_out.pack(fill='both', expand=True)
+
+    def _rev_print(self, lines):
+        self.rev_out.delete('1.0', 'end')
+        self.rev_out.insert('end', '\n'.join(lines) + '\n')
+        self.nb.select(self.rev_frame)
+
+    def sales_run_daily(self):
+        def done(res):
+            rep, _ = res
+            L = [f"DAILY SALES WORKFLOW {rep['date']}  -  {rep['discipline']}", '']
+            L += [f"  {r['role']:28} {', '.join(r['methods_applied'])}" for r in rep['roles']]
+            L += ['', f"Catalog: {rep['catalog']}", f"Outputs: {rep['outputs']}",
+                  f"Sales QA: {rep['sales_qa']['passed']}/{rep['sales_qa']['checks']} checks passed; blocked: {len(rep['sales_qa']['blocked'])}"]
+            L += [f"   BLOCKED {b['item']}: {'; '.join(b['problems'])}" for b in rep['sales_qa']['blocked'][:10]]
+            L += ['', f"Measured: {rep['measured']}", '', 'YOUR QUEUE:'] + [f'  - {q}' for q in rep['owner_queue']]
+            self._rev_print(L)
+        self.run_bg('Sales workflow', self.studio.sales_daily, done)
+
+    def sales_show_dashboard(self):
+        d = self.studio.sales_dashboard()
+        L = [f"Week 1 starts: {d['week1_start'] or 'NOT SET (use Set Week 1 start date)'}",
+             f"Real sales rows: {d['real_rows']}  (TEST rows excluded: {d['test_rows_excluded']})  units {d['units_total']}  net ${d['net_total']}",
+             f"Repeat-purchase rate: {d['repeat_purchase_rate']}",
+             f"1,000 units/week milestone: week {d['milestone_1000']['minimum_path_week']} (+10 %) / week {d['milestone_1000']['stretch_path_week']} (+17 %)", '',
+             f"{'week':>4} {'units':>6} {'min':>6} {'stretch':>8} {'net $':>10}  status"]
+        L += [f"{w['week']:>4} {w['units']:>6} {w['minimum']:>6} {w['stretch']:>8} {w['net']:>10}  {w['status']}" for w in d['weeks']]
+        self._rev_print(L)
+
+    def sales_import(self):
+        p = filedialog.askopenfilename(filetypes=[('CSV', '*.csv')])
+        if p:
+            r = self.studio.sales_import_csv(p)
+            self.log_line(f'Imported {r["imported"]} sales rows.')
+            self.sales_show_dashboard()
+
+    def sales_set_week1(self):
+        from tkinter import simpledialog
+        d = simpledialog.askstring('Week 1', 'Week 1 start date (YYYY-MM-DD):')
+        if d:
+            s = self.studio.sales_settings()
+            s['week1_start'] = d.strip()
+            self.studio.sales_save_settings(s)
+            self.sales_show_dashboard()
+
+    def sales_load_catalog(self):
+        p = filedialog.askopenfilename(filetypes=[('JSON', '*.json')])
+        if p:
+            s = self.studio.sales_settings()
+            s['catalog'] = json.loads(Path(p).read_text(encoding='utf-8'))
+            self.studio.sales_save_settings(s)
+            self.log_line(f'Catalog loaded: {len(s["catalog"])} products (only QA PASS + owner-approved ones are marketed).')
+
+    def sales_show_library(self):
+        lib = self.studio.sales_library()
+        L = ['RULES:'] + [f'  - {r}' for r in lib['rules']] + ['']
+        for m in lib['methods']:
+            L.append(f"{m['id']:6} [{m['status']}] {m['expert']}: {m['method']}")
+            L.append(f"        apply: {m['apply_at_byrdway']}")
+            L.append(f"        metric: {m['metric']}   roles: {', '.join(m['roles'])}")
+            L.append(f"        source: {m['source']['citation']}" + (f"  \"{m['source']['quote']}\"" if m['source'].get('quote') else ''))
+        self._rev_print(L)
 
     def powerhouse_feed(self):
         """One click: import a product, then run the full detect -> repair -> QA loop on a protected copy."""

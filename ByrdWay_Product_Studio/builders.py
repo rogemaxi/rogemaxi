@@ -164,11 +164,13 @@ PROVISIONAL_CSS = """
 *{box-sizing:border-box}body{margin:0;font-family:Segoe UI,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.5}
 header,main{max-width:900px;margin:auto;padding:16px}h1{font-size:1.6rem}h2{border-bottom:2px solid var(--accent);padding-bottom:4px}
 .card{background:var(--card);border:1px solid #d0d7de;border-radius:10px;padding:14px;margin:12px 0}
-nav a{margin-right:12px}button{font:inherit;padding:8px 14px;border-radius:8px;border:1px solid var(--accent);background:#fff;color:var(--accent);cursor:pointer;min-height:44px}
+nav{display:flex;flex-wrap:wrap;gap:4px 12px}nav a{margin-right:0}button{font:inherit;padding:8px 14px;border-radius:8px;border:1px solid var(--accent);background:#fff;color:var(--accent);cursor:pointer;min-height:44px}
 button:focus-visible,input:focus-visible{outline:3px solid #ffb000;outline-offset:2px}
 .flash{display:inline-block;width:min(100%,260px);min-height:110px;margin:6px;vertical-align:top}
 .feedback.ok{color:var(--ok)}.feedback.bad{color:var(--bad)}input[type=text]{font:inherit;padding:8px;min-width:12ch;max-width:100%}
 table{border-collapse:collapse;width:100%}td,th{border:1px solid #d0d7de;padding:6px;text-align:left}
+.bw-session li{margin:2px 0}.bw-mascot{width:72px;height:auto;float:right}progress{width:100%;height:14px}
+input[type=range]{width:min(100%,320px)}
 @media print{button{display:none}}
 """
 
@@ -221,11 +223,83 @@ MODULE_JS = r"""
    out.appendChild(ul);
  };
  updateScore();
+ // ---------------- ByrdWay Mastery Experience layer (placement, gate, hints, faded, generators, review, report)
+ var M=data.mastery||null; if(!M){return;}
+ var KEY='byrdway:'+M.product, st={};
+ try{st=JSON.parse(localStorage.getItem(KEY)||'{}')||{};}catch(e){st={};}
+ var me=st[M.module]=st[M.module]||{attempts:0,correct:0,streak:0,best_streak:0,mastered:false,placement:null,generated:0,started:Date.now()};
+ function save(){try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}}
+ function txt(id,t){var el=document.getElementById(id); if(el) el.textContent=t; return el;}
+ function pct(){var n=data.practice.length,c=0;for(var k in correct){if(correct[k])c++;}return n?c/n:0;}
+ function refresh(){
+   txt('bw-streak','Streak: '+me.streak+' (best '+me.best_streak+')');
+   var done=0,keys=Object.keys(answered).length; var pr=document.getElementById('bw-progress');
+   if(pr){pr.max=data.practice.length||1; pr.value=keys;}
+   var p=pct(), gate=document.getElementById('bw-gate'), nxt=document.getElementById('bw-next');
+   if(p>=M.threshold && keys===data.practice.length){me.mastered=true;
+     if(gate){gate.textContent='Mastered ('+Math.round(p*100)+'%). Next skill unlocked!';gate.className='feedback ok';}
+     if(nxt){nxt.hidden=false;}}
+   else{ if(gate){gate.textContent='Locked: score at least '+Math.round(M.threshold*100)+'% on every Practice question to unlock the next skill (now '+Math.round(p*100)+'%).';gate.className='feedback bad';}
+     if(nxt){nxt.hidden=true;}}
+   save();
+ }
+ var baseCheck=window.bwCheck;
+ window.bwCheck=function(i){
+   baseCheck(i); var q=data.practice[i], ok=correct[i]; me.attempts++;
+   if(ok){me.correct++;me.streak++;me.best_streak=Math.max(me.best_streak,me.streak);}
+   else{me.streak=0; var fb=document.getElementById('f'+i); if(fb&&q.hint&&fb.textContent.indexOf('Enter')!==0){fb.textContent='Not yet. Hint: '+q.hint;}}
+   refresh();
+ };
+ window.bwPlacement=function(){
+   var miss={},out=document.getElementById('bw-placement-path');
+   M.placement.forEach(function(q,i){var v=(document.getElementById('p'+i)||{}).value||''; if(!matches(v,q)) miss[q.skill||'core']=true;});
+   var ks=Object.keys(miss); me.placement=ks; save();
+   out.textContent = ks.length ? 'Your personal path: start with '+ks.join(', ')+', then continue in order.' : 'Placement: you are ready - go straight to the Practice and the Mastery check.';
+ };
+ window.bwFaded=function(i){
+   var f=M.faded[i], v=document.getElementById('fd'+i).value, ok=matches(v,f);
+   var fb=document.getElementById('ff'+i); fb.className='feedback '+(ok?'ok':'bad');
+   fb.textContent= ok ? 'Correct! Now try the independent Practice.' : 'Not yet. Look back at the worked example step by step.';
+ };
+ function ev(expr,vals){ if(!/^[\sA-Za-z0-9_+\-*\/().]*$/.test(expr)) throw new Error('bad expr');
+   var names=Object.keys(vals); return Function.apply(null,names.concat(['return ('+expr+');'])).apply(null,names.map(function(k){return vals[k];})); }
+ function fill(t,v){return t.replace(/\{(\w+)\}/g,function(_,k){return v[k];});}
+ var gen=null;
+ window.bwGenerate=function(g){
+   var G=M.generators[g], v={}; for(var k in G.params){var r=G.params[k];
+     do{v[k]=r[0]+Math.floor(Math.random()*(r[1]-r[0]+1));}while((G.nonzero||[]).indexOf(k)>=0&&v[k]===0);}
+   for(var c in (G.compute||{})){v[c]=ev(G.compute[c],v);}
+   gen={g:g,answer:String(fill(G.answer,v))}; txt('gq'+g,fill(G.template,v)); txt('gf'+g,''); var a=document.getElementById('ga'+g); if(a){a.value='';}
+   me.generated++; save();
+ };
+ window.bwGenCheck=function(g){
+   if(!gen||gen.g!==g){bwGenerate(g);return;}
+   var v=document.getElementById('ga'+g).value, ok=matches(v,{answer:gen.answer,accept:[]});
+   var fb=txt('gf'+g, ok?'Correct! Press New problem for another.':'Not yet. '+(M.generators[g].hint||'Check each step.')); fb.className='feedback '+(ok?'ok':'bad');
+   if(ok){me.streak++;me.best_streak=Math.max(me.best_streak,me.streak);}else{me.streak=0;} refresh();
+ };
+ window.bwReview=function(i){
+   var q=M.review[i], v=document.getElementById('rv'+i).value, ok=matches(v,q), fb=txt('rf'+i, ok?'Correct - still mastered.':'Not yet - revisit that earlier skill. '+(q.hint||''));
+   fb.className='feedback '+(ok?'ok':'bad');
+ };
+ window.bwSim=function(){
+   var S=M.simulation, v={}; S.inputs.forEach(function(inp){v[inp.name]=Number(document.getElementById('sim-'+inp.name).value); txt('simv-'+inp.name, v[inp.name]+' '+(inp.unit||''));});
+   var out=[]; S.outputs.forEach(function(o){var r=ev(o.expr,v); out.push(o.label+' = '+(Math.round(r*1000)/1000)+' '+(o.unit||''));});
+   txt('sim-out',out.join('   |   '));
+ };
+ window.bwReport=function(){
+   var rows=[]; for(var mid in st){var r=st[mid]; rows.push(mid+': '+(r.mastered?'MASTERED':'in progress')+', '+r.correct+'/'+r.attempts+' correct, best streak '+r.best_streak+', generated problems '+r.generated);}
+   var el=document.getElementById('bw-report-out'); el.textContent=''; var h=document.createElement('p');
+   h.textContent='ByrdWay progress report - '+M.product+' - '+new Date().toLocaleDateString(); el.appendChild(h);
+   var ul=document.createElement('ul'); rows.forEach(function(t){var li=document.createElement('li'); li.textContent=t; ul.appendChild(li);}); el.appendChild(ul);
+ };
+ if(M.simulation){bwSim();}
+ refresh();
 })();
 """
 
 
-def _module_html(bp, m, honors_ok):
+def _module_html(bp, m, honors_ok, mastery=None):
     parts = []
     sec = lambda sid, title, body: f'<section id="{E(sid)}" aria-labelledby="{E(sid)}-h"><h2 id="{E(sid)}-h">{E(title)}</h2>{body}</section>'
     nav = []
@@ -271,15 +345,139 @@ def _module_html(bp, m, honors_ok):
         if honors_ok:
             body = ''.join(f'<div class="card"><h3>{E(h["title"])}</h3><p>{E(h["explanation"])}</p></div>' for h in m['honors'])
             parts.append(sec('honors', 'Honors Extension', body)); nav.append(('honors', 'Honors'))
+    mastery = mastery or {}
+    if mastery:
+        mp, mdata = _mastery_parts(bp, m, mastery)
+        parts = mp['top'] + parts[:] + mp['bottom']
+        if mp.get('faded'):
+            ix = next((i for i, p in enumerate(parts) if p.startswith('<section id="practice"')), len(parts))
+            parts.insert(ix, mp['faded'])
+        nav += mp['nav']
     data = {'practice': [{'question': q['question'], 'answer': str(q.get('answer', '')),
                           **({'verify': q['verify']} if q.get('verify') else {}), 'accept': [str(a) for a in q.get('accept', [])],
                           'choices': q.get('choices'), 'correct_index': _choice_index(q),
-                          'explanation': q.get('explanation', ''), 'skill': q.get('skill')} for q in practice],
+                          'explanation': q.get('explanation', ''), 'skill': q.get('skill'),
+                          'hint': q.get('hint', '')} for q in practice],
             'pathway': m.get('pathway') or {}}
+    if mastery:
+        data['mastery'] = mdata
     data_json = json.dumps(data).replace('</', '<\\/')
     navhtml = '<nav aria-label="Sections">' + ''.join(f'<a href="#{a}">{E(t)}</a>' for a, t in nav) + '</nav>'
     content = f'<header><h1>{E(bp["product_title"])}: {E(m["title"])}</h1>{navhtml}</header><main>{"".join(parts)}</main>'
     return content, data_json
+
+
+# ------------------------------------------------------- ByrdWay Mastery Experience (owner standard 2026-11-11)
+MASTERY_THRESHOLD = 0.9
+SIM_SUBJECTS = ('physics', 'statistic', 'function', 'graph', 'motion', 'calculus')
+DEFAULT_BLOCKS = [('Placement check', 10), ('Learn: concepts and worked examples', 25), ('Faded example', 10),
+                  ('Independent practice + mastery check', 35), ('Unlimited generated practice', 25),
+                  ('Spaced review of earlier skills', 10), ('Progress report', 5)]
+BUILTIN_SIMS = {
+    'motion': {'title': 'Motion simulator: x = v0 t + (1/2) a t^2',
+               'inputs': [{'name': 'v0', 'label': 'Initial velocity v0', 'min': -10, 'max': 10, 'step': 1, 'value': 2, 'unit': 'm/s'},
+                          {'name': 'a', 'label': 'Acceleration a', 'min': -5, 'max': 5, 'step': 0.5, 'value': 1, 'unit': 'm/s^2'},
+                          {'name': 't', 'label': 'Time t', 'min': 0, 'max': 10, 'step': 0.5, 'value': 3, 'unit': 's'}],
+               'outputs': [{'label': 'x', 'expr': 'v0*t + 0.5*a*t*t', 'unit': 'm'},
+                           {'label': 'v', 'expr': 'v0 + a*t', 'unit': 'm/s'}]},
+    'linear': {'title': 'Line explorer: y = m x + b',
+               'inputs': [{'name': 'm', 'label': 'Slope m', 'min': -5, 'max': 5, 'step': 0.5, 'value': 2},
+                          {'name': 'b', 'label': 'Intercept b', 'min': -10, 'max': 10, 'step': 1, 'value': 1},
+                          {'name': 'x', 'label': 'x', 'min': -10, 'max': 10, 'step': 1, 'value': 3}],
+               'outputs': [{'label': 'y', 'expr': 'm*x + b'}]},
+}
+
+
+def needs_simulation(bp, m):
+    t = f'{bp.get("subject", "")} {m.get("title", "")}'.lower()
+    return bool(m.get('simulation')) or any(k in t for k in SIM_SUBJECTS)
+
+
+def mastery_data(bp, m, review=(), mascot_uri=None):
+    """Everything the Mastery Experience needs, derived ONLY from the owner blueprint (no invented content):
+    placement = first practice item of each skill; faded example = the worked example with its last step hidden;
+    review = practice items of earlier modules (spaced review); generators/simulation/hints come from the blueprint."""
+    practice = list(m.get('practice') or [])
+    seen, placement = set(), []
+    for q in practice:
+        sk = q.get('skill') or 'core'
+        if sk not in seen and not q.get('choices'):
+            seen.add(sk)
+            placement.append({'question': q['question'], 'answer': str(q.get('answer', '')),
+                              'accept': [str(a) for a in q.get('accept', [])], 'skill': sk})
+    faded = []
+    for w in m.get('worked_examples') or []:
+        steps = list(w.get('steps') or [])
+        if len(steps) >= 2:
+            faded.append({'question': w['question'], 'shown': steps[:-1], 'answer': str(w['answer']),
+                          'accept': [str(a) for a in w.get('accept', [])]})
+    sim = m.get('simulation')
+    if isinstance(sim, str):
+        sim = BUILTIN_SIMS.get(sim)
+    if sim is None and needs_simulation(bp, m):
+        sim = BUILTIN_SIMS['motion' if 'physic' in str(bp.get('subject', '')).lower() else 'linear']
+    return {'product': bp.get('product_title', ''), 'module': m['id'], 'threshold': MASTERY_THRESHOLD,
+            'placement': placement, 'faded': faded, 'generators': list(m.get('generators') or []),
+            'review': [{'question': q['question'], 'answer': str(q.get('answer', '')), 'hint': q.get('hint', ''),
+                        'accept': [str(a) for a in q.get('accept', [])]} for q in review if not q.get('choices')][:4],
+            'simulation': sim, 'blocks': [list(b) for b in (m.get('session_blocks') or DEFAULT_BLOCKS)],
+            'mascot': mascot_uri, 'next_module': m.get('_next_title')}
+
+
+def _mastery_parts(bp, m, M):
+    sec = lambda sid, title, body: f'<section id="{E(sid)}" aria-labelledby="{E(sid)}-h"><h2 id="{E(sid)}-h">{E(title)}</h2>{body}</section>'
+    mascot = (f'<img class="bw-mascot" src="{M["mascot"]}" alt="Lil Dr. Byrd">' if M.get('mascot') else '')
+    total = sum(b[1] for b in M['blocks'])
+    top = [sec('session', f'Your {total}-minute session',
+               '<ol class="bw-session">' + ''.join(f'<li>{E(b[0])} - {b[1]} min</li>' for b in M['blocks']) + '</ol>'
+               '<label for="bw-progress">Progress</label> <progress id="bw-progress" value="0" max="1"></progress>'
+               '<p id="bw-streak" aria-live="polite">Streak: 0</p>')]
+    if M['placement']:
+        items = ''.join(f'<div class="card"><p>{E(q["question"])}</p><label for="p{i}">Your answer:</label> '
+                        f'<input type="text" id="p{i}" autocomplete="off"></div>' for i, q in enumerate(M['placement']))
+        top.append(sec('placement', 'Placement check (start here)', items +
+                       '<button type="button" onclick="bwPlacement()">Get my personal path</button>'
+                       '<p id="bw-placement-path" class="feedback" aria-live="polite"></p>'))
+    faded = ''
+    if M['faded']:
+        body = ''
+        for i, f in enumerate(M['faded']):
+            body += (f'<div class="card">{mascot if i == 0 else ""}<p><strong>Your turn (faded example):</strong> {E(f["question"])}</p><ol>'
+                     + ''.join(f'<li>{E(x)}</li>' for x in f['shown']) +
+                     f'<li><label for="fd{i}">Complete the last step - answer:</label> <input type="text" id="fd{i}" autocomplete="off"> '
+                     f'<button type="button" onclick="bwFaded({i})">Check</button><span class="feedback" id="ff{i}" aria-live="polite"></span></li></ol>'
+                     + (f'<p><em>Lil Dr. Byrd: this last step is the hard one - do the same operation to both sides.</em></p>' if i == 0 else '')
+                     + '</div>')
+        faded = sec('faded', 'Faded example', body)
+    bottom = [sec('mastery-gate', 'Mastery check', '<p id="bw-gate" class="feedback bad" aria-live="polite"></p>'
+                  f'<p id="bw-next" hidden><strong>Next skill unlocked{": " + E(M["next_module"]) if M.get("next_module") else ""}</strong></p>')]
+    if M['generators']:
+        body = ''
+        for g, G in enumerate(M['generators']):
+            body += (f'<div class="card"><p><strong>{E(G.get("skill", "Practice"))}</strong> - unlimited problems, every answer verified.</p>'
+                     f'<p id="gq{g}" aria-live="polite">Press New problem.</p><label for="ga{g}">Your answer:</label> '
+                     f'<input type="text" id="ga{g}" autocomplete="off"> <button type="button" onclick="bwGenCheck({g})">Check</button> '
+                     f'<button type="button" onclick="bwGenerate({g})">New problem</button><p class="feedback" id="gf{g}" aria-live="polite"></p></div>')
+        bottom.append(sec('generated', 'Unlimited practice', body))
+    if M['review']:
+        body = ''.join(f'<div class="card"><p>{E(q["question"])}</p><label for="rv{i}">Your answer:</label> '
+                       f'<input type="text" id="rv{i}" autocomplete="off"> <button type="button" onclick="bwReview({i})">Check</button>'
+                       f'<p class="feedback" id="rf{i}" aria-live="polite"></p></div>' for i, q in enumerate(M['review']))
+        bottom.append(sec('review', 'Spaced review of earlier skills', body))
+    if M.get('simulation'):
+        S = M['simulation']
+        body = f'<p>{E(S.get("title", "Simulation"))}</p>' + ''.join(
+            f'<p><label for="sim-{E(i["name"])}">{E(i["label"])}</label> <input type="range" id="sim-{E(i["name"])}" '
+            f'min="{i["min"]}" max="{i["max"]}" step="{i["step"]}" value="{i["value"]}" oninput="bwSim()"> '
+            f'<span id="simv-{E(i["name"])}"></span></p>' for i in S['inputs']) + '<p id="sim-out" aria-live="polite"></p>'
+        bottom.append(sec('simulation', 'Interactive simulation', body))
+    bottom.append(sec('report', 'Progress report', '<p>Stored only on this device. No account needed.</p>'
+                      '<button type="button" onclick="bwReport()">Show my progress report</button><div id="bw-report-out"></div>'))
+    nav = [('placement', 'Placement')] if M['placement'] else []
+    nav += [(x, t) for x, t, ok in (('faded', 'Faded', M['faded']), ('mastery-gate', 'Mastery', True),
+                                    ('generated', 'Unlimited', M['generators']), ('review', 'Review', M['review']),
+                                    ('simulation', 'Simulation', M.get('simulation')), ('report', 'Report', True)) if ok]
+    return {'top': top, 'bottom': bottom, 'faded': faded, 'nav': nav}, M
 
 
 def _choice_index(q):
@@ -331,7 +529,17 @@ def build_power_tool_module(root, build_id, module_id):
     honors_ok = bool(bp.get('honors_approved'))
     items = [dict(q) for q in m.get('practice', [])] + [dict(w) for w in m.get('worked_examples', [])]
     results, n_bad, n_unsup, prov = _verify_items(items, f'{module_id}', is_sample(bp))
-    content, data_json = _module_html(bp, m, honors_ok)
+    idx = [x['id'] for x in bp['modules']].index(module_id)
+    review = [q for x in bp['modules'][:idx] for q in (x.get('practice') or [])]
+    m = dict(m, _next_title=bp['modules'][idx + 1]['title'] if idx + 1 < len(bp['modules']) else None)
+    mascot = get_asset(root, bp.get('mascot_asset_id', LIL_DR_BYRD_ID))
+    mascot_uri = None
+    if mascot:
+        import base64, mimetypes
+        mt = mimetypes.guess_type(mascot['file'])[0] or 'image/png'
+        mascot_uri = f'data:{mt};base64,' + base64.b64encode(Path(mascot['file']).read_bytes()).decode()
+    M = mastery_data(bp, m, review, mascot_uri)
+    content, data_json = _module_html(bp, m, honors_ok, M)
     page, tinfo = _apply_template(root, bp, f'{bp["product_title"]} - {m["title"]}', content, data_json)
     out_dir = b.dir / 'modules' / module_id
     out_dir.mkdir(parents=True, exist_ok=True)

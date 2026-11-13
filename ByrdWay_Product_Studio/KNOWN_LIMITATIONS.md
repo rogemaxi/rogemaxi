@@ -84,3 +84,20 @@ missing alt text, unnamed buttons, duplicate ids, external CDN dependencies, mob
 
 ## Unresolved defects
 None known in the implemented scope at the time of the final test run (see TEST_RESULTS.md).
+
+## Byrd Powerhouse v0.5.x additions (2026-11-13) - honest limits
+- **Picture-page Explainer repair is preview-only.** Fixes on flattened pages are proven correct by the Repair
+  Reviewer but are not of sale quality; professional fixes go into the editable (Canva) source.
+- **Construction content is drafted by the Curriculum Architect (Claude Code)** from the owner-approved TOC and must be
+  reviewed by the owner before sale. Machine verification proves answers, units, arithmetic, spelling and layout -
+  it does not prove pedagogy or classroom fit.
+- **Power Tools pass only with the owner's approved template and Lil Dr. Byrd asset registered.** The engineering
+  test used a template copied from the owner's own Algebra 1 v2 stylesheet; the owner must confirm it.
+- **Revenue & Media never sends, publishes, prices or pays.** Video rendering happens in the owner's Canva/HeyGen;
+  posting and emailing are done by the owner. Market research on the web is done outside the app.
+- **Sales results are measured only from imported real sales data.** Until the owner imports a TpT sales report,
+  the dashboard shows targets with no actuals - nothing is estimated or invented.
+- **Expert methods from books are paraphrased with bibliographic citations** (not page-verified); only the
+  Hormozi Diary of a CEO (2026-07-20) quotes are verified verbatim against a saved transcript.
+- **99.997 % reliability is a target to be measured** over enough real products; current evidence is reported as
+  counts of checks passed, never as an achieved reliability percentage.

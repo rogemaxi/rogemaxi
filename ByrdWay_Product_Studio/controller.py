@@ -215,6 +215,42 @@ class Studio:
             return u, builders.build_lil_dr_byrd_chapter(self.root, build_id, u)
         return None, None
 
+    def construct_next(self, build_id, run_browser=True):
+        """Build the next unit THROUGH the construction loop: Builder -> Build QA -> repair -> rebuild -> Chief Judge."""
+        import construction, powerhouse
+        s = builders.Build(self.root, build_id).state
+        for u in s['order']:
+            if s['units'][u]['status'] == 'OWNER_APPROVED':
+                continue
+            return u, construction.construct_unit(self.root, build_id, u, run_browser=run_browser,
+                                                  lessons=powerhouse.lessons_for_build(self.root))
+        return None, None
+
+    # Revenue & Media Division (drafts and measurement only: nothing is sent, published, priced or paid)
+    def sales_daily(self):
+        import salesintel
+        return salesintel.run_daily(self.root)
+
+    def sales_dashboard(self):
+        import salesintel
+        return salesintel.dashboard(self.root)
+
+    def sales_import_csv(self, path):
+        import salesintel
+        return salesintel.import_sales_csv(self.root, path)
+
+    def sales_settings(self):
+        import salesintel
+        return salesintel.settings(self.root)
+
+    def sales_save_settings(self, s):
+        import salesintel
+        return salesintel.save_settings(self.root, s)
+
+    def sales_library(self):
+        import salesintel
+        return salesintel.library()
+
     def approve_unit(self, build_id, unit, explicit=False, attest_unsupported=False, note=''):
         return builders.Build(self.root, build_id).approve(unit, explicit, attest_unsupported, note)
 

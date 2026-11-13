@@ -34,30 +34,37 @@ ENGINEERING = [
     (7, 'Observer', 'D. Learn', 'Turns every confirmed defect and fix into a lesson the builders must obey',
      'powerhouse.record_lessons', ('WORKING', 'WORKING', 'WORKING')),
     (8, 'Curriculum Architect', 'E. Build', 'Turns an approved table of contents into a unit-by-unit build plan',
-     'concepttiles.toc_from_blueprint_md, builders blueprints', ('PARTIAL', 'PARTIAL', 'WORKING')),
+     'concepttiles.toc_from_blueprint_md, builders blueprints + mastery_data', ('WORKING', 'WORKING', 'WORKING')),
     (9, 'Builder', 'E. Build', 'Writes each unit from the plan in the owner\'s product design',
      'builders.build_power_tool_module / build_lil_dr_byrd_chapter, concepttiles.render_unit',
-     ('PARTIAL', 'PARTIAL', 'WORKING')),
+     ('WORKING', 'WORKING', 'WORKING')),
     (10, 'Assembler', 'E. Build', 'Assembles all approved units into one complete product package',
-     'builders.assemble', ('PARTIAL', 'PARTIAL', 'MISSING')),
+     'builders.assemble, concepttiles.assemble_product + qa_product', ('WORKING', 'WORKING', 'WORKING')),
     (11, 'Build QA', 'F. Build QA', 'Independent checks of every built unit, incl. the Inspection checks',
-     'concepttiles.qa_pdf / check_tile, builders._verify_items', ('PARTIAL', 'PARTIAL', 'WORKING')),
+     'construction.power_tool_qa / explainer_qa (incl. 9-point Mastery standard in Chromium), concepttiles.qa_pdf',
+     ('WORKING', 'WORKING', 'WORKING')),
     (12, 'Chief Judge', 'F. Build QA', 'Final gate: 100 % of mandatory checks pass or the unit goes back',
-     'concepttiles.build_unit decision, quality.score', ('PARTIAL', 'PARTIAL', 'WORKING')),
+     'construction.construct_unit (repair + rebuild loop), concepttiles.build_unit', ('WORKING', 'WORKING', 'WORKING')),
 ]
 
-REVENUE = [
-    ('Prospect Intelligence', 'Research and qualify schools, districts, tutoring companies, homeschool groups',
-     'Notion CRM (Prospects, Contacts) - owner approval for any paid lookup', 'PARTIAL'),
-    ('Offers & Pricing', 'Bundles and premium pricing from verified products (published value-equation methods)',
-     'Notion Pricing Audit page; no live price changes without approval', 'PARTIAL'),
-    ('Media & Video', 'Lil Dr. Byrd videos and posts from VERIFIED products; owner approves every publish',
-     'Canva + HeyGen connectors available; not yet wired', 'MISSING'),
-    ('Sales & Conversion', 'Follow-ups, Gmail drafts awaiting approval, pipeline', 'Notion CRM (Opportunities, Follow-ups)',
-     'PARTIAL'),
-    ('Revenue Tracking', 'Paid units, gross, fees, refunds, net vs targets (125/week, +10-17 %, 1,000+/week)',
-     'Notion Weekly Targets + Purchases', 'WORKING'),
-]
+REVENUE_STATUS = {   # honest status of each Revenue & Media role inside the app
+    'market_research': ('PARTIAL', 'library methods + free research notes; web research is done outside the app'),
+    'offer_pricing': ('WORKING', 'salesintel.offer_proposals / value_score / van_westendorp - PROPOSALS only'),
+    'prospector': ('WORKING', 'salesintel.rank_prospects on the owner\'s local list - no paid lookups'),
+    'script_storyboard': ('WORKING', 'salesintel.media_package from VERIFIED products'),
+    'video_producer': ('PARTIAL', 'production brief; the owner renders in Canva / HeyGen'),
+    'social_publisher': ('PARTIAL', 'daily plan + approval queue; the OWNER publishes (never automatic)'),
+    'sales_followup': ('WORKING', 'salesintel.followup_drafts - drafts only, the owner sends'),
+    'retention': ('WORKING', 'salesintel.retention_paths'),
+    'revenue_tracker': ('WORKING', 'salesintel.dashboard / import_sales_csv - real sales only, TEST rows excluded'),
+    'sales_qa': ('WORKING', 'salesintel.sales_qa + library_qa + experiments (measured, minimum sample)'),
+}
+
+
+def _revenue():
+    import salesintel
+    return [(n, j, REVENUE_STATUS[k][1], REVENUE_STATUS[k][0], m) for k, n, j, m in salesintel.ROLES]
+
 
 
 def organization():
@@ -67,9 +74,10 @@ def organization():
         groups.setdefault(group, []).append({'id': aid, 'name': name, 'job': job, 'code': code,
                                              'status': dict(zip(FAMILIES, st))})
     return {'engineering': groups,
-            'revenue': [{'name': n, 'job': j, 'where': w, 'status': s} for n, j, w, s in REVENUE],
-            'quality_target': '99.97 % - measured on real products, never assumed',
-            'sales_targets': 'Week 1: 125 paid units; +10 % minimum / +17 % stretch weekly; 1,000+ per week'}
+            'revenue': [{'name': n, 'job': j, 'where': w, 'status': s, 'methods': m} for n, j, w, s, m in _revenue()],
+            'quality_target': '99.997 % reliability, measured through evidence; 100 % of mandatory release checks must pass',
+            'sales_targets': 'Week 1: 125 paid units; then +10 % (minimum) to +17 % (stretch) every week toward 1,000+ paid units per week '
+                             '(week 23 on the minimum path, week 15 on the stretch path)'}
 
 
 # ------------------------------------------------------------------ Observer: lessons library

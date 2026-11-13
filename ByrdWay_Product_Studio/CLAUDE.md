@@ -98,8 +98,9 @@ Fix before commercial use: Jordan logo on the mascot's sneakers; Bentley-like wi
   COMPLETE Power Tools, Lil Dr. Byrd Explainers and (on request) Concept Tiles: every unit through academic
   verification, functional tests, visual inspection, repair and independent Loop QA; 100 % of mandatory release
   checks must pass; no missing chapters, wrong answers or unverified completion claims.
-- **Reliability target 99.997 %**: a measured result (defined denominators, enough real tests), never asserted.
-- **Sales targets (targets, not guarantees):** week 1 = 125 verified paid units; +10 % minimum / +17 % stretch
+- **Reliability target 99.997 %** (corrected by owner 2026-11-13): measured through evidence (defined denominators,
+  enough real tests), never asserted; AND 100 % of mandatory release checks must pass.
+- **Sales targets (targets, not guarantees; corrected 2026-11-13):** week 1 = 125 verified paid units; then 10-17 % weekly growth (+10 % minimum / +17 % stretch)
   week over week; milestone 1,000+ paid units/week (week 23 on the minimum path, week 15 on the stretch path).
   Track paid units, gross, fees, refunds, net revenue, conversion; below target -> corrective action recorded.
 - TpT catalog verified 2026-11-12: 30 products (2 store pages). Re-verify every store page on each inventory sync.
@@ -119,3 +120,17 @@ Fix before commercial use: Jordan logo on the mascot's sneakers; Bentley-like wi
   owner's existing Concept Tile sections: Meaning & reasoning / Picture the reasoning / Worked examples /
   Practice & check / Misconceptions & teach it back / Honors: full reasoning; Lil Dr. Byrd on every tile.
   Product content stays private (not in this public repo).
+
+### Revenue & Media Division + Elite Sales Intelligence (owner, 2026-11-13)
+- 10 roles inside the SAME app (tab 8, salesintel.py): Market Researcher, Offer & Pricing Strategist, Prospector,
+  Script & Storyboard Writer, Video Producer, Social Publisher, Sales & Follow-up, Retention & Ascension,
+  Revenue Tracker, Sales QA & Compliance. They DRAFT and MEASURE; the owner approves, sends and publishes.
+- sales_library.json: source-linked methods (Alex & Leila Hormozi, Myron Golden, Grant Cardone, Zig Ziglar, Jim Rohn).
+  Priority source: Hormozi on The Diary of a CEO, 2026-07-20 (quotes verified verbatim against a saved transcript;
+  the transcript itself stays private). Book-sourced methods are paraphrased with bibliographic citations.
+- Constraints enforced in code by Sales QA: no referral incentives (method AH-21 EXCLUDED), no new subscriptions or
+  spending, no invented testimonials/sales/endorsements, never speak in an expert's name, market only Studio QA PASS +
+  owner-approved products, judge experiments only at minimum sample. Sales data stays in the private workspace.
+- Construction QA loop (construction.py) for Power Tools (incl. the 9-point Mastery standard tested in Chromium) and
+  Explainers; Concept Tiles Assembler (concepttiles.assemble_product + qa_product). Physics + Honors: all 100 tiles
+  built and assembled (content private, deliverables/physics_build).

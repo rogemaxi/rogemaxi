@@ -17,7 +17,10 @@ class Organization(unittest.TestCase):
             self.assertEqual(set(a['status']), set(powerhouse.FAMILIES))
             self.assertTrue(set(a['status'].values()) <= {'WORKING', 'PARTIAL', 'MISSING'})
             self.assertTrue(a['code'])
-        self.assertTrue(any(r['status'] == 'MISSING' for r in org['revenue']), 'missing parts are shown, never hidden')
+        st = {r['name']: r['status'] for r in org['revenue']}
+        self.assertEqual(len(st), 10)
+        for owner_dependent in ('Video Producer', 'Social Publisher'):      # the owner renders/publishes: never WORKING
+            self.assertEqual(st[owner_dependent], 'PARTIAL', 'limits are shown, never hidden')
 
 
 class ObserverLearnsFromRepairs(unittest.TestCase):

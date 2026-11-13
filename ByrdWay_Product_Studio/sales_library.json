@@ -1,0 +1,757 @@
+{
+ "version": "2026-11-13",
+ "transcript_snapshot_sha256": "ebfe0b7f8305e261ff0c830915945be6baa40a5a0b6c0db328c938bd3975db5d",
+ "rules": [
+  "Methods only, applied to ByrdWay - never impersonate or speak for a named expert.",
+  "No invented testimonials, sales figures or expert endorsements.",
+  "No referral incentives, new subscriptions, paid lookups or spending without owner approval.",
+  "Market only products whose Studio QA = PASS and that the owner approved.",
+  "A method is promoted or retired only from measured experiment results at or above minimum sample."
+ ],
+ "methods": [
+  {
+   "id": "AH-01",
+   "expert": "Alex Hormozi",
+   "method": "Stickiness before scale: keep the customers you win",
+   "apply_at_byrdway": "Every buyer gets a next-step path (next unit, bundle, companion Power Tool); track how many buyers buy again before pushing harder on new traffic.",
+   "roles": [
+    "retention"
+   ],
+   "metric": "repeat-purchase rate (buyers with 2+ orders / all buyers)",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "they would have stayed longer in the product-market fit phase",
+    "section": "The $1 Million to $10 Million Bottleneck",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-02",
+   "expert": "Alex Hormozi",
+   "method": "Price on what the customer will pay, not on your own wallet",
+   "apply_at_byrdway": "Price from teacher/school willingness to pay and competitor ranges, never from \"it was easy for me to make\".",
+   "roles": [
+    "offer_pricing"
+   ],
+   "metric": "conversion rate at each tested price; revenue per visitor",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "it’s all about what the customer is willing to pay",
+    "section": "Running Out of Time: The Pricing and Margin Problem",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-03",
+   "expert": "Alex Hormozi",
+   "method": "Van Westendorp price sensitivity (4 questions)",
+   "apply_at_byrdway": "Survey teachers (too expensive / too cheap / getting expensive / a bargain) before launching a new product price; slice by segment (homeschool, classroom, district).",
+   "roles": [
+    "offer_pricing",
+    "market_research"
+   ],
+   "metric": "acceptable price range per segment (from real survey answers only)",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "there’s 4 questions you ask",
+    "section": "The Van Westendorp Pricing Analysis",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-04",
+   "expert": "Alex Hormozi",
+   "method": "Thin margin is a symptom of a wrong offer or sales motion",
+   "apply_at_byrdway": "Watch net revenue per unit after TpT fees; if it falls, fix the offer (bundle, terms) before adding volume.",
+   "roles": [
+    "revenue_tracker",
+    "offer_pricing"
+   ],
+   "metric": "net revenue per unit after fees and refunds",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "The root cause is either that their offer is incorrect",
+    "section": "Running Out of Time: The Pricing and Margin Problem",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-05",
+   "expert": "Alex Hormozi",
+   "method": "Build the premium offer first and anchor high",
+   "apply_at_byrdway": "Lead with the complete course bundle (all units, Power Tool + Explainers + Concept Tiles) as the anchor; single units are the step-down.",
+   "roles": [
+    "offer_pricing"
+   ],
+   "metric": "share of revenue from bundles; average order value",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "start with the most absurdly valuable thing you possibly can",
+    "section": "The Power of Starting Unscalable",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-06",
+   "expert": "Alex Hormozi",
+   "method": "Value equation: outcome x likelihood / (time delay x effort & sacrifice)",
+   "apply_at_byrdway": "Score every offer: dream outcome (course mastered), perceived likelihood (verified answers, QA evidence, previews), time delay (minutes to first win), effort (print-and-go, no prep).",
+   "roles": [
+    "offer_pricing",
+    "script_storyboard"
+   ],
+   "metric": "offer score vs. measured conversion",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "outcome and then we have perceived likelihood of achievement",
+    "section": "The Value Equation",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-07",
+   "expert": "Alex Hormozi",
+   "method": "Time delay is the most under-used lever",
+   "apply_at_byrdway": "Lead messaging with the fastest verified win (e.g. one tile = one idea in one sitting) - only claims the product actually supports.",
+   "roles": [
+    "script_storyboard",
+    "offer_pricing"
+   ],
+   "metric": "click-through on time-to-result headlines vs. others",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "look at what everyone else is doing and do it half the time",
+    "section": "The Value Equation",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-08",
+   "expert": "Alex Hormozi",
+   "method": "Reality is the moat: show proof, and document proof of effort",
+   "apply_at_byrdway": "Content shows real work: the Studio verifying 2,151 checks, a tile being built and checked, Dr. Byrd teaching. Never fabricated results.",
+   "roles": [
+    "script_storyboard",
+    "video_producer"
+   ],
+   "metric": "saves/shares per post on proof content vs. generic tips",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "document the proof of effort",
+    "section": "What Content to Avoid",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-09",
+   "expert": "Alex Hormozi",
+   "method": "Answer \"Why should I listen to you?\" in the first seconds",
+   "apply_at_byrdway": "Every video opens with Dr. Byrd's real credential or the product's verified proof within 3 seconds.",
+   "roles": [
+    "script_storyboard",
+    "sales_qa"
+   ],
+   "metric": "3-second hold rate; QA rule: credential/proof line in the opening",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "Why should I listen to you?",
+    "section": "What Content to Avoid",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-10",
+   "expert": "Alex Hormozi",
+   "method": "Avoid commoditized tips and tricks with no proof",
+   "apply_at_byrdway": "No generic study-tip posts; every post ties to a verified ByrdWay product or real classroom result.",
+   "roles": [
+    "sales_qa",
+    "script_storyboard"
+   ],
+   "metric": "share of posts linked to a verified product",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "commoditized tips and tricks",
+    "section": "What Content to Avoid",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-11",
+   "expert": "Gary Halbert (as cited by Alex Hormozi)",
+   "method": "Channel existing demand instead of creating it",
+   "apply_at_byrdway": "Target the searches teachers already make (course + topic + format on TpT, Pinterest, YouTube) and put the ByrdWay product in that path.",
+   "roles": [
+    "market_research",
+    "social_publisher"
+   ],
+   "metric": "impressions/visits from search terms that already have volume",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "We don’t want to create demand. We want to channel it.",
+    "section": "Channeling Demand and Choosing Your Market",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-12",
+   "expert": "Alex Hormozi",
+   "method": "Decide who you serve",
+   "apply_at_byrdway": "Segment buyers (homeschool parent, classroom teacher, tutor, school/district); write each message for one segment.",
+   "roles": [
+    "prospector",
+    "market_research"
+   ],
+   "metric": "conversion by segment",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "one of the highest leverage decisions that you make with the business is who do I serve?",
+    "section": "Channeling Demand and Choosing Your Market",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-13",
+   "expert": "Alex Hormozi",
+   "method": "Cut once, sell twice: one product for many of the same customer",
+   "apply_at_byrdway": "Reuse one verified product across formats (Concept Tiles, Explainer, Power Tool) for the same course buyer.",
+   "roles": [
+    "retention",
+    "offer_pricing"
+   ],
+   "metric": "products sold per course family",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "We make one thing for 10 people",
+    "section": "Channeling Demand and Choosing Your Market",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-14",
+   "expert": "Alex Hormozi",
+   "method": "Use a real test size before judging a channel",
+   "apply_at_byrdway": "No channel or creative is judged \"failed\" before it reaches its minimum sample (set per experiment).",
+   "roles": [
+    "sales_qa",
+    "revenue_tracker"
+   ],
+   "metric": "experiments closed only at or above minimum sample",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "We usually put out 5,000 per test batch",
+    "section": "The Behaviorist Approach: Arranging Conditions for Success",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-15",
+   "expert": "Alex Hormozi",
+   "method": "Volume of activity and output",
+   "apply_at_byrdway": "Daily output quotas per role (posts, pins, outreach drafts, follow-ups) tracked every day.",
+   "roles": [
+    "social_publisher",
+    "sales_followup",
+    "prospector"
+   ],
+   "metric": "daily output vs. quota",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "the volume of activity and output",
+    "section": "The Behaviorist Approach: Arranging Conditions for Success",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-16",
+   "expert": "Alex Hormozi",
+   "method": "Arrange the conditions: make buying the easiest, nicest option",
+   "apply_at_byrdway": "Listing checklist: clear title, preview pages, what is included, grade/course fit, bundle link, answer keys stated, one-click path.",
+   "roles": [
+    "offer_pricing",
+    "sales_qa"
+   ],
+   "metric": "listing checklist pass rate; listing conversion",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "you haven’t made buying from you the most convenient, nicest option",
+    "section": "Doing and Listening: Reinforcement Learning in Practice",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-17",
+   "expert": "Alex Hormozi",
+   "method": "Plus/minus persuasion: more good, less bad if you act",
+   "apply_at_byrdway": "Copy template: what the teacher gains (more good), what is removed (less prep, fewer errors), and the honest cost of waiting - no fear-mongering.",
+   "roles": [
+    "script_storyboard",
+    "sales_followup"
+   ],
+   "metric": "reply/click rate by copy variant",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "plus, plus, plus, minus, minus, plus, minus, minus",
+    "section": "The Persuasion Framework: Plus and Minus",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-18",
+   "expert": "Alex Hormozi",
+   "method": "Run the business as a pipeline: lead gen, nurture, sales, onboarding, retention/ascension",
+   "apply_at_byrdway": "The dashboard measures each stage weekly, so the bottleneck is always visible.",
+   "roles": [
+    "revenue_tracker"
+   ],
+   "metric": "stage-by-stage counts and conversion",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "we’ve got lead gen as activity number 1",
+    "section": "Every Problem Is a Marketing Problem",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-19",
+   "expert": "Alex Hormozi",
+   "method": "Nurture with real sales materials (case studies, product video)",
+   "apply_at_byrdway": "Every product gets a Lil Dr. Byrd walkthrough video and a real sample page set; case studies only from real, permissioned classroom use.",
+   "roles": [
+    "video_producer",
+    "sales_followup"
+   ],
+   "metric": "conversion of visitors who watched the walkthrough",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "why don’t we have case studies?",
+    "section": "Every Problem Is a Marketing Problem",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-20",
+   "expert": "Alex Hormozi",
+   "method": "Ask your best customers what it would take to stay",
+   "apply_at_byrdway": "For schools/districts that buy: ask what would make ByrdWay their sole math/science resource provider; record answers.",
+   "roles": [
+    "retention",
+    "sales_followup"
+   ],
+   "metric": "answers collected; renewals",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "What would it take for us to be your sole provider forever?",
+    "section": "Every Problem Is a Marketing Problem",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-21",
+   "expert": "Alex Hormozi",
+   "method": "Paid referral incentives",
+   "apply_at_byrdway": "NOT USED.",
+   "roles": [
+    "retention"
+   ],
+   "metric": "n/a",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "Do we have an incentive for people to bring referrals?",
+    "section": "Treating Employees Like Customers",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "EXCLUDED",
+   "note": "Excluded by owner constraint: no referral incentives."
+  },
+  {
+   "id": "AH-22",
+   "expert": "Alex Hormozi",
+   "method": "Hold a high standard; the most senior person holds the highest bar",
+   "apply_at_byrdway": "Sales QA (role 10) rejects any draft below standard; the owner holds the final bar.",
+   "roles": [
+    "sales_qa"
+   ],
+   "metric": "QA rejection reasons trend toward zero",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "my bar wasn’t high enough",
+    "section": "The Hiring Mistake and the Fear of Starting",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-23",
+   "expert": "Alex Hormozi",
+   "method": "Do not hunt for a unicorn: split the job across specialists",
+   "apply_at_byrdway": "Ten specialist roles instead of one do-everything marketer.",
+   "roles": [
+    "sales_qa"
+   ],
+   "metric": "each role has its own output and metric",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "They try to find in one person what they can more easily find in 3.",
+    "section": "The Unicorn Hiring Trap",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-24",
+   "expert": "Alex Hormozi",
+   "method": "Move upmarket over time",
+   "apply_at_byrdway": "After classroom traction, add school/department licenses at higher prices; price signals value.",
+   "roles": [
+    "prospector",
+    "offer_pricing"
+   ],
+   "metric": "average order value; share of school/district orders",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "should be to move upmarket",
+    "section": "Moving Upmarket and Pricing Strategy",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-25",
+   "expert": "Alex Hormozi",
+   "method": "Focus and patience",
+   "apply_at_byrdway": "One course family at a time to 100 % verified, then the next; weekly targets compound.",
+   "roles": [
+    "revenue_tracker"
+   ],
+   "metric": "weekly paid units vs. +10 % / +17 % path",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "focus and patience are the 2 enduring competitive advantages",
+    "section": "The Foundation Problem: Why Most Businesses Plateau",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "LH-01",
+   "expert": "Leila Hormozi (as described by Alex Hormozi)",
+   "method": "Operator discipline and a team people want to work in",
+   "apply_at_byrdway": "Daily operating rhythm: every role reports output, blockers and next action; standards are written down.",
+   "roles": [
+    "sales_qa",
+    "revenue_tracker"
+   ],
+   "metric": "daily report completed by every role",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "Leila is a pure operator, an unbelievable leader.",
+    "section": "The Role of Leila in Alex’s Success",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE",
+   "note": "Described by Alex Hormozi in the interview; not Leila Hormozi's own words. Add her own published material when the owner supplies a source."
+  },
+  {
+   "id": "AH-26",
+   "expert": "Alex Hormozi",
+   "method": "Grand Slam Offer: an offer so good people feel stupid saying no (value stacking, guarantees, bonuses, scarcity/urgency, naming)",
+   "apply_at_byrdway": "Bundle offers stack verified components; any guarantee must be one the owner can honour; scarcity/urgency only when real (e.g. a real launch-week price).",
+   "roles": [
+    "offer_pricing"
+   ],
+   "metric": "conversion of stacked vs. plain listing",
+   "source": {
+    "type": "book",
+    "citation": "Alex Hormozi, $100M Offers: How to Make Offers So Good People Feel Stupid Saying No (Acquisition.com, 2021)",
+    "url": null,
+    "verification": "bibliographic citation; method paraphrased (no quotation); confirm page before quoting publicly"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-27",
+   "expert": "Alex Hormozi",
+   "method": "Core Four lead generation: warm outreach, content, cold outreach, paid ads",
+   "apply_at_byrdway": "Today: content (free) and warm outreach drafts (owner sends). Paid ads only with owner approval.",
+   "roles": [
+    "social_publisher",
+    "prospector"
+   ],
+   "metric": "leads per channel",
+   "source": {
+    "type": "book",
+    "citation": "Alex Hormozi, $100M Leads: How to Get Strangers to Want to Buy Your Stuff (Acquisition.com, 2023)",
+    "url": null,
+    "verification": "bibliographic citation; method paraphrased (no quotation); confirm page before quoting publicly"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "MG-01",
+   "expert": "Myron Golden",
+   "method": "Offer stack: present total value far above the price",
+   "apply_at_byrdway": "Bundle listings list each verified component with its own value; total value shown honestly from real individual prices.",
+   "roles": [
+    "offer_pricing"
+   ],
+   "metric": "conversion of offer-stack listing vs. plain",
+   "source": {
+    "type": "book",
+    "citation": "Myron Golden, Boss Moves: Unleash the Untapped Potential in Your Business (2022)",
+    "url": null,
+    "verification": "bibliographic citation; method paraphrased (no quotation); confirm page before quoting publicly"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "MG-02",
+   "expert": "Myron Golden",
+   "method": "Make more offers",
+   "apply_at_byrdway": "Every piece of content and every follow-up ends with one clear offer for a verified product.",
+   "roles": [
+    "script_storyboard",
+    "sales_followup"
+   ],
+   "metric": "offers made per day; offer-to-sale rate",
+   "source": {
+    "type": "book",
+    "citation": "Myron Golden, Boss Moves (2022)",
+    "url": null,
+    "verification": "bibliographic citation; method paraphrased (no quotation); confirm page before quoting publicly"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "MG-03",
+   "expert": "Myron Golden",
+   "method": "Ascend customers up a value ladder of higher-priced offers",
+   "apply_at_byrdway": "Single unit -> full course bundle -> school license; each step offered to existing buyers.",
+   "roles": [
+    "retention",
+    "offer_pricing"
+   ],
+   "metric": "ascension rate between ladder steps",
+   "source": {
+    "type": "book",
+    "citation": "Myron Golden, From the Trash Man to the Cash Man (2019); Boss Moves (2022)",
+    "url": null,
+    "verification": "bibliographic citation; method paraphrased (no quotation); confirm page before quoting publicly"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "GC-01",
+   "expert": "Grant Cardone",
+   "method": "10X targets and massive action",
+   "apply_at_byrdway": "Set daily activity at the level the 1,000 units/week goal needs, not the comfortable level; measure activity daily.",
+   "roles": [
+    "revenue_tracker",
+    "social_publisher"
+   ],
+   "metric": "daily activity vs. the level required by the target",
+   "source": {
+    "type": "book",
+    "citation": "Grant Cardone, The 10X Rule (Wiley, 2011)",
+    "url": null,
+    "verification": "bibliographic citation; method paraphrased (no quotation); confirm page before quoting publicly"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "GC-02",
+   "expert": "Grant Cardone",
+   "method": "Persistent follow-up",
+   "apply_at_byrdway": "Every warm lead gets a scheduled sequence of follow-up drafts until it answers yes or no; never dropped silently.",
+   "roles": [
+    "sales_followup"
+   ],
+   "metric": "leads with an overdue follow-up (target 0)",
+   "source": {
+    "type": "book",
+    "citation": "Grant Cardone, Sell or Be Sold (Greenleaf, 2011)",
+    "url": null,
+    "verification": "bibliographic citation; method paraphrased (no quotation); confirm page before quoting publicly"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "GC-03",
+   "expert": "Grant Cardone",
+   "method": "Agree with the buyer, then keep the conversation moving",
+   "apply_at_byrdway": "Objection replies first acknowledge the concern (price, time, fit), then answer with verified facts.",
+   "roles": [
+    "sales_followup"
+   ],
+   "metric": "objection-to-sale rate",
+   "source": {
+    "type": "book",
+    "citation": "Grant Cardone, Sell or Be Sold (2011); The Closer's Survival Guide (2009)",
+    "url": null,
+    "verification": "bibliographic citation; method paraphrased (no quotation); confirm page before quoting publicly"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "ZZ-01",
+   "expert": "Zig Ziglar",
+   "method": "Help enough other people get what they want",
+   "apply_at_byrdway": "Lead with the teacher's problem (prep time, student gaps) and how the product solves it; selling is service.",
+   "roles": [
+    "script_storyboard",
+    "sales_followup"
+   ],
+   "metric": "replies thanking for help; conversion",
+   "source": {
+    "type": "book",
+    "citation": "Zig Ziglar, See You at the Top (Pelican, 1975)",
+    "url": null,
+    "verification": "bibliographic citation; method paraphrased (no quotation); confirm page before quoting publicly"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "ZZ-02",
+   "expert": "Zig Ziglar",
+   "method": "Question-based selling: understand the need before presenting",
+   "apply_at_byrdway": "Outreach drafts ask one question about the teacher's course and pain before any pitch.",
+   "roles": [
+    "sales_followup",
+    "prospector"
+   ],
+   "metric": "reply rate of question-first drafts",
+   "source": {
+    "type": "book",
+    "citation": "Zig Ziglar, Secrets of Closing the Sale (Revell, 1984)",
+    "url": null,
+    "verification": "bibliographic citation; method paraphrased (no quotation); confirm page before quoting publicly"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "JR-01",
+   "expert": "Jim Rohn",
+   "method": "Success is a few simple disciplines practised every day",
+   "apply_at_byrdway": "The daily sales workflow runs every day: same steps, same measures.",
+   "roles": [
+    "revenue_tracker",
+    "sales_qa"
+   ],
+   "metric": "days the full workflow ran / days in period",
+   "source": {
+    "type": "book",
+    "citation": "Jim Rohn, 7 Strategies for Wealth & Happiness (Prima, 1985)",
+    "url": null,
+    "verification": "bibliographic citation; method paraphrased (no quotation); confirm page before quoting publicly"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "JR-02",
+   "expert": "Jim Rohn",
+   "method": "Keep a journal and study your results",
+   "apply_at_byrdway": "Every experiment and daily result is logged; the weekly review compares plan with results.",
+   "roles": [
+    "revenue_tracker"
+   ],
+   "metric": "experiments with recorded results",
+   "source": {
+    "type": "book",
+    "citation": "Jim Rohn, The Five Major Pieces to the Life Puzzle (1991)",
+    "url": null,
+    "verification": "bibliographic citation; method paraphrased (no quotation); confirm page before quoting publicly"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "JR-03",
+   "expert": "Jim Rohn",
+   "method": "Sowing and reaping: keep sowing, not every seed grows",
+   "apply_at_byrdway": "Do not stop a channel after a few no's; judge only at the planned sample size (pairs with AH-14).",
+   "roles": [
+    "social_publisher",
+    "sales_followup"
+   ],
+   "metric": "channels judged before minimum sample (target 0)",
+   "source": {
+    "type": "book",
+    "citation": "Jim Rohn, The Five Major Pieces to the Life Puzzle (1991)",
+    "url": null,
+    "verification": "bibliographic citation; method paraphrased (no quotation); confirm page before quoting publicly"
+   },
+   "status": "ACTIVE"
+  }
+ ]
+}
