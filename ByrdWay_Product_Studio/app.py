@@ -1062,13 +1062,15 @@ class App(tk.Tk):
         self.rev_frame = f
         ttk.Label(f, text='REVENUE & MEDIA DIVISION - 10 roles. The app drafts and measures; YOU approve, send and publish.',
                   font=('Segoe UI', 11, 'bold')).pack(anchor='w')
-        bar = ttk.Frame(f)
-        bar.pack(fill='x', pady=4)
-        for text, cmd in [("Run today's sales workflow", self.sales_run_daily), ('Revenue dashboard', self.sales_show_dashboard),
-                          ('Import TpT sales report (CSV)…', self.sales_import), ('Set Week 1 start date…', self.sales_set_week1),
-                          ('Load product catalog (JSON)…', self.sales_load_catalog), ('Strategy library', self.sales_show_library),
-                          ('30-second commercial QA…', self.sales_commercial)]:
-            ttk.Button(bar, text=text, command=cmd).pack(side='left', padx=2)
+        rows = [[("Run today's sales workflow", self.sales_run_daily), ('Revenue dashboard', self.sales_show_dashboard),
+                 ('Strategy library', self.sales_show_library), ('30-second commercial QA…', self.sales_commercial)],
+                [('Import TpT sales report (CSV)…', self.sales_import), ('Set Week 1 start date…', self.sales_set_week1),
+                 ('Load product catalog (JSON)…', self.sales_load_catalog)]]
+        for row in rows:                                  # two rows so every button fits a 1280-px window
+            bar = ttk.Frame(f)
+            bar.pack(fill='x', pady=2)
+            for text, cmd in row:
+                ttk.Button(bar, text=text, command=cmd).pack(side='left', padx=2)
         self.rev_out = tk.Text(f, height=30, font=('Consolas', 9), wrap='word')
         self.rev_out.pack(fill='both', expand=True)
 
