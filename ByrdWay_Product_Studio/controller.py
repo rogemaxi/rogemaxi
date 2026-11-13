@@ -226,6 +226,20 @@ class Studio:
                                                   lessons=powerhouse.lessons_for_build(self.root))
         return None, None
 
+    def build_concept_tiles(self, toc_md, content_json, course, mascot=None):
+        """Concept Tiles in the owner-approved ByrdWay format from an APPROVED table of contents + tile content,
+        through independent QA (design conformance, TOC coverage, continuity, academic, Reader lessons)."""
+        import byrdway_tiles, concepttiles, time
+        toc = concepttiles.toc_from_blueprint_md(Path(toc_md).read_text(encoding='utf-8'))
+        content = {int(k): v for k, v in json.loads(Path(content_json).read_text(encoding='utf-8')).items()}
+        out = self.root / 'concept_tiles' / time.strftime('%Y%m%d_%H%M%S')
+        out.mkdir(parents=True, exist_ok=True)
+        rep = byrdway_tiles.build_product(toc, content, out / f'{course.replace(" ", "_").replace("+", "Plus")}_Concept_Tiles.pdf',
+                                          course, mascot=Path(mascot) if mascot else None)
+        (out / 'QA_REPORT.json').write_text(json.dumps(rep, indent=1, ensure_ascii=False), encoding='utf-8')
+        activity(self.root, 'Concept Tiles Builder', f'built {rep["pdf"]}: {rep["decision"]}', checks=rep['mandatory_checks'], failed=rep['failed'])
+        return rep
+
     # Revenue & Media Division (drafts and measurement only: nothing is sent, published, priced or paid)
     def sales_daily(self):
         import salesintel

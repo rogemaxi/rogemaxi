@@ -647,6 +647,7 @@ class App(tk.Tk):
         ttk.Button(row, text='Register approved page template…', command=self.register_template).pack(side='left', padx=2)
         ttk.Button(row, text='Register Lil Dr. Byrd image…', command=self.register_mascot).pack(side='left', padx=2)
         ttk.Button(row, text='Register other approved asset…', command=self.register_asset).pack(side='left', padx=2)
+        ttk.Button(row, text='Build Concept Tiles (approved ByrdWay format)…', command=self.build_concept_tiles).pack(side='left', padx=2)
         self.prereq_box = tk.Text(s3, height=5, wrap='word', font=('Segoe UI', 9))
         self.prereq_box.pack(fill='x', pady=4)
         s4 = ttk.LabelFrame(f, text='Step 4 — Build one unit at a time, review it, approve it; then assemble and verify', padding=6)
@@ -823,6 +824,23 @@ class App(tk.Tk):
                 if self.btree.exists(f'{bid}::{r[0]}'):
                     self.btree.selection_set(f'{bid}::{r[0]}')
         self.run_bg('Build', lambda: self.studio.build_next(bid), done)
+
+    def build_concept_tiles(self):
+        toc = filedialog.askopenfilename(title='Approved table of contents (.md)', filetypes=[('Markdown', '*.md')])
+        if not toc:
+            return
+        content = filedialog.askopenfilename(title='Tile content (.json)', filetypes=[('JSON', '*.json')])
+        if not content:
+            return
+        course = simpledialog.askstring('Course', 'Course name for the footer (e.g. Physics + Honors):') or 'ByrdWay Concept Tiles'
+        mascot = filedialog.askopenfilename(title='Approved Lil Dr. Byrd image (optional)', filetypes=[('Image', '*.png *.jpg')]) or None
+
+        def done(rep):
+            self.log_line(f'Concept Tiles: {rep["decision"]} - {rep["mandatory_checks"] - rep["failed"]}/{rep["mandatory_checks"]} '
+                          f'mandatory checks, {rep["pages"]} pages: {rep["pdf"]}')
+            for f in rep['failures'][:15]:
+                self.log_line(f'   SEND BACK: {f[0]}: {f[2]}')
+        self.run_bg('Concept Tiles', lambda: self.studio.build_concept_tiles(toc, content, course, mascot), done)
 
     def construct_next(self):
         """Builder -> independent Build QA (academic, Reader lessons, code, browser, Mastery standard) -> repair ->
@@ -1066,6 +1084,13 @@ class App(tk.Tk):
             L += ['', f"Catalog: {rep['catalog']}", f"Outputs: {rep['outputs']}",
                   f"Sales QA: {rep['sales_qa']['passed']}/{rep['sales_qa']['checks']} checks passed; blocked: {len(rep['sales_qa']['blocked'])}"]
             L += [f"   BLOCKED {b['item']}: {'; '.join(b['problems'])}" for b in rep['sales_qa']['blocked'][:10]]
+            rd = rep['roadmap']
+            L += ['', f"SCALING ROADMAP STAGE: {rd['stage']['stage']} {rd['stage']['name']}"
+                      + (' (PROVISIONAL)' if rd['stage']['provisional'] else ''),
+                  *[f'   because: {r}' for r in rd['stage']['reasons']], *[f'   unverified: {u}' for u in rd['stage']['unverified']],
+                  f"BOTTLENECK: {rd['bottleneck']['constraint']} - {rd['bottleneck']['why']}. Fix: {rd['bottleneck']['fix']}",
+                  'TODAY (priority order):'] + [f"  {a['priority']:2}. [{a['role']}] {a['action']}  -> metric: {a['metric']}  ({', '.join(a['methods'])})"
+                                                for a in rd['daily_plan']['actions']]
             L += ['', f"Measured: {rep['measured']}", '', 'YOUR QUEUE:'] + [f'  - {q}' for q in rep['owner_queue']]
             self._rev_print(L)
         self.run_bg('Sales workflow', self.studio.sales_daily, done)

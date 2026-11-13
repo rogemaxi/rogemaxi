@@ -25,9 +25,9 @@ START_UNITS, MIN_GROWTH, STRETCH_GROWTH, MILESTONE = 125, 0.10, 0.17, 1000
 ROLES = [
     # key, name, job, methods it applies (library ids)
     ('market_research', 'Market Researcher', 'Free research: what teachers search for, competitor prices and formats',
-     ['AH-11', 'AH-12', 'AH-03']),
+     ['AH-11', 'AH-12', 'AH-03', 'AH-30']),
     ('offer_pricing', 'Offer & Pricing Strategist', 'Bundles, value-equation scoring, price PROPOSALS (never live changes)',
-     ['AH-06', 'AH-05', 'AH-02', 'AH-26', 'MG-01', 'AH-16', 'AH-24']),
+     ['AH-06', 'AH-05', 'AH-02', 'AH-26', 'MG-01', 'AH-16', 'AH-24', 'AH-29']),
     ('prospector', 'Prospector', 'Segments and ranks schools, teachers, tutors, homeschool groups (local data, no paid lookups)',
      ['AH-12', 'AH-24', 'ZZ-02', 'AH-15']),
     ('script_storyboard', 'Script & Storyboard Writer', 'Lil Dr. Byrd video scripts and posts from VERIFIED products',
@@ -37,13 +37,13 @@ ROLES = [
     ('social_publisher', 'Social Publisher', 'Daily posting plan and approval queue - the OWNER publishes',
      ['AH-11', 'AH-15', 'AH-27', 'GC-01', 'JR-03']),
     ('sales_followup', 'Sales & Follow-up', 'Outreach and follow-up DRAFTS awaiting owner approval',
-     ['GC-02', 'GC-03', 'ZZ-02', 'AH-17', 'MG-02']),
+     ['GC-02', 'GC-03', 'ZZ-02', 'AH-17', 'MG-02', 'AH-28']),
     ('retention', 'Retention & Ascension', 'Repeat purchases: next unit, bundle and license paths for existing buyers',
-     ['AH-01', 'MG-03', 'AH-13', 'AH-20']),
+     ['AH-01', 'MG-03', 'AH-13', 'AH-20', 'AH-28']),
     ('revenue_tracker', 'Revenue Tracker', 'Paid units, gross, fees, refunds, net vs targets; pipeline stages',
-     ['AH-18', 'AH-04', 'AH-25', 'JR-02', 'GC-01']),
+     ['AH-18', 'AH-04', 'AH-25', 'JR-02', 'GC-01', 'AH-29', 'AH-31']),
     ('sales_qa', 'Sales QA & Compliance', 'Independent check of every draft and every claim; experiment discipline',
-     ['AH-22', 'AH-14', 'AH-10', 'AH-09', 'JR-01', 'LH-01']),
+     ['AH-22', 'AH-14', 'AH-10', 'AH-09', 'JR-01', 'LH-01', 'AH-31']),
 ]
 
 
@@ -437,6 +437,11 @@ def run_daily(root, credential='Dr. Rogé J. Byrd, ByrdWay Mathematics & Science
     checks, blocked = sales_qa({k: v for k, v in out.items() if k in ('media', 'followups', 'offers', 'retention')}, cat)
     checks += library_qa()
     dash = dashboard(root, today)
+    import roadmap
+    evidence = {'weekly_units': [w['units'] for w in dash['weeks'] if w['status'] != 'IN PROGRESS'],
+                'team_size': s.get('team_size', 1), 'products_listed': len(cat), 'products_qa_pass': len(ok),
+                'reviews': s.get('store_reviews'), 'channel_weeks_with_sales': s.get('channel_weeks_with_sales', 0)}
+    road = roadmap.assess(evidence)
     passed = sum(1 for c in checks if c[1])
     report = {
         'date': today.isoformat(),
@@ -454,7 +459,9 @@ def run_daily(root, credential='Dr. Rogé J. Byrd, ByrdWay Mathematics & Science
                         f'review {len(out["followups"])} outreach draft(s) - the app never sends',
                         f'decide on {sum(1 for o in out["offers"] if "proposed_bundle_price" in o)} bundle proposal(s) - live prices unchanged',
                         'import the latest TpT sales report so results are measured, not assumed'],
-        'rules': library()['rules']}
+        'rules': library()['rules'],
+        'roadmap': {'stage': road['diagnosis'], 'bottleneck': road['bottleneck'], 'daily_plan': road['plan'],
+                    'evidence': evidence}}
     days = _load(root, 'daily_runs.json', [])
     days.append({'date': report['date'], 'outputs': report['outputs'], 'qa_passed': passed, 'qa_checks': len(checks),
                  'blocked': len(blocked)})

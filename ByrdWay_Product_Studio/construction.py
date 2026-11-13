@@ -68,7 +68,8 @@ def reader_checks(text, where, tech_words=()):
 
 
 _TECH = set('''byrdway lil honors kinematics displacement equilibrium newtons joules coulombs vectors scalars
-centripetal kepler doppler kirchhoff snell ohm ohms photoelectric thermodynamics placement faded'''.split())
+centripetal kepler doppler kirchhoff snell ohm ohms photoelectric thermodynamics placement faded
+centi milli kilo micro nano mega giga'''.split())
 
 
 def academic_checks(results, where):

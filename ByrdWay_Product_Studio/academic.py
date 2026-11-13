@@ -566,6 +566,8 @@ def classify(question):
     if m:
         return {'type': 'limit', 'var': m.group(1), 'to': m.group(2), 'expr': m.group(3)}
     m = re.search(r'(mean|average|median|mode|range|sample standard deviation|population standard deviation|standard deviation|variance)\b.*?' + _NUM_LIST, ql)
+    if m and len(set(re.findall(r'\b(mean|median|mode|range)\b', ql))) > 1:
+        m = None                           # several statistics asked at once: handled by verifier_algebra
     if m:
         stat = m.group(1).replace('sample ', '').replace('population ', '')
         return {'type': 'statistic', 'stat': stat, 'data': [x.strip() for x in m.group(2).split(',')]}
@@ -633,8 +635,21 @@ def verify_item(item):
     if spec and not explicit and not _spec_parses(spec):
         spec = None                       # inferred from wording that is not pure mathematics
     if not spec:
+        import verifier_algebra
+        spec = verifier_algebra.classify(question)
+    if not spec:
         return _result(UNSUPPORTED, 'unclassified', None, answer, [],
                        'Question type not supported by deterministic verifier: human or AI-assisted review required')
+    if spec.get('type') == 'algebra1':
+        import verifier_algebra
+        try:
+            st, exp, ev = verifier_algebra.check(spec, question, answer)
+        except Exception as e:          # unreadable answer or form: never guess -> human review
+            st, exp, ev = UNSUPPORTED, None, f'could not check deterministically ({type(e).__name__}: {str(e)[:120]})'
+        r = _result({'CORRECT': CORRECT, 'INCORRECT': INCORRECT}.get(st, UNSUPPORTED), f'algebra 1: {spec["form"]}', exp, answer,
+                    ['sympy exact algebra'] if st != UNSUPPORTED else [], ev)
+        r['spec'] = spec
+        return r
     try:
         t = spec['type']
         if t == 'expression':

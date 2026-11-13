@@ -97,17 +97,17 @@ def check_tile(tile, idx):
 
 
 # ------------------------------------------------------------------ diagrams (drawn from data, never decorative guesses)
-def draw_diagram(spec, out_png, scale=3):
+def draw_diagram(spec, out_png, scale=3, font_path=None, bg='white'):
     """Render a teaching diagram from a small data spec. Types:
       graph  : {'x_label','y_label','points':[[x,y],...],'shade':bool,'labels':[[x,y,'text'],...]}
       arrows : {'arrows':[[x0,y0,x1,y1,'label'],...]}            (head-to-tail vectors, paths, components)
       boxes  : {'boxes':['km','m','cm'],'links':['x1000','x100']} (conversion ladders, step chains)"""
     from PIL import Image, ImageDraw, ImageFont
     W, Hh = 420 * scale, 190 * scale
-    im = Image.new('RGB', (W, Hh), 'white')
+    im = Image.new('RGB', (W, Hh), bg)
     d = ImageDraw.Draw(im)
     try:
-        font = ImageFont.truetype('DejaVuSans.ttf', 13 * scale)
+        font = ImageFont.truetype(str(font_path) if font_path else 'DejaVuSans.ttf', 13 * scale)
     except OSError:
         try:
             font = ImageFont.load_default(size=13 * scale)       # Pillow >= 10.1: scalable built-in font (Windows)

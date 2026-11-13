@@ -45,3 +45,17 @@ first and shows its maximum cost. Everything else works offline for free.
 ## Safety net (tab 5) and problems (tab 6)
 **Create verified backup now** before big work. Every error is also written to tab 6. If something fails, send
 tab 6's latest lines and `reports\selftest_report.json`.
+
+## New in the Byrd Powerhouse build (2026-11-13)
+- **Tab 3 → Build next unit with QA loop**: Builder → independent Build QA (answers, Reader checks, code, browser and
+  the 9-point Mastery Experience standard) → automatic repair of wrong answers → rebuild → Chief Judge. A unit passes
+  only at 100 % of mandatory checks and still waits for your **Approve unit…**.
+- **Tab 3 → Build Concept Tiles (approved ByrdWay format)…**: choose the approved table of contents (.md), the tile
+  content (.json), the course name and your approved Lil Dr. Byrd image. The PDF is built in the measured ByrdWay
+  layout (landscape, sticky-note cards, Kalam handwriting) and checked page by page against that design, the table of
+  contents, the answer keys and every answer. The result and QA report are saved in your workspace (`concept_tiles\`).
+- **Tab 7 Byrd Powerhouse**: all 12 engineering agents and 10 Revenue & Media roles with honest status.
+- **Tab 8 Revenue & Media**: **Run today's sales workflow** (drafts only + your scaling-roadmap stage, the one
+  bottleneck and today's 10 prioritized actions), **Import TpT sales report (CSV)…**, **Set Week 1 start date…**,
+  **Load product catalog (JSON)…**, **Revenue dashboard**, **Strategy library** (every method with its source).
+  Nothing is sent, published, priced or paid by the app.

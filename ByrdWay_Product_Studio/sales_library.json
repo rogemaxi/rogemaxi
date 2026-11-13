@@ -4,7 +4,7 @@
  "rules": [
   "Methods only, applied to ByrdWay - never impersonate or speak for a named expert.",
   "No invented testimonials, sales figures or expert endorsements.",
-  "No referral incentives, new subscriptions, paid lookups or spending without owner approval.",
+  "No referral incentives, new subscriptions, paid lookups or spending without owner approval. Voluntary, unpaid recommendations from satisfied buyers are allowed.",
   "Market only products whose Studio QA = PASS and that the owner approved.",
   "A method is promoted or retired only from measured experiment results at or above minimum sample."
  ],
@@ -556,6 +556,86 @@
     "citation": "Alex Hormozi, $100M Leads: How to Get Strangers to Want to Buy Your Stuff (Acquisition.com, 2023)",
     "url": null,
     "verification": "bibliographic citation; method paraphrased (no quotation); confirm page before quoting publicly"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-28",
+   "expert": "Alex Hormozi",
+   "method": "Increase opportunities, not only closing rate: ask satisfied buyers who else could use it",
+   "apply_at_byrdway": "After a buyer confirms the product helped, ask once, voluntarily, whether a colleague might benefit; share a link they can forward themselves. No payment, no reward, no collecting third-party contact details, no unsolicited outreach.",
+   "roles": [
+    "retention",
+    "sales_followup"
+   ],
+   "metric": "introductions per satisfied buyer asked; sales from forwarded links",
+   "source": {
+    "type": "owner-supplied video",
+    "citation": "Alex Hormozi video shared by the owner (salesperson asking satisfied customers who else might benefit; reported 30-50 % more sales)",
+    "url": null,
+    "verification": "bibliographic citation; method paraphrased (no quotation); confirm page before quoting publicly"
+   },
+   "status": "ACTIVE",
+   "note": "Owner constraint: no referral incentives. Sales QA blocks any reward or incentive wording."
+  },
+  {
+   "id": "AH-29",
+   "expert": "Alex Hormozi",
+   "method": "Measure acquisition economics against contribution profit",
+   "apply_at_byrdway": "For every channel, compare what a customer costs to win (owner time, tools) with the contribution profit a customer brings (net revenue after TpT fees and refunds, including repeat purchases). Organic only; no payments for referrals.",
+   "roles": [
+    "revenue_tracker",
+    "offer_pricing"
+   ],
+   "metric": "contribution profit per customer vs. acquisition cost per channel",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "what do you make on a productive agent per year in gross profit",
+    "section": "Treating Employees Like Customers",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE",
+   "note": "The $500 -> $25,000 referral payment in the source is NOT adopted (owner constraint)."
+  },
+  {
+   "id": "AH-30",
+   "expert": "Alex Hormozi",
+   "method": "Do the unscalable thing first, then systematize what you learned",
+   "apply_at_byrdway": "Dr. Byrd's live expertise (teaching, worked solutions) is turned into repeatable products and software (Concept Tiles, Explainers, Power Tools, the Studio); his reported results are not assumed reproducible.",
+   "roles": [
+    "market_research",
+    "offer_pricing"
+   ],
+   "metric": "products built from proven classroom material; repeat purchases",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "Are there elements of this that are scalable that I now know because I’ve done it",
+    "section": "The Power of Starting Unscalable",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
+   },
+   "status": "ACTIVE"
+  },
+  {
+   "id": "AH-31",
+   "expert": "Alex Hormozi",
+   "method": "Diagnose the constraint: demand-constrained vs supply-constrained",
+   "apply_at_byrdway": "Each week the Revenue Tracker states whether ByrdWay is limited by demand (not enough buyers) or supply (not enough verified products/capacity) and fixes only that constraint.",
+   "roles": [
+    "revenue_tracker",
+    "sales_qa"
+   ],
+   "metric": "named constraint each week with the evidence behind it",
+   "source": {
+    "type": "interview transcript",
+    "citation": "Alex Hormozi on The Diary of a CEO with Steven Bartlett, July 20, 2026 (transcript, The Singju Post)",
+    "url": "https://singjupost.com/transcript-of-alex-hormozi-interview-the-diary-of-a-ceo-jul-20-2026/",
+    "quote": "demand constrained",
+    "section": "Every Problem Is a Marketing Problem",
+    "verification": "quote verified verbatim against transcript snapshot sha256 ebfe0b7f8305e261"
    },
    "status": "ACTIVE"
   },

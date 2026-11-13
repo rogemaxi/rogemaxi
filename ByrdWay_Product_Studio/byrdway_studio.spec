@@ -7,10 +7,10 @@ _keep = lambda m: '.tests' not in m and not m.endswith('.conftest')
 hidden = [m for m in (collect_submodules('sympy') + collect_submodules('pymupdf') + collect_submodules('playwright')
           + collect_submodules('openai')) if _keep(m)] + ['keyring.backends.Windows']
 datas = (collect_data_files('playwright') + collect_data_files('rapidocr_onnxruntime') + collect_data_files('spellchecker')
-         + collect_data_files('onnxruntime') + [('samples', 'samples'), ('sales_library.json', '.')])
+         + collect_data_files('onnxruntime') + [('samples', 'samples'), ('sales_library.json', '.'), ('fonts', 'fonts')])
 binaries = collect_dynamic_libs('onnxruntime')
 
-a = Analysis(['app.py'], pathex=['.'], hiddenimports=hidden + ['selftest', 'selftest_fixtures', 'imageread', 'imagerepair', 'concepttiles', 'powerhouse', 'construction', 'salesintel'] + collect_submodules('rapidocr_onnxruntime'),
+a = Analysis(['app.py'], pathex=['.'], hiddenimports=hidden + ['selftest', 'selftest_fixtures', 'imageread', 'imagerepair', 'concepttiles', 'powerhouse', 'construction', 'salesintel', 'byrdway_tiles', 'roadmap', 'verifier_algebra'] + collect_submodules('rapidocr_onnxruntime'),
              datas=datas, binaries=binaries,
              excludes=['tests', 'matplotlib', 'IPython', 'notebook'])
 pyz = PYZ(a.pure)
