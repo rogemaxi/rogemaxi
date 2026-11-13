@@ -150,6 +150,23 @@ class TestBridge(unittest.TestCase):
         again = self.b.match_deposits([{"ref": "DEP-1", "amount": "40.00", "date": today}])
         self.assertEqual(again["matched"], [])  # idempotent
 
+    def test_reads_byrdway_studio_ledger_read_only(self):
+        import os, tempfile
+        rows = [{"date": "2026-11-10", "product": "Algebra 1", "units": 1, "gross": 29.99, "fees": 6.0, "refund": 0, "buyer": "o1",
+                 "test": False, "source": "TpT sales report", "raw": {"Order": "o1"}},
+                {"date": "2026-11-10", "product": "TEST order", "units": 1, "gross": 59.0, "fees": 0, "refund": 0, "buyer": "t",
+                 "test": True, "source": "TpT sales report", "raw": {"Order": "TEST"}}]
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "ledger.json")
+            open(p, "w").write(json.dumps(rows))
+            before = open(p).read()
+            r = self.b.import_studio_ledger(p)
+            self.assertEqual((r["added"], r["test_rows_excluded"]), (1, 1))
+            self.assertEqual(self.b.available_cash()["verified_seller_proceeds"], "23.99")
+            self.assertEqual(self.b.import_studio_ledger(p)["already_imported"], 1)
+            self.assertEqual(open(p).read(), before)  # Studio's file is never modified
+        self.assertEqual(self.b.import_studio_ledger("/nonexistent/ledger.json")["status"], "NOT_FOUND")
+
     def test_breaker_blocks_proposals(self):
         signed(self.s)
         Control(self.s).trip("reconciliation_failed", "test")

@@ -28,6 +28,14 @@ DEFAULT_RULES = {"tax_reserve_rate": "0.30", "business_cash_reserve": "500", "de
 BUSINESS_KINDS = {"SELLER_PROCEEDS": 1, "BUSINESS_EXPENSE": -1, "OWNER_DISTRIBUTION": -1, "CONTRIBUTION_SENT": 0}
 
 
+def studio_ledger_path():
+    """ByrdWay Product Studio's sales ledger (read-only). Studio: app.py ROOT, salesintel._dir(root)/'ledger.json'."""
+    import os
+    from pathlib import Path
+    root = Path(os.environ.get("BYRDWAY_WORKSPACE") or (Path.home() / "Documents" / "ByrdWay_Product_Studio"))
+    return root / "revenue" / "ledger.json"
+
+
 class BridgeError(Exception):
     pass
 
@@ -78,6 +86,39 @@ class Bridge:
         self.s.log("owner", "BYRDWAY_IMPORT", {"file": source_file, "added": added, "unverified_skipped": skipped_unverified,
                                                "duplicates": duplicates, "errors": len(errors)})
         return {"added": added, "unverified_skipped": skipped_unverified, "duplicates_rejected": duplicates, "errors": errors}
+
+    def import_studio_ledger(self, path=None) -> dict:
+        """Read ByrdWay Product Studio's sales ledger (never writes to it). Studio rows come from imported TpT sales
+        reports; rows Studio marks test=True are excluded, exactly as Studio's own dashboard does."""
+        import hashlib
+        from pathlib import Path
+        p = Path(path) if path else studio_ledger_path()
+        if not p.exists():
+            return {"status": "NOT_FOUND", "path": str(p), "added": 0}
+        rows = json.loads(p.read_text(encoding="utf-8"))
+        added = dup = tests = bad = 0
+        for r in rows:
+            if r.get("test"):
+                tests += 1
+                continue
+            try:
+                net = D(str(r["gross"])) - D(str(r.get("fees", 0))) - D(str(r.get("refund", 0)))
+                ext = "STUDIO-" + hashlib.sha256(json.dumps(r.get("raw", r), sort_keys=True).encode()).hexdigest()[:20]
+                if self.s.conn.execute("SELECT 1 FROM bridge_entries WHERE external_id=?", (ext,)).fetchone():
+                    dup += 1
+                    continue
+                if net > ZERO:
+                    self._post("SELLER_PROCEEDS", net, f"ByrdWay Studio sale: {r.get('product', '')[:60]}", ext, r.get("date"),
+                               {"source": r.get("source"), "studio_ledger": str(p)})
+                    added += 1
+                elif net < ZERO:
+                    self._post("BUSINESS_EXPENSE", -net, f"ByrdWay Studio net refund: {r.get('product', '')[:60]}", ext, r.get("date"))
+                    added += 1
+            except Exception:
+                bad += 1
+        self.s.log("system", "STUDIO_LEDGER_SYNC", {"path": str(p), "added": added, "already_imported": dup, "test_rows_excluded": tests,
+                                                    "unreadable": bad})
+        return {"status": "OK", "path": str(p), "added": added, "already_imported": dup, "test_rows_excluded": tests, "unreadable": bad}
 
     def record_business_expense(self, amount, memo, external_id, effective_date):
         return self._post("BUSINESS_EXPENSE", amount, memo, external_id, effective_date)

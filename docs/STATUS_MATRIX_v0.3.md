@@ -37,14 +37,16 @@ Also fixed: duplicated drift alerts, and exposed business credentials wrongly su
 ## P4 ByrdWay → Genesis Capital Authorization Bridge
 | Requirement | Status | Evidence |
 |---|---|---|
-| Recover ByrdWay | IMPLEMENTED (data only) | `ByrdWay_Executive_Activation_2026-10-12.zip` from Drive contains data, not application code. Its `seller_proceeds.csv` schema is the interface. |
+| Recover ByrdWay | IMPLEMENTED | Second-pass recovery found **ByrdWay Product Studio** (the Powerhouse Windows app) on branch `claude/vibrant-bardeen-fwsvne`, active today, with verified-net capital allocation in `bizintel.py`. My first audit missed it because it checked only `main`. Also found 4 non-investment branches (Algebra tools, physics course, Lumi animation), out of scope. |
+| Read ByrdWay Studio's own sales ledger | IMPLEMENTED (read-only) | `Bridge.import_studio_ledger` reads `Documents\ByrdWay_Product_Studio\revenue\ledger.json` daily, excludes rows Studio marks `test`, and never writes to Studio (tested). The activation package's `seller_proceeds.csv` format is also supported. |
+| Tax assumption alignment | **NEEDS OWNER DECISION** | Studio assumes a 25% tax set-aside; the bridge uses a more conservative 30%. Both are assumptions. Set one rate with your tax professional (Settings → bridge rules). |
 | Only VERIFIED proceeds; fees/refunds arithmetic checked; duplicates rejected | IMPLEMENTED | `TestBridge` |
 | Expenses, tax reserve (30% proposed), business cash reserve ($500 proposed), owner distributions | IMPLEMENTED | `test_available_cash_respects…` |
 | Business revenue ≠ personal capital; personal account requires a recorded distribution with stated treatment | IMPLEMENTED | `test_personal_account_requires…` |
 | Contribution ceiling; raises only by newly signed policy | IMPLEMENTED | `test_ceiling_raise_is_new_signed_version` |
 | Deposit confirmation from broker statements (idempotent) | IMPLEMENTED | Auto-matched on statement import |
 | Real ByrdWay revenue today | Shown honestly as **NO VERIFIED REVENUE** | ByrdWay's own report says verified proceeds are UNKNOWN; the template is empty |
-| Integration inside the ByrdWay application | **BLOCKED** | No Powerhouse application code exists in any reachable repo or Drive file. The documented CSV interface keeps both systems independent, as the SSOI requires. |
+| Integration inside the ByrdWay application | IMPLEMENTED as an interface, by design | GCI reads Studio's records; Studio code is not modified (another division, under active development). Studio's "owner pay / giving" bucket is the source for personal contributions. |
 
 ## P5 Brokerage capabilities
 | Requirement | Status | Evidence |

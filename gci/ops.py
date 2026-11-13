@@ -204,7 +204,12 @@ def job_security_health(s, now):
     return {"chain_ok": chain["ok"], "open_security_incidents": len(open_inc)}
 
 
-DAILY = {"market_data": job_market_data, "valuation_snapshot": job_valuation_snapshot, "risk_monitor": job_risk_monitor,
+def job_byrdway_sync(s, now):
+    from .bridge import Bridge
+    return Bridge(s).import_studio_ledger(s.setting("studio_ledger_path"))
+
+
+DAILY = {"byrdway_sync": job_byrdway_sync, "market_data": job_market_data, "valuation_snapshot": job_valuation_snapshot, "risk_monitor": job_risk_monitor,
          "recurring_monitor": job_recurring_monitor, "reconciliation_status": job_reconciliation_status,
          "source_integrity": job_source_integrity, "decision_reviews": job_decision_reviews, "security_health": job_security_health}
 
