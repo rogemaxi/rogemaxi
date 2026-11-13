@@ -1,0 +1,29 @@
+{
+  "ok": true,
+  "results": {
+    "run_jobs": true,
+    "weekly_report": true,
+    "analysis": true,
+    "reject_click": true,
+    "order_refusal": true,
+    "policy_draft_validation": true,
+    "section_command": "Command Center",
+    "section_markets": "Global Markets",
+    "section_portfolio": "Portfolio",
+    "section_research": "Research",
+    "section_doctrine": "Doctrine Council",
+    "section_risk": "Risk Management",
+    "section_compounding": "Compounding",
+    "section_decisions": "Decision Memory",
+    "section_agents": "Agent Operations",
+    "section_ledgers": "Financial Ledgers",
+    "section_brokerage": "Brokerage Integration",
+    "section_reports": "Weekly Reporting",
+    "section_approvals": "Investment Policy (standing authorization)",
+    "section_audit": "Security incidents",
+    "section_settings": "Settings"
+  },
+  "errors": [
+    "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+  ]
+}

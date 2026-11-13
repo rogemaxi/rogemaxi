@@ -33,6 +33,15 @@ def main(argv=None):
     v = sub.add_parser("verify")
     v.add_argument("--db", default=str(default_db()))
     v.add_argument("--dataset", default="REAL", choices=["REAL", "SYNTHETIC"])
+    ac = sub.add_parser("acceptance", help="Run all SSOI acceptance demos on synthetic databases")
+    ac.add_argument("--out", default="acceptance_output")
+    j = sub.add_parser("run-jobs", help="Run due daily/weekly jobs once (for Windows Task Scheduler)")
+    j.add_argument("--db", default=str(default_db()))
+    j.add_argument("--dataset", default="REAL", choices=["REAL", "SYNTHETIC"])
+    i = sub.add_parser("install-schedule", help="Register a daily Windows scheduled task that runs run-jobs")
+    i.add_argument("--db", default=str(default_db()))
+    i.add_argument("--time", default="06:40")
+    i.add_argument("--remove", action="store_true")
     b = sub.add_parser("backup")
     b.add_argument("--db", default=str(default_db()))
     b.add_argument("--to", required=True)
@@ -54,6 +63,36 @@ def main(argv=None):
         from .ledgers import Ledgers
         st = Store.open(a.db, a.dataset)
         print(json.dumps({"chain": st.verify_chain(), "ledgers": Ledgers(st).reconcile_internal()}, indent=2))
+    elif a.cmd == "acceptance":
+        from .acceptance import run_all
+        import shutil
+        if Path(a.out).exists():
+            shutil.rmtree(a.out)
+        r = run_all(a.out)
+        for k in ("investment_40", "investment_10000", "operations"):
+            print(f"{k}: {r[k]['passed']}/{r[k]['total']}")
+            for st in r[k]["steps"]:
+                if not st["pass"]:
+                    print(f"   FAIL {st['step']} {st['title']}: {str(st['evidence'])[:300]}")
+        print("ALL PASSED" if r["all_passed"] else "SOME FAILED")
+        sys.exit(0 if r["all_passed"] else 1)
+    elif a.cmd == "run-jobs":
+        from .db import Store
+        from .ops import Scheduler
+        st = Store.open(a.db, a.dataset)
+        for r in Scheduler(st, Path(a.db).parent / "reports").run_due():
+            print(f"{r['job']:<22} {r['period']:<12} {r['status']}")
+    elif a.cmd == "install-schedule":
+        import subprocess
+        name = "GenesisCapitalIntelligence-DailyJobs"
+        if sys.platform != "win32":
+            print("Windows only. On this OS use cron to run: python -m gci run-jobs"); sys.exit(2)
+        if a.remove:
+            sys.exit(subprocess.run(["schtasks", "/Delete", "/TN", name, "/F"]).returncode)
+        here = str(Path(__file__).resolve().parent.parent)
+        cmd = f'cmd /c cd /d "{here}" && "{sys.executable}" -m gci run-jobs --db "{a.db}"'
+        r = subprocess.run(["schtasks", "/Create", "/SC", "DAILY", "/TN", name, "/TR", cmd, "/ST", a.time, "/F"])
+        print("Registered." if r.returncode == 0 else "schtasks failed."); sys.exit(r.returncode)
     elif a.cmd == "backup":
         from .db import Store
         from .security import backup

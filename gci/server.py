@@ -55,7 +55,14 @@ class App:
         chain = self.s.verify_chain()
         if not chain["ok"]:
             alerts.append({"level": "high", "text": "Audit log integrity check FAILED"})
+        from .control import Control
+        for e in Control(self.s).open_exceptions("WEEKLY")[:5]:
+            alerts.append({"level": "medium", "text": e["message"]})
+        for b in Control(self.s).breakers():
+            if b["state"] == "OPEN":
+                alerts.append({"level": "high", "text": f"Suspended: {b['label']} ({b['reason']})"})
         return {"version": VERSION, "dataset": self.s.dataset, "brokerage": CONNECTION_STATUS,
+                "mode": self.s.setting("operating_mode", "SHADOW"), "immediate": Control(self.s).open_exceptions("IMMEDIATE"),
                 "portfolio": Portfolio(self.s).summary(), "pending_approvals": len(Approvals(self.s).list("PENDING")),
                 "alerts": alerts, "chain": chain}
 
@@ -108,6 +115,43 @@ class App:
                                                         "preservation_challenges", "note")} for k, v in ch["councils"].items()}
             out["pick"], out["rule"], out["resolved"] = ch["pick"], ch["rule"], ch["resolved_by_allocation"]
         return out
+
+    def policy(self, q):
+        from .ips import InvestmentPolicy, TEMPLATE, BROKER_RULES, autoinvest_setup_steps, validate
+        ip = InvestmentPolicy(self.s)
+        a = ip.active()
+        drafts = [v for v in ip.versions() if v["status"] == "DRAFT"]
+        snap = _safe_snapshot()
+        return {"active": a, "versions": ip.versions(), "template": TEMPLATE, "broker_rules": BROKER_RULES,
+                "setup_steps": autoinvest_setup_steps(a["policy"]) if a and a["policy"]["recurring"]["legs"] else [],
+                "latest_draft_problems": validate(drafts[0]["policy"], snap) if drafts else None,
+                "latest_draft_version": drafts[0]["version"] if drafts else None}
+
+    def bridge(self, q):
+        from .bridge import Bridge
+        b = Bridge(self.s)
+        return {"available": b.available_cash(), "proposals": b.proposals(), "rules": b.rules(),
+                "entries": [dict(r) for r in self.s.conn.execute("SELECT id, ts, kind, amount, external_id, effective_date, memo "
+                                                                  "FROM bridge_entries ORDER BY id DESC LIMIT 200")]}
+
+    def ops(self, q):
+        from .control import Control
+        from .ops import Scheduler, ShadowMode, recurring_status
+        c = Control(self.s)
+        return {"jobs": Scheduler(self.s).history(), "breakers": c.breakers(), "exceptions": c.open_exceptions(),
+                "shadow": ShadowMode(self.s).evaluate(), "recurring": recurring_status(self.s)}
+
+    def reports(self, q):
+        return {"reports": [dict(r) | {"record": json.loads(r["record"])} for r in
+                            self.s.conn.execute("SELECT * FROM weekly_reports ORDER BY week_start DESC LIMIT 26")]}
+
+    def security(self, q):
+        from .ops import sync_known_exposures
+        from .security import scan_for_secrets
+        sync_known_exposures(self.s)
+        return {"incidents": [dict(r) for r in self.s.conn.execute("SELECT * FROM security_incidents ORDER BY id")],
+                "chain": self.s.verify_chain(), "data_dir_secret_scan": len(scan_for_secrets(Path(self.s.path).parent))
+                if self.s.path != ":memory:" else 0}
 
     def agents(self, q):
         return {"roles": AGENTS, "routes": ROUTES, "economics": HeadManager(self.s).unit_economics()}
@@ -185,6 +229,54 @@ class App:
                 return {"ok": True, "data": fetch_treasury_bills()}
             except DataUnavailable as exc:
                 return {"ok": False, "error": str(exc), "message": "Live fetch unavailable; showing last dated snapshot."}
+        if path == "/api/policy/draft":
+            from .ips import InvestmentPolicy
+            return {"version": InvestmentPolicy(self.s).save_draft(body["policy"])}
+        if path == "/api/policy/sign":
+            from .ips import InvestmentPolicy
+            return InvestmentPolicy(self.s).sign(int(body["version"]), "owner", _safe_snapshot(), body.get("acknowledgement", ""))
+        if path == "/api/bridge/import":
+            from .bridge import Bridge
+            return Bridge(self.s).import_byrdway_proceeds(body["csv"], body.get("file", "upload.csv"))
+        if path == "/api/bridge/expense":
+            from .bridge import Bridge
+            return {"id": Bridge(self.s).record_business_expense(body["amount"], body["memo"], body["external_id"], body.get("date"))}
+        if path == "/api/bridge/distribution":
+            from .bridge import Bridge
+            return {"id": Bridge(self.s).record_owner_distribution(body["amount"], body["treatment"], body["external_id"], body.get("date"))}
+        if path == "/api/bridge/propose":
+            from .bridge import Bridge
+            return Bridge(self.s).propose(body.get("amount"))
+        if path == "/api/bridge/authorize":
+            from .bridge import Bridge
+            return Bridge(self.s).authorize(body["id"], distribution_external_id=body.get("distribution_id"))
+        if path == "/api/jobs/run":
+            from .ops import Scheduler
+            return {"results": [{k: v for k, v in r.items() if k != "result"} for r in Scheduler(self.s).run_due()]}
+        if path == "/api/report/generate":
+            from datetime import date as _d
+            from .ops import weekly_report
+            ws = _d.fromisoformat(body["week_start"]) if body.get("week_start") else _d.today()
+            return weekly_report(self.s, ws, Path(self.s.path).parent / "reports" if self.s.path != ":memory:" else None)
+        if path == "/api/exception/resolve":
+            from .control import Control
+            Control(self.s).resolve(body["id"], body["resolution"])
+            return {"ok": True}
+        if path == "/api/breaker/reset":
+            from .control import Control
+            Control(self.s).reset(body["workflow"], note=body.get("note", ""))
+            return {"ok": True}
+        if path == "/api/security/confirm":
+            from .ops import confirm_rotation
+            confirm_rotation(self.s, body["id"], body["note"])
+            return {"ok": True}
+        if path == "/api/shadow/activate":
+            from .ops import ShadowMode
+            return ShadowMode(self.s).activate()
+        if path == "/api/shadow/windows-evidence":
+            from .ops import ShadowMode
+            ShadowMode(self.s).record_windows_acceptance(body["evidence"])
+            return {"ok": True}
         if path == "/api/place-order":
             refuse("place_order")
         raise KeyError(path)
@@ -200,7 +292,8 @@ def _safe_snapshot():
 GET_ROUTES = {"/api/status": "status", "/api/markets": "markets", "/api/research": "research", "/api/risk": "risk",
               "/api/compounding": "compounding", "/api/decisions": "decisions", "/api/agents": "agents",
               "/api/ledgers": "ledgers", "/api/approvals": "approvals", "/api/audit": "audit", "/api/settings": "settings",
-              "/api/portfolio": "status", "/api/doctrine": "doctrine"}
+              "/api/portfolio": "status", "/api/doctrine": "doctrine",
+              "/api/policy": "policy", "/api/bridge": "bridge", "/api/ops": "ops", "/api/reports": "reports", "/api/security": "security"}
 
 
 def make_handler(app: App):
@@ -246,11 +339,30 @@ def make_handler(app: App):
     return H
 
 
+def start_background_jobs(app, interval_seconds=1800):
+    """Quiet daily/weekly jobs while the app is open. Idempotent, so this and Task Scheduler can both run them."""
+    from .ops import Scheduler
+
+    def loop():
+        import time
+        while True:
+            try:
+                with app.lock:
+                    Scheduler(app.s, Path(app.s.path).parent / "reports").run_due()
+            except Exception as exc:  # recorded by the job table; never crash the UI
+                app.s.log("system", "SCHEDULER_LOOP_ERROR", {"error": str(exc)})
+            time.sleep(interval_seconds)
+    th = threading.Thread(target=loop, daemon=True, name="gci-scheduler")
+    th.start()
+    return th
+
+
 def serve(db_path, dataset="REAL", port=8765, open_browser=True):
     store = Store.open(db_path, dataset)
     app = App(store, Path(db_path).parent / "backups")
     srv = ThreadingHTTPServer(("127.0.0.1", port), make_handler(app))
     url = f"http://127.0.0.1:{srv.server_address[1]}/"
+    start_background_jobs(app)
     print(f"GCI {VERSION} running at {url}  (dataset: {dataset}, db: {db_path}). Close this window to stop.")
     if open_browser:
         webbrowser.open(url)

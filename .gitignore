@@ -5,3 +5,4 @@ demo_output/
 *.db
 *.db-wal
 *.db-shm
+acceptance_output/

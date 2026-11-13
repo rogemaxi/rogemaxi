@@ -1,0 +1,86 @@
+name: windows-acceptance
+# Clean-Windows acceptance: build the exact release ZIP, extract it into an empty folder,
+# run tests + acceptance demos, launch the real "Launch GCI.bat", drive all 15 dashboard sections,
+# exercise DPAPI and Task Scheduler. Evidence is uploaded as an artifact.
+on:
+  push:
+    branches: [ "claude/**", "main" ]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - name: Build release ZIP
+        shell: pwsh
+        run: |
+          python tools/package.py
+          Get-ChildItem dist
+      - name: Extract into a clean folder
+        shell: pwsh
+        run: |
+          $zip = Get-ChildItem dist/*.zip | Select-Object -First 1
+          $hash = (Get-FileHash $zip.FullName -Algorithm SHA256).Hash.ToLower()
+          $expected = (Get-Content "$($zip.FullName).sha256").Split(" ")[0]
+          if ($hash -ne $expected) { throw "SHA-256 mismatch" }
+          New-Item -ItemType Directory -Path "$env:RUNNER_TEMP\clean" | Out-Null
+          Expand-Archive $zip.FullName -DestinationPath "$env:RUNNER_TEMP\clean"
+          $dir = (Get-ChildItem "$env:RUNNER_TEMP\clean" -Directory | Select-Object -First 1).FullName
+          "GCI_DIR=$dir" | Out-File -FilePath $env:GITHUB_ENV -Append
+          New-Item -ItemType Directory -Path "$env:RUNNER_TEMP\evidence" | Out-Null
+          "ZIP=$($zip.Name) SHA256=$hash" | Out-File "$env:RUNNER_TEMP\evidence\release.txt"
+      - name: Unit tests (from extracted ZIP)
+        shell: pwsh
+        working-directory: ${{ env.GCI_DIR }}
+        run: python -m unittest discover -s tests -t . -v 2>&1 | Tee-Object "$env:RUNNER_TEMP\evidence\unittest.log"; if ($LASTEXITCODE -ne 0) { exit 1 }
+      - name: Acceptance demos ($40, $10,000, operations)
+        shell: pwsh
+        working-directory: ${{ env.GCI_DIR }}
+        run: |
+          python -m gci acceptance --out "$env:RUNNER_TEMP\evidence\acceptance" 2>&1 | Tee-Object "$env:RUNNER_TEMP\evidence\acceptance.log"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+      - name: Launch the real Windows launcher and drive the dashboard
+        shell: pwsh
+        working-directory: ${{ env.GCI_DIR }}
+        run: |
+          Copy-Item "$env:RUNNER_TEMP\evidence\acceptance\operations\ops.db" "$env:RUNNER_TEMP\ui.db"
+          $p = Start-Process cmd.exe -ArgumentList '/c','"Launch GCI.bat" --no-browser --port 8765 --dataset SYNTHETIC --db "%RUNNER_TEMP%\ui.db" < NUL' -PassThru -RedirectStandardOutput "$env:RUNNER_TEMP\evidence\server.log"
+          $ok = $false
+          for ($i = 0; $i -lt 60; $i++) { try { Invoke-WebRequest http://127.0.0.1:8765/api/status -UseBasicParsing | Out-Null; $ok = $true; break } catch { Start-Sleep 1 } }
+          if (-not $ok) { Get-Content "$env:RUNNER_TEMP\evidence\server.log"; throw "dashboard did not start" }
+          foreach ($e in "status","markets","research","doctrine","risk","compounding","decisions","agents","ledgers","approvals","audit","settings","policy","bridge","ops","reports","security") {
+            $r = Invoke-WebRequest "http://127.0.0.1:8765/api/$e" -UseBasicParsing
+            "$e $($r.StatusCode)" | Tee-Object -FilePath "$env:RUNNER_TEMP\evidence\endpoints.txt" -Append
+          }
+          npm install --no-save playwright@1.48.2
+          npx playwright install chromium
+          node tools/ui_check.js http://127.0.0.1:8765/ "$env:RUNNER_TEMP\evidence\screenshots"
+          $code = $LASTEXITCODE
+          Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+          Get-Process python* -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+          if ($code -ne 0) { exit 1 }
+      - name: Task Scheduler registration (install, verify, remove)
+        shell: pwsh
+        working-directory: ${{ env.GCI_DIR }}
+        run: |
+          python -m gci install-schedule --db "$env:RUNNER_TEMP\sched.db"
+          schtasks /Query /TN GenesisCapitalIntelligence-DailyJobs /V /FO LIST | Tee-Object "$env:RUNNER_TEMP\evidence\schtasks.txt"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          python -m gci run-jobs --db "$env:RUNNER_TEMP\sched.db" --dataset REAL | Tee-Object "$env:RUNNER_TEMP\evidence\run_jobs.txt"
+          python -m gci install-schedule --remove
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-acceptance-evidence
+          path: |
+            ${{ runner.temp }}/evidence
+            dist/*

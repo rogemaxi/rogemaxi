@@ -35,13 +35,17 @@ python tools/package.py      # release ZIP + SHA-256
 | `marketdata.py` | Dated evidence snapshots, live Treasury adapter, staleness flags |
 | `approvals.py` | Four-part decision cards |
 | `security.py` | Secret redaction and scanning, DPAPI credential store, backup and restore |
-| `server.py` + `static/` | 12-section dashboard (localhost only, per-session token on writes) |
+| `ips.py` | Signed Investment Policy (standing authorization) + J.P. Morgan Autoinvest rules, setup steps, schedule |
+| `bridge.py` | ByrdWay → owner → brokerage Capital Authorization Bridge (verified proceeds only) |
+| `ops.py` / `control.py` | Background jobs, recovery, weekly report, Autoinvest monitoring, shadow mode, exceptions, circuit breakers |
+| `acceptance.py` | Full acceptance runner (`python -m gci acceptance`) |
+| `server.py` + `static/` | 15-section dashboard (localhost only, per-session token on writes) |
 
 ## Data sources
 See `data/evidence/*.json`. Every value carries its URL, as-of date and retrieval time. Free sources are not exchange-licensed real-time feeds.
 
 ## Status, limits, and agent roles
-- Status of every requirement: `docs/REQUIREMENTS_MATRIX.md`
+- Status of every requirement: `docs/STATUS_MATRIX_v0.3.md` (current) and `docs/REQUIREMENTS_MATRIX.md` (history)
 - What existed before this build: `docs/RECOVERY_REPORT.md`
 - Sign-off steps on Windows: `docs/ACCEPTANCE_CHECKLIST.md`
 

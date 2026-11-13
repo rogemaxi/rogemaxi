@@ -1,0 +1,9 @@
+{
+  "note": "Credential exposures found by GCI's secret scan on 2026-11-13. No secret values are stored here.",
+  "findings": [
+    {"id": "SEC-2026-001", "provider": "Stripe (test-mode secret key, sk_test_)", "location": "rogemaxi/congenial-barnacle: division07-n8n-ready.json line 323 (commit ba16859)", "finding": "Bearer secret key embedded in HTTP Request node calling api.stripe.com/v1/charges"},
+    {"id": "SEC-2026-002", "provider": "Printful (API token)", "location": "rogemaxi/congenial-barnacle: division07-n8n-ready.json line 158 (commit ba16859)", "finding": "Bearer token embedded in HTTP Request node calling api.printful.com/orders"},
+    {"id": "SEC-2026-003", "provider": "Printify (personal access token, JWT)", "location": "rogemaxi/congenial-barnacle: division07-n8n-ready.json line 185 (commit ba16859)", "finding": "Bearer JWT embedded in HTTP Request node calling api.printify.com"},
+    {"id": "SEC-2026-004", "provider": "Google Cloud (API key, AIza format)", "location": "rogemaxi/congenial-barnacle: division07-n8n-ready.json line 221 (commit ba16859)", "finding": "API key embedded as Bearer header for sheets.googleapis.com"}
+  ]
+}

@@ -65,7 +65,7 @@ class Ledgers:
     # ---- posting ---------------------------------------------------------
     def post(self, ledger: str, kind: str, amount, memo: str = "", authorization_id: str = None,
              external_id: str = None, ref: str = None, transfer_id: str = None, actor: str = "owner",
-             allow_negative: bool = False) -> int:
+             allow_negative: bool = False, effective_date: str = None) -> int:
         if ledger not in KINDS or kind not in KINDS[ledger]:
             raise LedgerError(f"Entry kind {kind} is not valid for ledger {ledger}.")
         amt = D(amount)
@@ -81,9 +81,10 @@ class Ledgers:
                 raise LedgerError(f"Duplicate transaction {external_id} rejected.")
             if signed < ZERO and not allow_negative and self.balance(ledger) + signed < ZERO:
                 raise LedgerError(f"Ledger {ledger} balance would go negative; rejected (no margin/overdraft).")
-            cur = c.execute("INSERT INTO ledger_entries (ledger, ts, kind, amount, memo, authorization_id, transfer_id, external_id, ref)"
-                            " VALUES (?,?,?,?,?,?,?,?,?)",
-                            (ledger, now_iso(), kind, str(signed), memo, authorization_id, transfer_id, external_id, ref))
+            cur = c.execute("INSERT INTO ledger_entries (ledger, ts, kind, amount, memo, authorization_id, transfer_id, external_id, ref,"
+                            " effective_date) VALUES (?,?,?,?,?,?,?,?,?,?)",
+                            (ledger, now_iso(), kind, str(signed), memo, authorization_id, transfer_id, external_id, ref,
+                             effective_date or now_iso()[:10]))
             self.s.log(actor, "LEDGER_POSTED", {"ledger": ledger, "kind": kind, "amount": str(signed), "memo": memo,
                                                 "authorization_id": authorization_id, "transfer_id": transfer_id})
             return cur.lastrowid

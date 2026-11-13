@@ -48,8 +48,24 @@ LENS_RULES = {
 LENS_RULES_VERSION = "1.0"
 
 
+PROFILE_FIELDS = ("principles", "sources", "testable_rules", "market_conditions", "limitations", "risks",
+                  "small_capital_applicability", "evidence_quality", "conflicts_with", "review_requirement")
+
+
 def load_library(path=None) -> dict:
     return json.loads(Path(path or LIB_PATH).read_text(encoding="utf-8"))
+
+
+def profile(inv: dict, lib: dict) -> dict:
+    """The ten required attributes for one investor. School-level fields are labelled as such."""
+    sp = lib.get("school_profiles", {}).get(inv["school"], {})
+    return {"name": inv["name"], "principles": [p["text"] for p in inv["principles"]], "sources": inv["sources"],
+            "testable_rules": {p["lens"]: LENS_RULES[p["lens"]] for p in inv["principles"]},
+            "market_conditions": sp.get("market_conditions") + " (school-level)" if sp else None,
+            "limitations": "; ".join(x for x in (inv.get("caution"), sp.get("limitations", "") + " (school-level)") if x),
+            "risks": sp.get("risks", "") + " (school-level)",
+            "small_capital_applicability": inv["small_capital"], "evidence_quality": inv["source_quality"],
+            "conflicts_with": sp.get("conflicts_with", []), "review_requirement": lib.get("review_requirements", {}).get(inv["small_capital"])}
 
 
 def _eq(legs):

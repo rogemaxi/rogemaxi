@@ -15,7 +15,8 @@ REQUIRED_NAMES = ["Warren Buffett", "Charlie Munger", "Benjamin Graham", "Peter 
                   "Akira Mori", "Jim Simons", "Ray Dalio", "George Soros", "Stanley Druckenmiller", "David Tepper",
                   "Ken Griffin", "Cliff Asness", "Israel Englander", "Paul Tudor Jones", "Michael Steinhardt", "Bruce Kovner",
                   "Louis Bacon", "David E. Shaw", "John Overdeck and David Siegel", "Michael Platt", "Alan Howard",
-                  "Chris Hohn", "Bill Ackman", "Masayoshi Son", "Nicolai Tangen", "Edward O. Thorp"]
+                  "Chris Hohn", "Bill Ackman", "Masayoshi Son", "Nicolai Tangen", "Edward O. Thorp",
+                  "Pierre Andurand", "Steve Cohen", "Michael Burry", "John Paulson"]
 
 
 class TestLibrary(unittest.TestCase):
@@ -31,6 +32,17 @@ class TestLibrary(unittest.TestCase):
             self.assertIn(i["source_quality"], ("primary", "secondary", "limited"))
             for p in i["principles"]:
                 self.assertIn(p["lens"], LENS_RULES, (i["id"], p["lens"]))
+
+    def test_every_investor_has_all_ten_required_attributes(self):
+        from gci.doctrine import profile, PROFILE_FIELDS
+        for i in self.lib["investors"]:
+            p = profile(i, self.lib)
+            for f in PROFILE_FIELDS:
+                self.assertTrue(p[f], (i["id"], f))
+
+    def test_original_39_preserved(self):
+        self.assertGreaterEqual(len(self.lib["investors"]), 43)
+        self.assertIn("buffett", {i["id"] for i in self.lib["investors"]})
 
     def test_policy_blocked_doctrines_are_not_actionable(self):
         for i in self.lib["investors"]:
@@ -95,7 +107,10 @@ class TestCouncil(unittest.TestCase):
             if c["symbol"] == "VT":
                 c["trailing_pe"] = 10.0  # 10% earnings yield → premium > 3pp
         self.assertEqual(run_lenses(PROPOSALS["ALL_EQUITY"], snap, OWNER)["margin_of_safety"]["verdict"], "SUPPORT")
-        self.assertEqual(choose_allocation(snap, OWNER)["pick"], "ALL_EQUITY")
+        rich = choose_allocation(snap, OWNER)
+        self.assertEqual(rich["pick"], "EQ80")  # highest share without a preservation challenge; 100% is still one stream
+        thin = choose_allocation(self.snap, OWNER)
+        self.assertGreater(PROPOSALS[rich["pick"]]["equity_weight"], PROPOSALS[thin["pick"]]["equity_weight"])
 
     def test_owner_facts_change_verdicts(self):
         r = run_lenses(PROPOSALS["ALL_EQUITY"], self.snap, {"horizon_years": 2, "emergency_fund_ok": False,
@@ -119,7 +134,13 @@ class TestIntegration(unittest.TestCase):
         responses = {x["lens"] for x in r["job"]["judgment"]["doctrine_responses"]}
         self.assertTrue({c["lens"] for c in r["council"]["challenges"]} <= responses)
         r2 = analyze_starter_allocation(s, 40, {"horizon_years": 10, "emergency_fund_ok": True, "max_loss_tolerance_pct": 5})
-        self.assertTrue(any("capital_preservation" in c for c in r2["card"]["rejection_conditions"]))
+        self.assertEqual(r2["choice"], "NO_ACTION")  # 5% tolerance: no equity mix fits, so hold T-bills
+        snap = copy.deepcopy(load_snapshot())
+        for c in snap["candidates"]:
+            if c["symbol"] == "VT":
+                c["price"] = "145.00"  # >2% below its 200-day average -> momentum CHALLENGE (not a preservation lens)
+        r3 = analyze_starter_allocation(s, 40, OWNER, snap)
+        self.assertTrue(any("momentum" in c for c in r3["card"]["rejection_conditions"]))
         self.assertTrue(r["job"]["auditor"]["certified"], r["job"]["auditor"]["issues"])
         for role in ("market_intel", "research", "risk", "auditor"):
             self.assertIn("doctrine_lenses", r["job"][role])

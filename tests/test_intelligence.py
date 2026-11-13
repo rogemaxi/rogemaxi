@@ -350,7 +350,7 @@ class TestServer(unittest.TestCase):  # items 21, 28 via HTTP
 
     def test_all_sections_load(self):
         for p in ("/api/status", "/api/markets", "/api/research", "/api/risk", "/api/compounding", "/api/decisions",
-                  "/api/agents", "/api/ledgers", "/api/approvals", "/api/audit", "/api/settings", "/api/doctrine"):
+                  "/api/agents", "/api/ledgers", "/api/approvals", "/api/audit", "/api/settings", "/api/doctrine", "/api/policy", "/api/bridge", "/api/ops", "/api/reports", "/api/security"):
             code, _ = self.call(p)
             self.assertEqual(code, 200, p)
 
@@ -372,7 +372,7 @@ class TestServer(unittest.TestCase):  # items 21, 28 via HTTP
         with urllib.request.urlopen(self.base + "/") as r:
             html = r.read().decode()
         for name in ("Command Center", "Global Markets", "Portfolio", "Research", "Risk", "Compounding", "Decision Memory",
-                     "Agent Operations", "Capital Ledgers", "Approvals", "Audit", "Settings"):
+                     "Agent Operations", "Financial Ledgers", "Approvals", "Audit", "Settings", "Doctrine Council", "Brokerage Integration", "Weekly Reporting"):
             self.assertIn(name, html)
         self.assertNotIn("__TOKEN__", html)
 

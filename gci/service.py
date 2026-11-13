@@ -12,10 +12,9 @@ from .regime import classify
 from . import viability, VERSION
 
 BROKER_DEFAULTS = {"fractional_supported": True, "min_investment": "5", "commission_per_trade": "0"}
-SELECTION_RULE = ("Start from 100% VT (lowest cost, widest diversification). If the Doctrine Council raises two or more "
-                  "capital-preservation CHALLENGEs against it (margin of safety, return streams, capital preservation, "
-                  "cycle, liquidity) and the 50/50 VT/SGOV barbell raises fewer, recommend the barbell.")
-
+SELECTION_RULE = ("Evaluate VT/SGOV mixes from 100% to 0% equity with the Doctrine Council. Recommend the HIGHEST equity share "
+                  "that draws no capital-preservation CHALLENGE (margin of safety, return streams, capital preservation, cycle, "
+                  "liquidity) and no horizon CHALLENGE. If none qualifies, recommend the no-action alternative (100% T-bills/cash).")
 BASE_FALSIFICATION = [
     {"metric": "tracking_difference_pp_12m", "op": "<", "threshold": -0.30,
      "justification": "VT's cost is 0.06%/yr; a shortfall vs its index worse than 0.30pp (5x the fee) would mean the "
@@ -34,14 +33,23 @@ BARBELL_FALSIFICATION = [
     {"metric": "sgov_expense_ratio", "op": ">", "threshold": 0.0015,
      "justification": "Above 0.15%, SGOV's fee would consume a material share of its T-bill yield versus alternatives."},
 ]
-PROPOSALS = {
-    "ALL_EQUITY": {"name": "100% VT (global equity)", "legs": [{"symbol": "VT", "weight": 1.0, "asset_class": "global_equity"}],
-                   "falsification": BASE_FALSIFICATION},
-    "BARBELL": {"name": "50% VT + 50% SGOV (barbell)",
-                "legs": [{"symbol": "VT", "weight": 0.5, "asset_class": "global_equity"},
-                         {"symbol": "SGOV", "weight": 0.5, "asset_class": "fixed_income_cash_equivalent"}],
-                "falsification": BASE_FALSIFICATION + BARBELL_FALSIFICATION},
-}
+def _mix(eq):
+    legs = ([{"symbol": "VT", "weight": eq, "asset_class": "global_equity"}] if eq > 0 else []) + \
+           ([{"symbol": "SGOV", "weight": round(1 - eq, 2), "asset_class": "fixed_income_cash_equivalent"}] if eq < 1 else [])
+    name = ("100% VT (global equity)" if eq == 1 else "100% SGOV (T-bills; no-action alternative)" if eq == 0
+            else f"{int(eq * 100)}% VT + {int(round((1 - eq) * 100))}% SGOV")
+    return {"name": name, "legs": legs, "equity_weight": eq,
+            "falsification": BASE_FALSIFICATION + (BARBELL_FALSIFICATION if eq < 1 else [])}
+
+
+# Keys kept stable for decision memory: ALL_EQUITY = 100%, BARBELL = 50/50, NO_ACTION = 0%.
+PROPOSALS = {"ALL_EQUITY": _mix(1.0), "EQ80": _mix(0.8), "EQ60": _mix(0.6), "BARBELL": _mix(0.5),
+             "EQ40": _mix(0.4), "EQ20": _mix(0.2), "NO_ACTION": _mix(0.0)}
+PROPOSALS["NO_ACTION"]["falsification"] = [
+    {"metric": "equity_premium_pp", "op": ">", "threshold": 3.0,
+     "justification": "Holding only T-bills is justified while equities' earnings-yield premium is thin; above 3pp, revisit."},
+    {"metric": "tbill_13w_pct", "op": "<", "threshold": 1.0,
+     "justification": "Below 1%, T-bills no longer offset a meaningful part of inflation; the no-action case weakens."}]
 
 
 def candidates_from_snapshot(snap: dict) -> list:
@@ -64,12 +72,18 @@ def candidates_from_snapshot(snap: dict) -> list:
 
 def choose_allocation(snap, owner) -> dict:
     councils = {k: council(p, snap, owner) for k, p in PROPOSALS.items()}
-    a, b = councils["ALL_EQUITY"], councils["BARBELL"]
-    pick = "BARBELL" if len(a["preservation_challenges"]) >= 2 and len(b["preservation_challenges"]) < len(a["preservation_challenges"]) \
-        else "ALL_EQUITY"
-    other = "ALL_EQUITY" if pick == "BARBELL" else "BARBELL"
-    resolved = sorted(set(a["preservation_challenges"]) - set(councils[pick]["preservation_challenges"])) if pick == "BARBELL" else []
-    return {"pick": pick, "other": other, "councils": councils, "resolved_by_allocation": resolved, "rule": SELECTION_RULE}
+
+    def blocked(k):
+        L = councils[k]["lenses"]
+        return bool(councils[k]["preservation_challenges"]) or L["horizon"]["verdict"] == "CHALLENGE"
+    order = sorted(PROPOSALS, key=lambda k: -PROPOSALS[k]["equity_weight"])
+    pick = next((k for k in order if k != "NO_ACTION" and not blocked(k)), "NO_ACTION")
+    other = "ALL_EQUITY" if pick != "ALL_EQUITY" else "NO_ACTION"
+    resolved = sorted(set(councils["ALL_EQUITY"]["preservation_challenges"]) - set(councils[pick]["preservation_challenges"]))
+    screened = [{"key": k, "name": PROPOSALS[k]["name"], "preservation_challenges": councils[k]["preservation_challenges"],
+                 "horizon": councils[k]["lenses"]["horizon"]["verdict"], "eligible": not blocked(k)} for k in order]
+    return {"pick": pick, "other": other, "councils": councils, "resolved_by_allocation": resolved, "rule": SELECTION_RULE,
+            "screened": screened}
 
 
 def analyze_starter_allocation(store, amount, owner_profile: dict, snap: dict = None, review_days=90) -> dict:
@@ -83,9 +97,12 @@ def analyze_starter_allocation(store, amount, owner_profile: dict, snap: dict = 
     alt_cn = choice["councils"][choice["other"]]
     legs = [{**l, "amount": cents(amount * D(str(l["weight"])))} for l in prop["legs"]]
     leg_viability = {l["symbol"]: viability.assess(by_sym[l["symbol"]], l["amount"], l["amount"]) for l in legs}
-    mos = cn["lenses"]["margin_of_safety"]["derived"]
+    mos = choice["councils"]["ALL_EQUITY"]["lenses"]["margin_of_safety"]["derived"]  # premium measured on the equity sleeve
     rates = snap["rates"]
-    if choice["pick"] == "BARBELL":
+    if choice["pick"] == "NO_ACTION":
+        thesis = (f"Hold ${cents(amount)} in SGOV (0-3 month T-bills, 0.09% cost, 30-day SEC yield 3.86%) for now. No equity mix "
+                  f"passed the capital-preservation screen for this owner profile and current evidence (13-week T-bill 4.24%).")
+    elif choice["pick"] != "ALL_EQUITY":
         thesis = (f"Split ${cents(amount)}: ${legs[0]['amount']} into VT (about 10,185 stocks worldwide, 0.06% annual cost) and "
                   f"${legs[1]['amount']} into SGOV (0-3 month T-bills, 0.09% cost, 30-day SEC yield 3.86%). The Doctrine Council "
                   f"found the equity earnings yield of {mos['earnings_yield_pct']}% only {mos['equity_premium_pp']}pp above the "
@@ -124,7 +141,7 @@ def analyze_starter_allocation(store, amount, owner_profile: dict, snap: dict = 
         "agents": {"selected": job["agents"], "versions": {"gci": VERSION, "agents": "deterministic-rules-1.0",
                                                            "doctrine_library": cn["library_version"], "lens_rules": LENS_RULES_VERSION},
                    "job_id": job["job_id"]},
-        "doctrine_council": {"chosen": prop["name"], "selection_rule": choice["rule"],
+        "doctrine_council": {"chosen": prop["name"], "selection_rule": choice["rule"], "screened": choice["screened"],
                              "chosen_tally": cn["tally_by_distinct_lens"], "alternative": PROPOSALS[choice["other"]]["name"],
                              "alternative_tally": alt_cn["tally_by_distinct_lens"],
                              "resolved_by_allocation": choice["resolved_by_allocation"],
@@ -138,9 +155,11 @@ def analyze_starter_allocation(store, amount, owner_profile: dict, snap: dict = 
         "action": f"Buy {legs_txt} as $0-commission fractional orders, placed by you in your J.P. Morgan account.",
         "reason": (f"{prop['name']}. " + ("Doctrine Council: equity earns only "
                    f"{mos['equity_premium_pp']}pp more than T-bills on trailing earnings (margin-of-safety lens: Graham, Klarman, Marks) "
-                   "and 100% equity is a single return stream (Dalio, Graham). Half in T-bills answers both; the VT half keeps "
-                   "global diversification at 0.06%/yr (Bogle, Buffett's index guidance)."
-                   if choice["pick"] == "BARBELL" else
+                   "and 100% equity is a single return stream (Dalio, Graham). This is the highest equity share with no capital-"
+                   "preservation challenge; the VT share keeps global diversification at 0.06%/yr (Bogle, Buffett's index guidance)."
+                   if choice["pick"] not in ("ALL_EQUITY", "NO_ACTION") else
+                   "No equity mix passed the capital-preservation screen; T-bills keep the money safe and earning while you revisit."
+                   if choice["pick"] == "NO_ACTION" else
                    "Widest diversification at 0.06%/yr; the council found fewer than two capital-preservation challenges.")),
         "inaction": f"Money stays in cash. If swept to T-bills/SGOV it earns about {tb}% "
                     f"(≈${cents(amount * D(str(tb)) / 100)}/yr) with almost no price risk; you forgo uncertain long-run equity growth.",
@@ -175,7 +194,9 @@ def analyze_starter_allocation(store, amount, owner_profile: dict, snap: dict = 
 def dedupe_key(amount, snap, owner_profile) -> str:
     import hashlib
     prof = hashlib.sha256(json.dumps(owner_profile, sort_keys=True).encode()).hexdigest()[:10]
-    return f"starter-{D(amount)}-{snap['snapshot_id']}-{prof}"
+    ev = hashlib.sha256(json.dumps({k: v for k, v in snap.items() if k not in ("freshness", "file")}, sort_keys=True,
+                                   default=str).encode()).hexdigest()[:10]  # evidence CONTENT, not just its id
+    return f"starter-{D(amount)}-{snap['snapshot_id']}-{ev}-{prof}"
 
 
 def _job_output(store, job_id):

@@ -27,7 +27,7 @@ class Portfolio:
         cost = qty * price + fee
         with self.s.tx() as c:
             self.led.post("A", "BUY", cents(cost), f"Buy {qty} {symbol} @ {price}", external_id=external_id,
-                          ref=symbol, actor=actor)
+                          ref=symbol, actor=actor, effective_date=(ts or now_iso())[:10])
             cur = c.execute("INSERT INTO lots (symbol, acquired_ts, qty, remaining_qty, cost_total, ref) VALUES (?,?,?,?,?,?)",
                             (symbol, ts or now_iso(), str(qty), str(qty), str(cost), external_id))
             return cur.lastrowid
@@ -45,7 +45,7 @@ class Portfolio:
         remaining, realized_total, basis_total = qty, ZERO, ZERO
         with self.s.tx() as c:
             self.led.post("A", "SELL", cents(proceeds_total - fee), f"Sell {qty} {symbol} @ {price}",
-                          external_id=external_id, ref=symbol, actor=actor)
+                          external_id=external_id, ref=symbol, actor=actor, effective_date=ts[:10])
             for lot in c.execute("SELECT * FROM lots WHERE symbol=? AND CAST(remaining_qty AS REAL) > 0 "
                                  "ORDER BY acquired_ts, id", (symbol,)).fetchall():
                 if remaining <= ZERO:
@@ -68,11 +68,11 @@ class Portfolio:
         return {"symbol": symbol, "qty": qty, "proceeds": proceeds_total, "fees": fee, "cost_basis": basis_total,
                 "realized_gain": realized_total}
 
-    def record_income(self, kind: str, amount, symbol: str = "", external_id=None, actor="owner"):
+    def record_income(self, kind: str, amount, symbol: str = "", external_id=None, actor="owner", effective_date=None):
         if kind not in ("DIVIDEND", "INTEREST"):
             raise LedgerError("Income kind must be DIVIDEND or INTEREST.")
         return self.led.post("A", kind, amount, f"{kind.title()} {symbol}".strip(), external_id=external_id,
-                             ref=symbol, actor=actor)
+                             ref=symbol, actor=actor, effective_date=effective_date)
 
     # ---- marks -------------------------------------------------------------
     def set_price(self, symbol, price, as_of, source, retrieved_at=None, currency="USD"):
@@ -99,12 +99,12 @@ class Portfolio:
             if p["qty"] == ZERO:
                 continue
             px = self.latest_price(sym)
-            mv = p["qty"] * D(px["price"]) if px else None
+            mv = p["qty"] * D(px["price"]) if px else p["cost_basis"]  # no price: valued at cost, flagged below
             out.append({"symbol": sym, "qty": str(p["qty"]), "cost_basis": str(cents(p["cost_basis"])),
                         "price": px["price"] if px else None, "price_as_of": px["as_of"] if px else None,
-                        "price_source": px["source"] if px else None,
+                        "price_source": px["source"] if px else "NO PRICE — valued at cost",
                         "market_value": str(cents(mv)) if mv is not None else None,
-                        "unrealized_gain": str(cents(mv - p["cost_basis"])) if mv is not None else None})
+                        "unrealized_gain": str(cents(mv - p["cost_basis"])) if px else None, "priced": bool(px)})
         return out
 
     def realized_gains(self, start: str = None, end: str = None):
@@ -131,7 +131,7 @@ class Portfolio:
     def summary(self) -> dict:
         h = self.holdings()
         cash = self.led.balance("A")
-        priced = all(x["market_value"] is not None for x in h)
+        priced = all(x["priced"] for x in h)
         mv = sum((D(x["market_value"]) for x in h if x["market_value"] is not None), ZERO)
         unreal = sum((D(x["unrealized_gain"]) for x in h if x["unrealized_gain"] is not None), ZERO)
         total = cash + mv

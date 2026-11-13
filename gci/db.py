@@ -78,6 +78,46 @@ CREATE TABLE IF NOT EXISTS contribution_proposals (
 
 CREATE TABLE IF NOT EXISTS imports (
   row_hash TEXT PRIMARY KEY, ts TEXT NOT NULL, source TEXT NOT NULL, raw TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS ips_versions (
+  version INTEGER PRIMARY KEY, created_ts TEXT NOT NULL, policy TEXT NOT NULL, policy_hash TEXT NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('DRAFT','SIGNED','SUPERSEDED')), signed_ts TEXT, signed_by TEXT);
+
+CREATE TABLE IF NOT EXISTS bridge_entries (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT NOT NULL, kind TEXT NOT NULL, amount TEXT NOT NULL,
+  source TEXT NOT NULL, external_id TEXT UNIQUE, effective_date TEXT, memo TEXT NOT NULL DEFAULT '', record TEXT);
+CREATE TRIGGER IF NOT EXISTS bridge_no_update BEFORE UPDATE ON bridge_entries
+  BEGIN SELECT RAISE(ABORT, 'bridge entries are immutable'); END;
+CREATE TABLE IF NOT EXISTS bridge_proposals (
+  id TEXT PRIMARY KEY, ts TEXT NOT NULL, record TEXT NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('PROPOSED','AUTHORIZED','DEPOSIT_CONFIRMED','DECLINED','EXPIRED')),
+  authorization_id TEXT, deposit_ref TEXT UNIQUE);
+
+CREATE TABLE IF NOT EXISTS job_runs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, job TEXT NOT NULL, period_key TEXT NOT NULL, started_ts TEXT NOT NULL,
+  heartbeat_ts TEXT NOT NULL, finished_ts TEXT, status TEXT NOT NULL CHECK (status IN ('RUNNING','DONE','FAILED','INTERRUPTED','SKIPPED')),
+  result TEXT, attempt INTEGER NOT NULL DEFAULT 1);
+CREATE UNIQUE INDEX IF NOT EXISTS job_runs_done ON job_runs(job, period_key) WHERE status='DONE';
+
+CREATE TABLE IF NOT EXISTS exceptions (
+  id TEXT PRIMARY KEY, ts TEXT NOT NULL, severity TEXT NOT NULL CHECK (severity IN ('IMMEDIATE','WEEKLY')),
+  category TEXT NOT NULL, message TEXT NOT NULL, dedupe_key TEXT UNIQUE, status TEXT NOT NULL CHECK (status IN ('OPEN','RESOLVED')),
+  resolved_ts TEXT, resolution TEXT, notified INTEGER NOT NULL DEFAULT 0);
+
+CREATE TABLE IF NOT EXISTS breakers (
+  workflow TEXT PRIMARY KEY, state TEXT NOT NULL CHECK (state IN ('CLOSED','OPEN')), reason TEXT, ts TEXT NOT NULL);
+
+CREATE TABLE IF NOT EXISTS valuation_snapshots (
+  as_of TEXT PRIMARY KEY, record TEXT NOT NULL);
+
+CREATE TABLE IF NOT EXISTS weekly_reports (
+  week_start TEXT PRIMARY KEY, created_ts TEXT NOT NULL, record TEXT NOT NULL, markdown TEXT NOT NULL);
+
+CREATE TABLE IF NOT EXISTS security_incidents (
+  id TEXT PRIMARY KEY, ts TEXT NOT NULL, provider TEXT NOT NULL, location TEXT NOT NULL, finding TEXT NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('OPEN','ROTATED_CONFIRMED','FALSE_POSITIVE')), resolved_ts TEXT, note TEXT);
+
+CREATE TABLE IF NOT EXISTS shadow_checks (
+  item TEXT PRIMARY KEY, status TEXT NOT NULL CHECK (status IN ('PENDING','PASSED','FAILED')), ts TEXT, evidence TEXT);
 """
 
 GENESIS_HASH = "0" * 64
@@ -110,6 +150,9 @@ class Store:
         conn.execute("PRAGMA foreign_keys=ON")
         conn.execute("PRAGMA journal_mode=WAL" if path != ":memory:" else "PRAGMA journal_mode=MEMORY")
         conn.executescript(SCHEMA)
+        cols = [r[1] for r in conn.execute("PRAGMA table_info(ledger_entries)")]
+        if "effective_date" not in cols:  # schema v2: transaction date separate from posting time
+            conn.execute("ALTER TABLE ledger_entries ADD COLUMN effective_date TEXT")
         store = cls(conn, path)
         existing = store.meta("dataset")
         if existing is None:
@@ -118,7 +161,12 @@ class Store:
                 conn.execute("INSERT INTO meta VALUES ('schema_version', ?)", (str(SCHEMA_VERSION),))
                 conn.execute("INSERT INTO meta VALUES ('created_by_version', ?)", (VERSION,))
             store.log("system", "DB_CREATED", {"dataset": dataset, "schema_version": SCHEMA_VERSION})
-        elif existing != dataset:
+        elif existing == dataset and int(store.meta("schema_version") or 1) < SCHEMA_VERSION:
+            old = store.meta("schema_version")
+            with store.tx():
+                conn.execute("UPDATE meta SET value=? WHERE key='schema_version'", (str(SCHEMA_VERSION),))
+            store.log("system", "SCHEMA_MIGRATED", {"from": old, "to": SCHEMA_VERSION})
+        if existing is not None and existing != dataset:
             conn.close()
             raise DatasetMismatch(f"{path} holds {existing} records; refusing to open it as {dataset}")
         return store

@@ -21,6 +21,7 @@ from .portfolio import Portfolio
 
 CONNECTION_STATUS = {
     "jpmorgan_api": "NOT CONNECTED - no supported read-only retail API verified. Import CSV statements instead.",
+    "recurring_investing": "SUPPORTED AT BROKER (J.P. Morgan Autoinvest, owner-configured in the Chase app). GCI monitors; it cannot change it.",
     "order_placement": "DISABLED BY DESIGN",
 }
 
@@ -47,7 +48,7 @@ class BrokerageImport:
     def import_activity(self, csv_text: str, source: str, dataset_label: str) -> dict:
         if dataset_label != self.s.dataset:
             raise LedgerError(f"File labelled {dataset_label} cannot be imported into a {self.s.dataset} database.")
-        added, dupes, errors = 0, 0, []
+        added, dupes, errors, deposits = 0, 0, [], []
         for i, raw in enumerate(csv.DictReader(io.StringIO(csv_text)), start=2):
             row = _norm(raw)
             h = hashlib.sha256(json.dumps(row, sort_keys=True).encode()).hexdigest()
@@ -59,10 +60,16 @@ class BrokerageImport:
                     self._apply(row, ext=f"IMP-{h[:16]}")
                     c.execute("INSERT INTO imports VALUES (?,?,?,?)", (h, now_iso(), source, json.dumps(row)))
                 added += 1
+                if row.get("type", "").upper() in ("DEPOSIT", "CONTRIBUTION"):
+                    deposits.append({"ref": f"IMP-{h[:16]}", "amount": str(abs(D(row["amount"]))), "date": row.get("date") or now_iso()})
             except Exception as exc:  # report each bad row; never half-apply
                 errors.append({"line": i, "error": str(exc), "row": row})
         self.s.log("owner", "BROKERAGE_IMPORT", {"source": source, "added": added, "duplicates": dupes, "errors": len(errors)})
-        return {"added": added, "duplicates_skipped": dupes, "errors": errors}
+        bridge = None
+        if deposits:
+            from .bridge import Bridge
+            bridge = Bridge(self.s).match_deposits(deposits)
+        return {"added": added, "duplicates_skipped": dupes, "errors": errors, "bridge_deposit_matching": bridge}
 
     def _apply(self, row, ext):
         t = row.get("type", "").upper()
@@ -70,18 +77,26 @@ class BrokerageImport:
         fee = D(row.get("fees") or 0)
         if t in ("BUY", "BOUGHT"):
             self.pf.record_buy(row["symbol"], row["quantity"], row["price"], fee, ts=ts, external_id=ext)
+            self._observe_price(row, ts)
         elif t in ("SELL", "SOLD"):
             self.pf.record_sell(row["symbol"], abs(D(row["quantity"])), row["price"], fee, ts=ts, external_id=ext)
+            self._observe_price(row, ts)
         elif t in ("DIVIDEND", "INTEREST"):
-            self.pf.record_income(t, abs(D(row["amount"])), row.get("symbol", ""), external_id=ext)
+            self.pf.record_income(t, abs(D(row["amount"])), row.get("symbol", ""), external_id=ext, effective_date=ts[:10])
         elif t in ("DEPOSIT", "CONTRIBUTION"):
-            self.led.post("A", "CONTRIBUTION", abs(D(row["amount"])), "Deposit (imported)", external_id=ext)
+            self.led.post("A", "CONTRIBUTION", abs(D(row["amount"])), "Deposit (imported)", external_id=ext, effective_date=ts[:10])
         elif t == "FEE":
-            self.led.post("A", "FEE", abs(D(row["amount"])), row.get("description", "Fee"), external_id=ext)
+            self.led.post("A", "FEE", abs(D(row["amount"])), row.get("description", "Fee"), external_id=ext, effective_date=ts[:10])
         elif t == "WITHDRAWAL":
             raise LedgerError("Withdrawals must be recorded as owner-authorized DISTRIBUTION entries.")
         else:
             raise LedgerError(f"Unsupported transaction type '{t}'")
+
+    def _observe_price(self, row, ts):
+        """A broker trade price is a real dated observation; keep it unless a newer price exists."""
+        cur = self.pf.latest_price(row["symbol"])
+        if cur is None or cur["as_of"] < ts[:10]:
+            self.pf.set_price(row["symbol"], row["price"], ts[:10], "broker statement trade price")
 
     def reconcile_positions(self, csv_text: str, broker_cash=None, tolerance="0.00001") -> dict:
         """Compare the broker's positions export with GCI's computed holdings."""
