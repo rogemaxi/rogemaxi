@@ -101,3 +101,10 @@ None known in the implemented scope at the time of the final test run (see TEST_
   Hormozi Diary of a CEO (2026-07-20) quotes are verified verbatim against a saved transcript.
 - **99.997 % reliability is a target to be measured** over enough real products; current evidence is reported as
   counts of checks passed, never as an achieved reliability percentage.
+
+## Video platform + Blotato (added 2026-11-13)
+- Blotato integration follows Blotato's published REST docs and is tested against a simulated server; it has NOT yet run
+  against the owner's live Blotato account (Video Producer / Social Publisher stay PARTIAL until it does).
+- Google Flow and Adobe Firefly have no API this app can call: the Studio exports the shot list; the owner renders.
+- Blotato AI templates use an AI voice: the Reviewer BLOCKS such a render until it is dubbed with the approved Lil Dr. Byrd recording.
+- Hook / retention / emotional impact are capped below 9 until real audience data (3-second hold, average view) is entered.

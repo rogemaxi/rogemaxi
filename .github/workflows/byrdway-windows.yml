@@ -28,6 +28,17 @@ jobs:
           python -m pip install -r requirements-build.txt
           python -m playwright install chromium
 
+      - name: Fetch ffmpeg for Windows (video Reviewer; bundled into the ZIP)
+        run: |
+          $u = "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip"
+          Invoke-WebRequest $u -OutFile "$env:RUNNER_TEMP\ffmpeg.zip"
+          Expand-Archive "$env:RUNNER_TEMP\ffmpeg.zip" -DestinationPath "$env:RUNNER_TEMP\ffx" -Force
+          $b = Get-ChildItem "$env:RUNNER_TEMP\ffx" -Recurse -Filter ffmpeg.exe | Select-Object -First 1
+          New-Item -ItemType Directory -Force ffmpeg | Out-Null
+          Copy-Item "$($b.DirectoryName)\ffmpeg.exe", "$($b.DirectoryName)\ffprobe.exe" ffmpeg\
+          Copy-Item (Get-ChildItem "$env:RUNNER_TEMP\ffx" -Recurse -Filter LICENSE.txt | Select-Object -First 1).FullName ffmpeg\FFMPEG_LICENSE.txt
+          .\ffmpeg\ffmpeg.exe -version | Select-Object -First 1
+
       - name: Full automated test suite incl. real-window GUI and Explainer end-to-end (no skips allowed)
         run: |
           "E2E=$env:RUNNER_TEMP\e2e_explainer_evidence" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
@@ -52,6 +63,8 @@ jobs:
           $v = python -c "from version import __version__; print(__version__)"
           "VERSION=$v" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           Copy-Item USER_GUIDE.md, OWNER_QUICK_START.md, KNOWN_LIMITATIONS.md, PRODUCTION_READINESS_REPORT.md dist\ByrdWayStudio\
+          Copy-Item ffmpeg dist\ByrdWayStudio\ffmpeg -Recurse -Force
+          if (-not (Test-Path dist\ByrdWayStudio\ffmpeg\ffprobe.exe)) { Write-Error "ffmpeg not bundled"; exit 1 }
           Compress-Archive -Path dist\ByrdWayStudio -DestinationPath "ByrdWayStudio_v${v}_Windows_exe.zip" -Force
           git -C "$env:GITHUB_WORKSPACE" archive --format=zip --prefix="ByrdWay_Product_Studio_v$v/" HEAD:ByrdWay_Product_Studio -o "$PWD\ByrdWay_Product_Studio_v${v}_source.zip"
           if ($LASTEXITCODE -ne 0) { exit 1 }

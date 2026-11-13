@@ -8,7 +8,7 @@ import re, shutil
 from pathlib import Path
 from engine import workspace, sha256, write_json, read_json, utcnow, make_read_only
 
-KINDS = {'mascot', 'logo', 'template', 'illustration', 'font', 'reference_product'}
+KINDS = {'mascot', 'logo', 'template', 'illustration', 'font', 'reference_product', 'voice'}
 LIL_DR_BYRD_ID = 'lil_dr_byrd'
 
 

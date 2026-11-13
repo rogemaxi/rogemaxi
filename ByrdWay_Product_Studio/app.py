@@ -1065,7 +1065,10 @@ class App(tk.Tk):
         rows = [[("Run today's sales workflow", self.sales_run_daily), ('Revenue dashboard', self.sales_show_dashboard),
                  ('Strategy library', self.sales_show_library), ('30-second commercial QA…', self.sales_commercial)],
                 [('Import TpT sales report (CSV)…', self.sales_import), ('Set Week 1 start date…', self.sales_set_week1),
-                 ('Load product catalog (JSON)…', self.sales_load_catalog)]]
+                 ('Load product catalog (JSON)…', self.sales_load_catalog)],
+                [('Video platform & Blotato setup…', self.vp_setup), ('Lil Dr. Byrd commercial brief…', self.vp_brief),
+                 ('Generate on Blotato…', self.vp_generate), ('Review platform video…', self.vp_review),
+                 ('Publish via Blotato…', self.vp_publish)]]
         for row in rows:                                  # two rows so every button fits a 1280-px window
             bar = ttk.Frame(f)
             bar.pack(fill='x', pady=2)
@@ -1148,6 +1151,107 @@ class App(tk.Tk):
                   'Publishing is manual and needs your approval. Measure retention, clicks and conversions after you publish.']
             self._rev_print(L)
         self.run_bg('Commercial QA', lambda: self.studio.produce_commercial(p), done)
+
+    # ---- Lil Dr. Byrd commercials: video platform (Blotato / Google Flow / Firefly) + Blotato publishing
+    def vp_setup(self):
+        st = self.studio.video_platform_status()
+        L = ['VIDEO PLATFORM & PUBLISHING SETUP', '',
+             f"Blotato API key: {'SET (OS secret store)' if st['blotato_key'] else 'NOT SET'}",
+             f"Lil Dr. Byrd reference image (asset lil_dr_byrd_reference): {'REGISTERED' if st['character_reference'] else 'NOT REGISTERED'}",
+             f"Approved Lil Dr. Byrd voice (asset lil_dr_byrd_voice): {'REGISTERED' if st['approved_voice'] else 'NOT REGISTERED'}", '',
+             'Video platforms:']
+        L += [f"  {k:14} {v['name']} [{v['mode']}] - {v['how']}  ({v['url']})" for k, v in st['platforms'].items()]
+        L += ['', 'Your channels:'] + [f'  {k:10} {u}' for k, u in st['channels'].items()]
+        if not st['character_reference'] and messagebox.askyesno('Lil Dr. Byrd', 'Register the approved Lil Dr. Byrd image now?'):
+            p = filedialog.askopenfilename(title='Approved Lil Dr. Byrd image', filetypes=[('Image', '*.png *.jpg *.jpeg')])
+            if p:
+                self.studio.register_asset(p, 'lil_dr_byrd_reference', 'mascot', 'approved character reference', True)
+        if not st['approved_voice'] and messagebox.askyesno('Lil Dr. Byrd voice', 'Register the approved Lil Dr. Byrd voice recording now?'):
+            p = filedialog.askopenfilename(title='Approved Lil Dr. Byrd voice', filetypes=[('Audio', '*.mp3 *.wav *.m4a')])
+            if p:
+                self.studio.register_asset(p, 'lil_dr_byrd_voice', 'voice', 'approved character voice', True)
+        if messagebox.askyesno('Blotato', 'Enter or replace your Blotato API key now? (Blotato Settings > API)'):
+            k = simpledialog.askstring('Blotato API key', 'Paste the full key (including any trailing "="):', show='*')
+            if k:
+                self.studio.set_blotato_key(k)
+                L.append('Blotato key saved.')
+        self._rev_print(L)
+        if self.studio.video_platform_status()['blotato_key']:
+            def done(acc):
+                L2 = L + ['', 'BLOTATO CONNECTED ACCOUNTS:'] + [
+                    f"  {p:10} {'CONNECTED ' + ', '.join(a['username'] or a['name'] or a['id'] for a in r['accounts']) if r['connected'] else 'NOT CONNECTED - connect it at my.blotato.com/accounts'}"
+                    + (f"  pages: {[pg.get('name') for pg in r.get('pages', [])]}" if p == 'facebook' and r['connected'] else '')
+                    for p, r in acc.items()]
+                self._rev_print(L2)
+            self.run_bg('Checking Blotato accounts', self.studio.blotato_accounts, done)
+
+    def vp_brief(self):
+        p = filedialog.askopenfilename(title='Commercial spec (.json: product, lines, duration 30-45)', filetypes=[('JSON', '*.json')])
+        if not p:
+            return
+        plat = simpledialog.askstring('Video platform', 'Platform: blotato, google_flow or adobe_firefly', initialvalue='blotato')
+        if not plat:
+            return
+        b, out = self.studio.commercial_brief(p, plat.strip())
+        self.vp_dir = out
+        self._rev_print([f'BRIEF {"READY" if b["ready"] else "NOT READY"}: {out}', ''] + [f'  - {x}' for x in b['problems']]
+                        + ['', (out / 'SHOT_LIST.txt').read_text(encoding='utf-8')])
+
+    def _vp_pick_dir(self):
+        d = filedialog.askdirectory(title='Commercial brief folder', initialdir=str(getattr(self, 'vp_dir', '') or ''))
+        return Path(d) if d else None
+
+    def _vp_show(self, rec):
+        sc = rec.get('score') or {}
+        if 'generation' in rec:
+            return self._rev_print([f"GENERATION: {rec['generation']}", rec['decision']])
+        L = [f"COMMERCIAL REVIEW - {rec['decision']}", f"video: {rec['mp4']}", f"overall {rec['overall_100']}/100", '']
+        L += [f'  {k:16} {v:>2}/10  {sc["reasons"][k]}' for k, v in sc.get('scores', {}).items()]
+        L += ['', 'REPAIR / BLOCKERS:'] + [f'  - {r}' for r in sc.get('repair_list', [])]
+        if sc.get('data_capped_only'):
+            L += ['', 'Only audience-data categories are below 9: you may approve it as a FIRST POST (Publish via Blotato).']
+        self._rev_print(L)
+
+    def vp_generate(self):
+        d = self._vp_pick_dir()
+        if not d or not messagebox.askyesno('Paid generation', 'Generate this commercial on Blotato? This uses Blotato credits on your plan.'):
+            return
+        self.run_bg('Blotato generation (can take 10-15 min)',
+                    lambda: self.studio.commercial_generate_blotato(d, owner_confirmed=True), self._vp_show)
+
+    def vp_review(self):
+        d = self._vp_pick_dir()
+        if not d:
+            return
+        mp4 = filedialog.askopenfilename(title='Video from Blotato / Google Flow / Firefly', filetypes=[('Video', '*.mp4 *.mov')])
+        if not mp4:
+            return
+        voice = None
+        if messagebox.askyesno('Voice', 'Replace the video audio with your Lil Dr. Byrd voice recording?'):
+            voice = filedialog.askopenfilename(title='Lil Dr. Byrd voice recording', filetypes=[('Audio', '*.mp3 *.wav *.m4a')]) or None
+        self.run_bg('Commercial review', lambda: self.studio.commercial_review(d, mp4, voice=voice), self._vp_show)
+
+    def vp_publish(self):
+        d = self._vp_pick_dir()
+        if not d:
+            return
+        rec = json.loads((d / 'REVIEW.json').read_text(encoding='utf-8'))
+        first = False
+        if not rec['decision'].startswith('PASS'):
+            if not rec['score'].get('data_capped_only'):
+                return messagebox.showerror('Not approved', f"Reviewer decision: {rec['decision']}. Fix the blockers first.")
+            first = messagebox.askyesno('First post', 'Only hook/retention/emotion (need audience data) are below 9. Publish as a first post?')
+            if not first:
+                return
+        plats = simpledialog.askstring('Platforms', 'Publish to (comma separated):', initialvalue='facebook,instagram,tiktok,youtube')
+        owner = simpledialog.askstring('Owner approval', 'Type your name to approve publishing:')
+        if not plats or not owner or not messagebox.askyesno('Publish', f'Publish {rec["mp4"]} to {plats} now?'):
+            return
+        def done(out):
+            self._rev_print(['PUBLISHED VIA BLOTATO (each platform reported separately):'] + [
+                f"  {r['platform']:10} {r['status']}  {r.get('publicUrl') or r.get('errorMessage') or r.get('problems') or ''}" for r in out['results']])
+        self.run_bg('Publishing via Blotato', lambda: self.studio.commercial_publish(
+            d, [x.strip() for x in plats.split(',') if x.strip()], owner, explicit=True, first_post_override=first), done)
 
     def sales_show_library(self):
         lib = self.studio.sales_library()

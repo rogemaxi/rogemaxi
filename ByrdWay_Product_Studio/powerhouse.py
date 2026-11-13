@@ -53,8 +53,10 @@ REVENUE_STATUS = {   # honest status of each Revenue & Media role inside the app
     'offer_pricing': ('WORKING', 'salesintel.offer_proposals / value_score / van_westendorp - PROPOSALS only'),
     'prospector': ('WORKING', 'salesintel.rank_prospects on the owner\'s local list - no paid lookups'),
     'script_storyboard': ('WORKING', 'salesintel.media_package from VERIFIED products'),
-    'video_producer': ('PARTIAL', 'production brief; the owner renders in Canva / HeyGen'),
-    'social_publisher': ('PARTIAL', 'daily plan + approval queue; the OWNER publishes (never automatic)'),
+    'video_producer': ('PARTIAL', 'BUILT, live Blotato account not yet verified - videoplatform: 30-45 s Lil Dr. Byrd brief -> Blotato AI video (API, owner-confirmed credits) '
+                                  'or Google Flow / Adobe Firefly shot list (manual render) -> Commercial Reviewer'),
+    'social_publisher': ('PARTIAL', 'BUILT, live Blotato account not yet verified - videoplatform.publish via Blotato to Facebook / Instagram / TikTok / YouTube after '
+                                    'Reviewer PASS + explicit owner approval (never automatic)'),
     'sales_followup': ('WORKING', 'salesintel.followup_drafts - drafts only, the owner sends'),
     'retention': ('WORKING', 'salesintel.retention_paths'),
     'revenue_tracker': ('WORKING', 'salesintel.dashboard / import_sales_csv - real sales only, TEST rows excluded'),

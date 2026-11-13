@@ -252,6 +252,90 @@ class Studio:
         activity(self.root, 'Media Division', f'commercial reviewed: {hist[-1]["score"]["decision"]}', overall=hist[-1]['score']['overall_100'])
         return hist[-1], out
 
+    # Video platform (Blotato / Google Flow / Adobe Firefly) + Blotato social publishing: Media Division agents
+    def video_platform_status(self):
+        import videoplatform as vp, commercial
+        ref = assets.registry(self.root).get(vp.CHARACTER_ASSET_ID)
+        return {'blotato_key': bool(vp.get_key()), 'platforms': vp.PLATFORMS, 'channels': vp.CHANNELS,
+                'character_reference': bool(ref), 'approved_voice': bool(assets.registry(self.root).get(commercial.VOICE_ASSET_ID))}
+
+    def set_blotato_key(self, key):
+        import videoplatform as vp
+        vp.store_key(key)
+        activity(self.root, 'Social Publisher', 'Blotato API key stored in OS secret store (value not logged)')
+
+    def blotato_accounts(self, client=None):
+        import videoplatform as vp
+        r = vp.platform_setup_check(client or vp.Blotato())
+        activity(self.root, 'Social Publisher', 'Blotato accounts checked',
+                 connected=[k for k, v in r.items() if v['connected']])
+        return r
+
+    def commercial_brief(self, spec_json, platform='blotato'):
+        """Script & Storyboard: spec {product, lines, duration} -> brief JSON + shot list TXT (paste into Flow/Firefly)."""
+        import videoplatform as vp, time
+        spec = json.loads(Path(spec_json).read_text(encoding='utf-8'))
+        b = vp.brief(spec['product'], spec['lines'], spec.get('duration', 30), platform)
+        out = self.root / 'commercials' / ('brief_' + time.strftime('%Y%m%d_%H%M%S'))
+        out.mkdir(parents=True, exist_ok=True)
+        (out / 'BRIEF.json').write_text(json.dumps(b, indent=1), encoding='utf-8')
+        (out / 'SHOT_LIST.txt').write_text(vp.brief_text(b), encoding='utf-8')
+        activity(self.root, 'Script & Storyboard', f'commercial brief for {platform}: ready={b["ready"]}')
+        return b, out
+
+    def commercial_generate_blotato(self, brief_dir, owner_confirmed=False, kind='character', client=None, progress=None):
+        """Video Producer: paid Blotato generation (owner confirmed) -> wait -> download -> Commercial Reviewer."""
+        import videoplatform as vp
+        brief_dir = Path(brief_dir)
+        b = json.loads((brief_dir / 'BRIEF.json').read_text(encoding='utf-8'))
+        c = client or vp.Blotato()
+        ref = assets.get_asset(self.root, vp.CHARACTER_ASSET_ID)
+        char_url = c.upload(ref['file']) if ref else None
+        job = vp.produce_on_blotato(c, b, owner_confirmed, kind, char_url)
+        activity(self.root, 'Video Producer', f'Blotato generation started {job["visual_id"]}', owner_confirmed=True)
+        (brief_dir / 'GENERATION.json').write_text(json.dumps(job, indent=1), encoding='utf-8')
+        res = c.wait_visual(job['visual_id'])
+        (brief_dir / 'GENERATION.json').write_text(json.dumps(dict(job, result=res), indent=1), encoding='utf-8')
+        if res.get('status') != 'done':
+            return {'generation': res, 'decision': 'NOT DONE - nothing re-submitted (check Blotato before trying again)'}
+        mp4 = vp.download(res['mediaUrl'], brief_dir / 'platform_render.mp4', getattr(c, 'http', None) if client else None)
+        return self.commercial_review(brief_dir, mp4, ai_voice=True)
+
+    def commercial_review(self, brief_dir, mp4, voice=None, ai_voice=False):
+        """Commercial Reviewer on any platform render (Blotato, Google Flow, Firefly). With the owner's Lil Dr. Byrd
+        recording, the generator's audio is replaced first (dub). Writes REVIEW.json; nothing is published."""
+        import videoplatform as vp
+        brief_dir = Path(brief_dir)
+        b = json.loads((brief_dir / 'BRIEF.json').read_text(encoding='utf-8'))
+        if voice:
+            mp4 = vp.dub_with_voice(mp4, voice, brief_dir / 'commercial_owner_voice.mp4')
+            ai_voice = False
+        r = vp.review(mp4, b, self.root, ai_voice=ai_voice)
+        rec = {'mp4': str(mp4), 'brief': str(brief_dir / 'BRIEF.json'), 'decision': r['score']['decision'],
+               'overall_100': r['score'].get('overall_100'), 'scores': r['score'].get('scores'), 'review': r['review'],
+               'voice_check': r['voice_check'], 'score': r['score']}
+        (brief_dir / 'REVIEW.json').write_text(json.dumps(rec, indent=1, default=str), encoding='utf-8')
+        activity(self.root, 'Commercial Reviewer', f'review: {rec["decision"]}', overall=rec['overall_100'])
+        return rec
+
+    def commercial_publish(self, brief_dir, platforms, owner, explicit=False, scheduled_time=None, client=None,
+                           first_post_override=False):
+        """Social Publisher via Blotato: only after Reviewer PASS and the owner's explicit approval."""
+        import videoplatform as vp
+        brief_dir = Path(brief_dir)
+        rec = json.loads((brief_dir / 'REVIEW.json').read_text(encoding='utf-8'))
+        b = json.loads((brief_dir / 'BRIEF.json').read_text(encoding='utf-8'))
+        c = client or vp.Blotato()
+        out = vp.publish(c, rec['mp4'], b['product'], platforms,
+                         {'owner': owner, 'explicit': explicit is True, 'qa_decision': rec['decision'],
+                          'first_post_override': first_post_override is True,
+                          'data_capped_only': rec['score'].get('data_capped_only', False)},
+                         ai_generated=b['platform'] != 'owner_footage', scheduled_time=scheduled_time)
+        (brief_dir / 'PUBLISH.json').write_text(json.dumps(out, indent=1), encoding='utf-8')
+        activity(self.root, 'Social Publisher', 'published via Blotato (owner approved)', approved_by=owner,
+                 results=[(r['platform'], r['status']) for r in out['results']])
+        return out
+
     # Revenue & Media Division (drafts and measurement only: nothing is sent, published, priced or paid)
     def sales_daily(self):
         import salesintel

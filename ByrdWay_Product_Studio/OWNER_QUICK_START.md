@@ -59,3 +59,19 @@ tab 6's latest lines and `reports\selftest_report.json`.
   bottleneck and today's 10 prioritized actions), **Import TpT sales report (CSV)…**, **Set Week 1 start date…**,
   **Load product catalog (JSON)…**, **Revenue dashboard**, **Strategy library** (every method with its source).
   Nothing is sent, published, priced or paid by the app.
+
+## Lil Dr. Byrd commercials: video platform + Blotato publishing (tab 8)
+The Studio does not make the video itself. It writes the brief, sends it to a video platform, reviews the result and
+publishes through Blotato after you approve.
+1. **Video platform & Blotato setup…**: register the approved Lil Dr. Byrd image and voice once, paste your Blotato API key
+   (Blotato > Settings > API; stored in Windows Credential Manager) and see which of Facebook / Instagram / TikTok /
+   YouTube are connected in Blotato (connect missing ones at my.blotato.com/accounts).
+2. **Lil Dr. Byrd commercial brief…**: choose a spec JSON (`product`, `lines` with hook / problem / demo / cta, `duration`
+   30-45) and a platform: `blotato` (automatic), `google_flow` or `adobe_firefly` (the Studio writes SHOT_LIST.txt you paste
+   into Flow / Firefly with the Lil Dr. Byrd image).
+3. **Generate on Blotato…** (asks before spending Blotato credits) or render in Flow / Firefly yourself.
+4. **Review platform video…**: the Commercial Reviewer watches the whole MP4, scores 8 categories and checks the voice. Choose
+   your Lil Dr. Byrd recording to replace any AI voice.
+5. **Publish via Blotato…**: only after Reviewer PASS (or, for a first post, everything passing except the audience-data
+   categories) and your typed approval. Each platform is reported separately with its live link.
+The Windows ZIP includes ffmpeg (folder `ffmpeg`, GPL license file inside) for the Reviewer.

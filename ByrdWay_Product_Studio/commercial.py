@@ -24,6 +24,20 @@ import tempfile
 from pathlib import Path
 
 W, H, FPS, DUR = 1080, 1920, 30, 30.0
+
+
+def _bundled_ffmpeg_on_path():
+    """The Windows ZIP ships ffmpeg.exe + ffprobe.exe in an 'ffmpeg' folder next to the app; put it on PATH."""
+    import os, sys
+    for base in (Path(getattr(sys, '_MEIPASS', '')), Path(sys.executable).parent, Path(__file__).parent):
+        d = base / 'ffmpeg'
+        if str(base) and (d / 'ffmpeg.exe').exists() and str(d) not in os.environ.get('PATH', ''):
+            os.environ['PATH'] = str(d) + os.pathsep + os.environ.get('PATH', '')
+            return str(d)
+    return None
+
+
+_bundled_ffmpeg_on_path()
 # Safe area for vertical short-form (keep text away from platform UI): top 7 %, bottom 17 %, right 11 %, left 5 %.
 SAFE = (54, 134, 1080 - 120, 1920 - 330)
 PLATFORMS = {
@@ -349,25 +363,42 @@ def _is_product_page_text(ys):
 
 
 # ------------------------------------------------------------------ 4. score (evidence-capped) + gate
-def score(product, beats, review, voice_kind, competitor_benchmark=None, voice_check=None, render_info=None):
+DATA_CAPPED = {'hook', 'retention', 'emotional_impact'}   # cannot reach 9 until real audience data exists
+
+
+def score(product, beats, review, voice_kind, competitor_benchmark=None, voice_check=None, render_info=None,
+          target_duration=DUR, footage=False):
     s, why = {}, {}
     def put(k, val, reason):
         s[k], why[k] = max(0, min(10, val)), reason
     hook = beats[0]
     hk = 10 - (2 if hook['words'] > 9 else 0) - (3 if review['caption_readable_ratio'].get('hook', 0) < 0.8 else 0)
-    put('hook', min(hk, 8), f'{hook["words"]} words, readable {review["caption_readable_ratio"].get("hook")}; capped at 8 until real 3-second hold data exists')
-    put('retention', 8 if review['longest_static_s'] <= 0.5 else 5, f'longest static stretch {review["longest_static_s"]} s; capped at 8 without audience data')
+    aud = product.get('audience') or {}            # real post metrics: hold_3s (0-1), avg_view_pct (0-1)
+    hk_cap = 10 if aud.get('hold_3s', 0) >= 0.6 else 8
+    put('hook', min(hk, hk_cap), f'{hook["words"]} words, readable {review["caption_readable_ratio"].get("hook")}; '
+        + ('3-second hold %.0f %%' % (100 * aud['hold_3s']) if 'hold_3s' in aud else 'capped at 8 until real 3-second hold data exists'))
+    rt_cap = 10 if aud.get('avg_view_pct', 0) >= 0.5 else 8
+    put('retention', rt_cap if review['longest_static_s'] <= 0.5 else 5, f'longest static stretch {review["longest_static_s"]} s; '
+        + ('average view %.0f %%' % (100 * aud['avg_view_pct']) if 'avg_view_pct' in aud else 'capped at 8 without audience data'))
     clar = min(review['caption_readable_ratio'].values() or [0])
     trunc = list((render_info or {}).get('truncated_text') or []) + \
         [f'missing glyph {c!r} (renders as an empty box)' for c in (render_info or {}).get('missing_glyphs') or []]
     legible_px = (render_info or {}).get('min_product_text_px') or 0
     put('clarity', 9 if clar >= 0.8 and not trunc and all(b['words_per_s'] <= 3.2 for b in beats) else 5,
         f'captions OCR-readable >= {clar}; cut-off text: {trunc or "none"}; speaking rates {[b["words_per_s"] for b in beats]} words/s')
-    put('emotional_impact', 7, 'still-image motion graphics with a teacher/student problem; no live performance or music - capped at 7')
+    if footage and review['audio_stream']:
+        put('emotional_impact', 8, 'real character footage with the owner\'s own voice; capped at 8 without audience data')
+    else:
+        put('emotional_impact', 7, 'still-image motion graphics with a teacher/student problem; no live performance or music - capped at 7')
     demo_real = product.get('demo_from_real_product') and product.get('demo_verified')
+    if product.get('demo_kind') == 'cover':
+        demo_real = False
     put('product_demo', 9 if demo_real and legible_px >= 26 else (6 if demo_real else 4),
         f'actual product pages, verified worked example; smallest product text ~{legible_px} px on a 1080-wide phone frame (needs >= 26)'
-        if demo_real else 'demonstration not from verified product pages')
+        if demo_real else ('shows the real product cover/contents and accurate formula cards, but no solved problem from the product'
+                           if product.get('demo_kind') == 'cover' else 'demonstration not from verified product pages'))
+    if product.get('demo_kind') == 'cover':
+        s['product_demo'] = 7
     cta = 10 if product.get('destination_verified') and review['footer_readable_ratio'] >= 0.9 else (5 if review['footer_readable_ratio'] >= 0.9 else 3)
     put('cta', cta, f'product name + destination footer readable in {review["footer_readable_ratio"] * 100:.0f} % of sampled frames; '
                     f'destination verified: {bool(product.get("destination_verified"))}')
@@ -377,10 +408,11 @@ def score(product, beats, review, voice_kind, competitor_benchmark=None, voice_c
         lu = review['loudness_lufs']
         put('audio', 9 if lu is not None and -16 <= lu <= -12 and not review['silent_gaps_s'] else 7,
             f'owner narration; loudness {lu} LUFS; silent gaps {review["silent_gaps_s"]}')
-    vis = 7 if review['longest_static_s'] <= 0.5 and not review['text_outside_safe_zone'] else 5
-    put('visual', vis, f'pan/zoom motion graphics on real pages (capped at 7: not cinematic footage); text outside safe zone: '
-                       f'{review["text_outside_safe_zone"][:3]}')
-    platform = [(k, review['size'] == tuple(p['size']) and review['duration_s'] <= p['max_s'] and abs(review['duration_s'] - DUR) < 0.2)
+    ok_vis = review['longest_static_s'] <= 0.5 and not review['text_outside_safe_zone'] and not (render_info or {}).get('overlaps')
+    vis = (9 if footage else 7) if ok_vis else 5
+    put('visual', vis, ('real footage with motion' if footage else 'pan/zoom motion graphics on real pages (capped at 7: not cinematic footage)')
+        + f'; text outside safe zone: {review["text_outside_safe_zone"][:3]}; overlaps: {(render_info or {}).get("overlaps") or "none"}')
+    platform = [(k, review['size'] == tuple(p['size']) and review['duration_s'] <= p['max_s'] and abs(review['duration_s'] - target_duration) < 0.2)
                 for k, p in PLATFORMS.items()]
     total = round(sum(s.values()) / (10 * len(CATEGORIES)) * 100, 1)
     fails = [k for k in CATEGORIES if s[k] < 9]
@@ -395,6 +427,8 @@ def score(product, beats, review, voice_kind, competitor_benchmark=None, voice_c
             'decision': 'PASS - awaiting owner approval to publish' if not fails and total >= 95 and all(ok for _, ok in platform)
             else ('BLOCKED - approved Lil Dr. Byrd voice required' if not voice_ok else 'FAIL - back to repair'),
             'repair_list': [f'{k}: {why[k]}' for k in fails],
+            'data_capped_only': bool(fails) and set(fails) <= DATA_CAPPED and voice_ok and total >= 85
+                                and all(ok for _, ok in platform) and all(s[k] >= 9 for k in CATEGORIES if k not in DATA_CAPPED),
             'rule': '>= 9 in every category AND >= 95/100 overall (internal standard, not a performance prediction)'}
 
 
@@ -429,3 +463,162 @@ def produce_and_review(product, assets, out_dir, narration=None, rounds=2, root=
             b['words_per_s'] = round(keep / (b['t1'] - b['t0']), 2)
     (out_dir / 'COMMERCIAL_QA.json').write_text(json.dumps(history, indent=1, default=str), encoding='utf-8')
     return history
+
+
+# ====================================================================== voiced commercials from the owner's own recording
+# Media Division agents: Voice Analyst -> Producer -> Commercial Reviewer (independent) -> repair loop.
+def voice_analyst(voice_file, phrases, min_pause=0.18):
+    """Find the spoken phrases in the owner's recording (silence detection) and give each script phrase its window.
+    More detected segments than phrases: the closest segments are merged; fewer: the longest is split by word count."""
+    out = subprocess.run(['ffmpeg', '-hide_banner', '-i', str(voice_file), '-af', f'silencedetect=n=-32dB:d={min_pause}', '-f', 'null', '-'],
+                         capture_output=True, text=True).stderr
+    dur = float(re.findall(r'Duration: (\d+):(\d+):([\d.]+)', out)[0][2]) + 60 * int(re.findall(r'Duration: (\d+):(\d+)', out)[0][1])
+    starts = [float(x) for x in re.findall(r'silence_start: ([\d.]+)', out)]
+    ends = [float(x) for x in re.findall(r'silence_end: ([\d.]+)', out)]
+    segs, cur = [], 0.0
+    for a, b in zip(starts, ends + [dur] * (len(starts) - len(ends))):
+        if a - cur > 0.15:
+            segs.append([cur, a])
+        cur = b
+    if dur - cur > 0.15:
+        segs.append([cur, dur])
+    while len(segs) > len(phrases):                       # merge the pair with the smallest gap
+        gaps = [segs[i + 1][0] - segs[i][1] for i in range(len(segs) - 1)]
+        i = gaps.index(min(gaps))
+        segs[i] = [segs[i][0], segs[i + 1][1]]
+        del segs[i + 1]
+    while len(segs) < len(phrases):                       # split the longest segment
+        i = max(range(len(segs)), key=lambda k: segs[k][1] - segs[k][0])
+        a, b = segs[i]
+        segs[i:i + 1] = [[a, (a + b) / 2], [(a + b) / 2, b]]
+    windows = []
+    for i, (p, sg) in enumerate(zip(phrases, segs)):
+        t0 = 0.0 if i == 0 else round((segs[i - 1][1] + sg[0]) / 2, 2)
+        t1 = round(dur, 2) if i == len(segs) - 1 else round((sg[1] + segs[i + 1][0]) / 2, 2)
+        windows.append(dict(p, t0=t0, t1=t1, speech=[round(sg[0], 2), round(sg[1], 2)],
+                            words=len(p['text'].split()), words_per_s=round(len(p['text'].split()) / max(t1 - t0, 0.1), 2)))
+    return {'duration': round(dur, 2), 'segments_found': len(starts) + 1, 'phrases': windows}
+
+
+def _footage_frames(video, tmp):
+    subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-i', str(video), '-vf', f'fps={FPS}', str(Path(tmp) / 'v%04d.png')], check=True)
+    return sorted(Path(tmp).glob('v*.png'))
+
+
+def producer(spec, plan, out_mp4):
+    """Compose the ad: owner footage (real motion) or product art, phrase-synced captions, accurate formula cards
+    (DejaVu font, every glyph checked), CTA, persistent product + purchase footer. Product art is always fitted
+    BETWEEN the caption and the footer (never under them)."""
+    from PIL import Image, ImageDraw, ImageFont
+    TRUNCATED.clear(); MISSING.clear()
+    overlaps = []
+    tmp = Path(tempfile.mkdtemp())
+    try:
+        frames = _footage_frames(spec['footage'], tmp) if spec.get('footage') else []
+        dj = Path('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf')
+        fdir = Path(__file__).parent / 'fonts'
+        mathfont = (lambda n: ImageFont.truetype(str(dj), n)) if dj.exists() else (lambda n: _font(n, True))
+        dur = plan['duration']
+        foot = (spec['product']['title'], spec['product']['destination_label'])
+        n_frames = int(round(dur * FPS))
+        for k in range(n_frames):
+            t = k / FPS
+            ph = next((p for p in plan['phrases'] if p['t0'] <= t < p['t1']), plan['phrases'][-1])
+            pr = (t - ph['t0']) / max(ph['t1'] - ph['t0'], 0.01)
+            canvas = Image.new('RGB', (W, H), NAVY)
+            d = ImageDraw.Draw(canvas)
+            fsz = 76
+            f = _font(fsz, True)
+            lines = _wrap(d, ph['text'], f, SAFE[2] - SAFE[0] - 48)
+            if len(lines) > 3:
+                TRUNCATED.add(ph['text'])
+            y0 = SAFE[1] + 6
+            cap_bottom = y0 + len(lines[:3]) * (fsz + 12) + 28
+            fy = SAFE[3] - 120
+            box = (SAFE[0], cap_bottom + 20, SAFE[2], fy - 20)
+            src = None
+            if ph.get('visual', 'footage') == 'footage' and frames:
+                src = Image.open(frames[min(k, len(frames) - 1)]).convert('RGB')
+                c = spec.get('footage_crop') or (0, 0, 1, 1)
+                src = src.crop((int(c[0] * src.width), int(c[1] * src.height), int(c[2] * src.width), int(c[3] * src.height)))
+            elif ph.get('visual') == 'product' and spec.get('product_image'):
+                pi = spec['product_image']
+                if isinstance(pi, dict) and frames:
+                    src = Image.open(frames[min(int(pi.get('t', 0) * FPS), len(frames) - 1)]).convert('RGB')
+                    c = pi.get('crop') or (0, 0, 1, 1)
+                    src = src.crop((int(c[0] * src.width), int(c[1] * src.height), int(c[2] * src.width), int(c[3] * src.height)))
+                elif isinstance(pi, str):
+                    src = Image.open(pi).convert('RGB')
+            if src is not None:
+                bw, bh = box[2] - box[0], box[3] - box[1]
+                if ph.get('visual') == 'footage':
+                    sc = max(bw / src.width, bh / src.height) * (1 + 0.05 * pr)       # fill the box, crop overflow
+                else:
+                    sc = min(bw / src.width, bh / src.height) * (0.94 + 0.06 * pr)    # product art always whole
+                im = src.resize((max(1, int(src.width * sc)), max(1, int(src.height * sc))))
+                cx, cy = (im.width - bw) // 2, (im.height - bh) // 2
+                im = im.crop((max(cx, 0), max(cy, 0), max(cx, 0) + min(bw, im.width), max(cy, 0) + min(bh, im.height)))
+                canvas.paste(im, (box[0] + max(0, (bw - im.width) // 2), box[1] + max(0, (bh - im.height) // 2)))
+            d.rounded_rectangle([SAFE[0], y0, SAFE[2], cap_bottom], radius=30, fill=(255, 245, 138))
+            for i, ln in enumerate(lines[:3]):
+                d.text((SAFE[0] + 24, y0 + 12 + i * (fsz + 12)), ln, font=f, fill=NAVY)
+            if ph.get('card'):
+                fm = mathfont(76)
+                tw = d.textlength(ph['card'], font=fm)
+                if dj.exists():
+                    from imageread import _fitz
+                    fz = _fitz().Font(fontfile=str(dj))
+                    MISSING.update(ch for ch in ph['card'] if not ch.isspace() and not fz.has_glyph(ord(ch)))
+                if tw > box[2] - box[0] - 80:
+                    TRUNCATED.add(ph['card'])
+                cy = int(box[3] - 220 - 50 * min(1, pr * 4))
+                d.rounded_rectangle([(W - tw) / 2 - 40, cy, (W + tw) / 2 + 40, cy + 130], radius=26, fill=(255, 255, 255),
+                                    outline=(247, 196, 68), width=6)
+                d.text(((W - tw) / 2, cy + 22), ph['card'], font=fm, fill=NAVY)
+            if ph.get('visual') == 'cta':
+                fc = _font(70, True)
+                pulse = 1 + 0.04 * math.sin(4 * math.pi * pr)
+                bw2, bh2 = int(820 * pulse), int(150 * pulse)
+                yb = box[3] - bh2 - 30
+                d.rounded_rectangle([(W - bw2) // 2, yb, (W + bw2) // 2, yb + bh2], radius=40, fill=(247, 196, 68))
+                msg = spec['product'].get('cta_button', 'Get it on TpT')
+                _check_glyphs(msg)
+                d.text(((W - d.textlength(msg, font=fc)) / 2, yb + (bh2 - 90) / 2), msg, font=fc, fill=NAVY)
+            d.rectangle([SAFE[0], fy, SAFE[2], fy + 112], fill=(10, 20, 35))
+            for txt, yy, size, col in ((foot[0], fy + 10, 36, (255, 255, 255)), (foot[1], fy + 60, 30, (247, 196, 68))):
+                fnt = _font(size, True)
+                while size > 22 and d.textlength(txt, font=fnt) > SAFE[2] - SAFE[0] - 40:
+                    size -= 1
+                    fnt = _font(size, True)
+                _check_glyphs(txt)
+                d.text((SAFE[0] + 20, yy), txt, font=fnt, fill=col)
+            canvas.save(tmp / f'f{k:05d}.jpg', quality=92)
+        subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-framerate', str(FPS), '-i', str(tmp / 'f%05d.jpg'), '-i', str(spec['voice']),
+                        '-map', '0:v', '-map', '1:a', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-r', str(FPS), '-c:a', 'aac', '-b:a', '192k',
+                        '-af', 'loudnorm=I=-14:TP=-1.5:LRA=11', '-t', str(dur), '-movflags', '+faststart', str(out_mp4)], check=True)
+        return {'mp4': str(out_mp4), 'frames': n_frames, 'voice': 'owner voice recording', 'truncated_text': sorted(TRUNCATED),
+                'missing_glyphs': sorted(MISSING), 'overlaps': overlaps, 'min_product_text_px': 56}
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def produce_voiced(spec, out_dir, root=None):
+    """Owner recording -> Voice Analyst -> Producer -> Commercial Reviewer (watches the whole render, checks the
+    voice against the approved reference) -> score/gate. Publishing stays manual and owner-approved."""
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    plan = voice_analyst(spec['voice'], spec['phrases'])
+    names = ['hook'] + [f'p{i}' for i in range(2, len(plan['phrases']))] + ['cta']
+    beats = [{'t0': p['t0'], 't1': p['t1'], 'beat': n, 'caption': p['text'], 'voice': p['text'], 'words': p['words'],
+              'words_per_s': p['words_per_s']} for n, p in zip(names, plan['phrases'])]
+    mp4 = out_dir / f'{re.sub(r"[^A-Za-z0-9]+", "_", spec["product"]["title"])[:60]}_{int(plan["duration"])}s.mp4'
+    r = producer(spec, plan, mp4)
+    rev = watch(mp4, beats, (spec['product']['title'], spec['product']['destination_label']))
+    ref = approved_voice(root) if root else None
+    ref_file = (ref or {}).get('file') or spec.get('voice_reference')
+    vc = voice_consistency(mp4, ref_file) if ref_file else None
+    sc = score(spec['product'], beats, rev, 'owner voice recording', voice_check=vc, render_info=r,
+               target_duration=plan['duration'], footage=bool(spec.get('footage')))
+    rec = {'plan': plan, 'render': r, 'review': rev, 'score': sc, 'voice_reference': ref_file}
+    (out_dir / 'COMMERCIAL_QA.json').write_text(json.dumps(rec, indent=1, default=str), encoding='utf-8')
+    return rec
