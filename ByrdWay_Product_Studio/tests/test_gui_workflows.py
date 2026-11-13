@@ -101,7 +101,7 @@ class ProductsAndJobs(GuiBase):
         # Repair a copy & verify -> jobs tab, report opened
         self.app.run_job()
         self.pump()
-        self.assertEqual(self.app.nb.index('current'), 1)
+        self.assertEqual(str(self.app.nb.select()), str(self.app.jobs_frame))
         self.assertEqual(self.opened[-1].name, 'report.html')
         rep = self.opened[-1].read_text(encoding='utf-8')
         self.assertIn('VERIFIED', rep)
@@ -109,7 +109,7 @@ class ProductsAndJobs(GuiBase):
         jid = self.app.jtree.selection()[0]
         self.assertIn('NEXT STEP', self.app.jtext.get('1.0', '2.0'))
         # Open latest report from products tab
-        self.app.nb.select(0)
+        self.app.nb.select(self.app.products_frame)
         self.app.open_latest_report()
         self.assertEqual(self.opened[-1].name, 'report.html')
         # Jobs tab buttons

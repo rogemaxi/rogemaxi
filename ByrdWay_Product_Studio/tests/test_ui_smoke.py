@@ -60,7 +60,7 @@ class UISmoke(unittest.TestCase):
                 app.refresh_all()
                 shot = os.environ.get('BYRDWAY_UI_SHOT')
                 if shot:
-                    app.nb.select(1)
+                    app.nb.select(app.jobs_frame)
                     app.update()
                     time.sleep(0.5)
                     app.update()
