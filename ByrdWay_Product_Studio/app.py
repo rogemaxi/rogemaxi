@@ -78,6 +78,7 @@ class App(tk.Tk):
         self._logs_tab()
         self._powerhouse_tab()
         self._revenue_tab()
+        self._command_center()
         self._poll_id = self.after(150, self._poll)
         self.refresh_all()
 
@@ -221,6 +222,7 @@ class App(tk.Tk):
     def _products_tab(self):
         f = ttk.Frame(self.nb, padding=8)
         self.nb.add(f, text='1. Products')
+        self.products_frame = f
         ttk.Label(f, text='Workflow:  ① Import  →  ② Diagnose (changes nothing)  →  read the report  →  '
                           '③ Repair a Copy & Verify  →  tab 2: Approve  →  Export', font=('Segoe UI', 10, 'bold'),
                   foreground='#0b3d91').pack(anchor='w', pady=(0, 6))
@@ -308,7 +310,7 @@ class App(tk.Tk):
         def done(job):
             qa = job.get('qa') or {}
             self.log_line(f'JOB {job["id"]}: {job["status"]} (QA {qa.get("decision")}, score {qa.get("score")})')
-            self.nb.select(1)
+            self.nb.select(self.jobs_frame)
             self.refresh_jobs()
             if self.jtree.exists(job['id']):
                 self.jtree.selection_set(job['id'])
@@ -393,6 +395,7 @@ class App(tk.Tk):
     def _jobs_tab(self):
         f = ttk.Frame(self.nb, padding=8)
         self.nb.add(f, text='2. Jobs, QA & Approval')
+        self.jobs_frame = f
         bar = ttk.Frame(f)
         bar.pack(fill='x')
         for text, cmd in [('Open Readable Report', self.open_job_report), ('Before / After Diff', self.show_diff), ('Open Evidence Folder', self.open_evidence),
@@ -628,6 +631,7 @@ class App(tk.Tk):
     def _builders_tab(self):
         f = ttk.Frame(self.nb, padding=8)
         self.nb.add(f, text='3. New Product Builders')
+        self.builders_frame = f
         s1 = ttk.LabelFrame(f, text='Step 1 — What are you building?', padding=6)
         s1.pack(fill='x')
         self.kind_var = tk.StringVar(value='power_tool')
@@ -926,7 +930,7 @@ class App(tk.Tk):
 
         def done(job):
             self.log_line(f'Assembled and verified: {job["status"]}. See tab 2.')
-            self.nb.select(1)
+            self.nb.select(self.jobs_frame)
             self.refresh_jobs()
             if self.jtree.exists(job['id']):
                 self.jtree.selection_set(job['id'])
@@ -1054,6 +1058,14 @@ class App(tk.Tk):
         ttk.Button(bar, text='Lessons learned', command=self.powerhouse_lessons).pack(side='left')
         self.ph_out = tk.Text(f, height=8, font=('Consolas', 9))
         self.ph_out.pack(fill='both', expand=True)
+
+    def _command_center(self):
+        """Powerhouse Command Center: first tab - all 22 agents as cards with assignment, today, last action, RUN."""
+        from commandcenter import CommandCenter
+        self.cc = CommandCenter(self.nb, self)
+        self.nb.insert(0, self.cc, text='  BYRD POWERHOUSE COMMAND CENTER  ')
+        self.nb.select(self.cc)
+        self.nb.bind('<<NotebookTabChanged>>', lambda e: self.cc.refresh() if str(self.nb.select()) == str(self.cc) else None, add='+')
 
     def _revenue_tab(self):
         """Revenue & Media Division: 10 roles, source-linked methods, daily workflow, dashboard. Drafts only."""

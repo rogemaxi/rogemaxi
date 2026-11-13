@@ -145,8 +145,8 @@ def daily_plan(diag, neck):
         'terms with visible demand', ['AH-11', 'AH-12'])
     add(5, 'script_storyboard', 'One proof-based Lil Dr. Byrd script from a verified product (credential in the first 3 s)',
         '3-second hold rate (when posted)', ['AH-08', 'AH-09'])
-    add(6, 'video_producer', 'Owner renders the approved script in Canva/HeyGen (manual)', 'videos rendered', ['AH-19'])
-    add(7, 'social_publisher', 'Owner publishes on ONE channel only until it reaches its minimum sample', 'clicks to listing per post', ['AH-11', 'AH-14'])
+    add(6, 'video_producer', 'Generate the approved Lil Dr. Byrd commercial on Blotato (owner confirms credits) and run the Reviewer', 'videos passing review', ['AH-19'])
+    add(7, 'social_publisher', 'Publish the approved commercial via Blotato (owner approval); judge each channel at its minimum sample', 'clicks to listing per post', ['AH-11', 'AH-14'])
     add(8, 'prospector', 'List 5 warm contacts (teachers/tutors the owner already knows) for one verified course', 'warm contacts listed', ['AH-12', 'AH-27'])
     add(9, 'sales_followup', 'Question-first drafts for those contacts; the owner decides and sends', 'reply rate', ['ZZ-02', 'GC-02'])
     add(10, 'retention', 'Ask satisfied buyers once whether a colleague might benefit (voluntary, unpaid, no contact collection)',

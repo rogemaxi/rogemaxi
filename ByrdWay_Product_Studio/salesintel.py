@@ -32,9 +32,9 @@ ROLES = [
      ['AH-12', 'AH-24', 'ZZ-02', 'AH-15']),
     ('script_storyboard', 'Script & Storyboard Writer', 'Lil Dr. Byrd video scripts and posts from VERIFIED products',
      ['AH-09', 'AH-08', 'AH-17', 'AH-07', 'ZZ-01', 'MG-02']),
-    ('video_producer', 'Video Producer', 'Production briefs for the owner\'s Canva / HeyGen (owner produces and approves)',
+    ('video_producer', 'Video Producer', '30-45 s Lil Dr. Byrd commercials on Blotato (or Google Flow / Firefly shot lists); owner approves',
      ['AH-08', 'AH-19']),
-    ('social_publisher', 'Social Publisher', 'Daily posting plan and approval queue - the OWNER publishes',
+    ('social_publisher', 'Social Publisher', 'Publishes approved commercials to Facebook / Instagram / TikTok / YouTube via Blotato after owner approval',
      ['AH-11', 'AH-15', 'AH-27', 'GC-01', 'JR-03']),
     ('sales_followup', 'Sales & Follow-up', 'Outreach and follow-up DRAFTS awaiting owner approval',
      ['GC-02', 'GC-03', 'ZZ-02', 'AH-17', 'MG-02', 'AH-28']),
@@ -301,9 +301,9 @@ def media_package(product, credential):
          'voice': 'Less prep for you, more wins for them. Link in bio.', 'method': 'AH-17', 'also': 'MG-02'}]
     caption = (f'{product["title"]}: {product.get("promise", "one idea per tile, worked examples, answer keys")}. '
                f'Every answer verified. #ByrdWay #LilDrByrd #{re.sub(r"[^A-Za-z]", "", product.get("course", "math"))}')
-    return {'product': product['title'], 'status': 'DRAFT - owner produces in Canva/HeyGen and approves every post',
+    return {'product': product['title'], 'status': 'DRAFT - Video Producer renders on Blotato (or Google Flow / Firefly); owner approves every post',
             'hook': hook, 'scenes': scenes, 'caption': caption, 'platforms': PLATFORMS,
-            'production_brief': {'tool': "owner's Canva / HeyGen", 'mascot': 'approved Lil Dr. Byrd asset only',
+            'production_brief': {'tool': 'Blotato (API) or Google Flow / Adobe Firefly (shot list)', 'mascot': 'approved Lil Dr. Byrd asset only',
                                  'length_s': 55, 'captions': 'burned-in, high contrast'},
             'methods': sorted({s['method'] for s in scenes} | {s['also'] for s in scenes if s.get('also')})}
 
@@ -455,7 +455,7 @@ def run_daily(root, credential='Dr. Rogé J. Byrd, ByrdWay Mathematics & Science
                      'units_total': dash['units_total'], 'net_total': dash['net_total'],
                      'repeat_purchase_rate': dash['repeat_purchase_rate'], 'weeks': dash['weeks'][-2:],
                      'experiments': method_scorecard(root)},
-        'owner_queue': [f'approve/edit {len(out["media"])} video package(s) in Canva/HeyGen',
+        'owner_queue': [f'approve {len(out["media"])} video package(s) for Blotato / Google Flow',
                         f'review {len(out["followups"])} outreach draft(s) - the app never sends',
                         f'decide on {sum(1 for o in out["offers"] if "proposed_bundle_price" in o)} bundle proposal(s) - live prices unchanged',
                         'import the latest TpT sales report so results are measured, not assumed'],

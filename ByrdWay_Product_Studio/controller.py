@@ -336,6 +336,111 @@ class Studio:
                  results=[(r['platform'], r['status']) for r in out['results']])
         return out
 
+    # Powerhouse Command Center: every agent with its assignment, today's work and last action (all from real state)
+    ENG_LOG_ROLES = {1: ('Reader', 'Inspection'), 2: ('Academic Verifier', 'Answer Verifier'), 3: ('Diagnostician',),
+                     4: ('Power Tool Repair', 'Explainer Repair', 'Repair Engineer'), 5: ('Repair Reviewer',),
+                     6: ('Release QA',), 7: ('Observer',), 8: ('Curriculum Architect',),
+                     9: ('Power Tool Builder', 'Lil Dr. Byrd Builder', 'Concept Tiles Builder', 'Builder'),
+                     10: ('Assembler',), 11: ('Build QA',), 12: ('Chief Judge',)}
+
+    def command_center(self):
+        import powerhouse, salesintel
+        org = powerhouse.organization()
+        acts = read_activity(self.root, 2000)
+        last = lambda names: next((a for a in reversed(acts) if a.get('role') in names), None)
+        prods, jobs, builds, lessons = self.products(), self.jobs(), self.builds(), self.lessons()
+        st = lambda j: str(j.get('status', ''))
+        waiting = [j for j in jobs if 'AWAITING' in st(j) or 'READY' in st(j)]
+        failing = [j for j in jobs if 'FAIL' in st(j) or 'BLOCKED' in st(j)]
+        diag = {d.parent.name for d in (self.root / 'reports').glob('diag_*/diagnosis.json')}
+        units_open = sum(1 for b in builds for u in (b.get('units') or []) if 'APPROVED' not in str(u.get('status', '') if isinstance(u, dict) else u).upper())
+        today_eng = {
+            1: f'{len(prods)} product(s) protected; {max(len(prods) - len(diag), 0)} not yet read end to end',
+            2: f'{len(prods)} product(s) to recompute; every answer, step and unit re-verified independently',
+            3: f'{len(diag)} diagnosis report(s) on file; defect register per product',
+            4: f'{len(failing)} job(s) sent back for repair' if failing else 'no repair waiting',
+            5: f'{len(jobs)} repair job(s) on record; every fix re-read before QA',
+            6: f'{len(waiting)} job(s) at QA PASS waiting for your approval' if waiting else 'no release waiting',
+            7: f'{len(lessons)} lesson(s) the builders must obey',
+            8: f'{len(builds)} build plan(s) from approved tables of contents',
+            9: f'{units_open} unit(s) open across {len(builds)} build(s)',
+            10: f'{sum(1 for b in builds if b.get("assembled"))} product(s) assembled',
+            11: '9-point Mastery standard + Reader lessons checked on every unit',
+            12: '100 % of mandatory checks or the unit goes back',
+        }
+        eng = []
+        for group, agents in org['engineering'].items():
+            for a in agents:
+                la = last(self.ENG_LOG_ROLES.get(a['id'], (a['name'],)) + (a['name'],))
+                eng.append(dict(a, group=group, today=today_eng.get(a['id'], ''),
+                                last=(f"{la['ts'][:16].replace('T', ' ')}  {la['message']}" if la else 'no action yet')))
+        rd = None
+        try:
+            import roadmap
+            dash = salesintel.dashboard(self.root)
+            ss = salesintel.settings(self.root)
+            cat = ss.get('catalog', [])
+            rd = roadmap.assess({'weekly_units': [w['units'] for w in dash['weeks'] if w['status'] != 'IN PROGRESS'],
+                                 'team_size': ss.get('team_size', 1), 'products_listed': len(cat),
+                                 'products_qa_pass': len(salesintel.marketable(cat)), 'reviews': ss.get('store_reviews'),
+                                 'channel_weeks_with_sales': ss.get('channel_weeks_with_sales', 0)})
+        except Exception:
+            dash = {'weeks': [], 'units_total': 0, 'net_total': 0, 'real_rows': 0}
+        actions = (rd or {}).get('plan', {}).get('actions', [])
+        rev = []
+        for (k, name, job, _m), r in zip(salesintel.ROLES, org['revenue']):
+            mine = [a['action'] for a in actions if a['role'] == k]
+            la = last((name, {'video_producer': 'Video Producer', 'social_publisher': 'Social Publisher',
+                              'script_storyboard': 'Script & Storyboard'}.get(k, name), 'Commercial Reviewer' if k == 'video_producer' else name))
+            rev.append({'key': k, 'name': name, 'job': r['job'], 'status': r['status'], 'methods': r['methods'],
+                        'today': mine[0] if mine else 'standing by for today\'s workflow',
+                        'last': f"{la['ts'][:16].replace('T', ' ')}  {la['message']}" if la else 'no action yet'})
+        cur = next((w for w in reversed(dash['weeks']) if w), None) if dash['weeks'] else None
+        posts = sum(1 for a in acts if a.get('role') == 'Social Publisher' and 'published' in a.get('message', ''))
+        kpis = [('Products protected', len(prods)), ('Repair jobs', len(jobs)), ('Awaiting your approval', len(waiting)),
+                ('Lessons learned', len(lessons)), ('Builds in progress', len(builds)),
+                ('Paid units this week', f"{cur['units'] if cur else 0} / {cur['minimum'] if cur else 125}"),
+                ('Net revenue (imported)', f"${dash.get('net_total', 0)}"), ('Posts published', posts)]
+        return {'kpis': kpis, 'engineering': eng, 'revenue': rev, 'feed': acts[-60:][::-1],
+                'stage': (rd or {}).get('diagnosis'), 'bottleneck': (rd or {}).get('bottleneck'),
+                'targets': org['sales_targets'], 'quality': org['quality_target']}
+
+    def revenue_role(self, key):
+        """Run one Revenue & Media agent's real work for today and return its deliverables."""
+        import salesintel
+        rep, out = salesintel.run_daily(self.root)
+        ss = salesintel.settings(self.root)
+        acts = [a for a in rep['roadmap']['daily_plan']['actions'] if a['role'] == key]
+        res = {'assignment': acts, 'stage': rep['roadmap']['stage'], 'bottleneck': rep['roadmap']['bottleneck']}
+        if key == 'offer_pricing':
+            res['deliverables'] = out['offers']
+        elif key == 'prospector':
+            res['deliverables'] = salesintel.rank_prospects(ss.get('prospects', []))
+        elif key == 'script_storyboard':
+            res['deliverables'] = out['media']
+        elif key == 'sales_followup':
+            res['deliverables'] = out['followups']
+        elif key == 'retention':
+            res['deliverables'] = out['retention']
+        elif key == 'revenue_tracker':
+            res['deliverables'] = salesintel.dashboard(self.root)
+        elif key == 'sales_qa':
+            res['deliverables'] = rep['sales_qa']
+        elif key in ('video_producer', 'social_publisher'):
+            recs = []
+            for d in sorted((self.root / 'commercials').glob('brief_*'))[-10:]:
+                r = {'folder': str(d)}
+                for f in ('REVIEW.json', 'PUBLISH.json'):
+                    if (d / f).exists():
+                        j = json.loads((d / f).read_text(encoding='utf-8'))
+                        r[f[:-5].lower()] = j.get('decision') or [(x['platform'], x['status']) for x in j.get('results', [])]
+                recs.append(r)
+            res['deliverables'] = {'commercials': recs, 'platform': self.video_platform_status()}
+        else:
+            res['deliverables'] = {'methods': [m for m in salesintel.library()['methods'] if 'market_research' in m.get('roles', [])][:6]}
+        activity(self.root, dict((k, n) for k, n, *_ in salesintel.ROLES)[key], 'ran today\'s assignment from the Command Center')
+        return res
+
     # Revenue & Media Division (drafts and measurement only: nothing is sent, published, priced or paid)
     def sales_daily(self):
         import salesintel

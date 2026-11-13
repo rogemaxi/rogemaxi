@@ -27,7 +27,13 @@ class UISmoke(unittest.TestCase):
             app = App(Path(t) / 'ws')
             app.opener = lambda p: None
             try:
-                self.assertEqual(app.nb.index('end'), 8)
+                self.assertEqual(app.nb.index('end'), 9)
+                self.assertEqual(str(app.nb.select()), str(app.cc), 'Command Center opens first')
+                self.assertEqual(len(app.cc.data['engineering']), 12)
+                self.assertEqual(len(app.cc.data['revenue']), 10)
+                cards = [w for g in app.cc.grid_frame.winfo_children() for w in g.winfo_children() if isinstance(w, appmod.tk.Frame)
+                         and w.winfo_children()]
+                self.assertGreaterEqual(len(cards), 22)
                 z = fixtures.broken_power_tool_zip(Path(t) / 'tool.zip')
                 m = app.studio.import_product(z)
                 app.refresh_products()
@@ -42,6 +48,10 @@ class UISmoke(unittest.TestCase):
                 app.update()
                 jobs = app.jtree.get_children()
                 self.assertEqual(len(jobs), 1)
+                app.cc.refresh()
+                self.assertEqual(dict(app.cc.data['kpis'])['Products protected'], 1)
+                self.assertEqual(dict(app.cc.data['kpis'])['Repair jobs'], 1)
+                self.assertNotEqual(app.cc.data['engineering'][5]['last'], 'no action yet')   # Release QA acted
                 app.jtree.selection_set(jobs[0])
                 app.show_job()
                 text = app.jtext.get('1.0', 'end')
