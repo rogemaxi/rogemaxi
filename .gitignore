@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+dist/
+demo_output/
+*.db
+*.db-wal
+*.db-shm

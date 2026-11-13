@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Genesis Capital Intelligence</title>
+<style>
+:root{--bg:#f6f7f9;--panel:#fff;--ink:#16202c;--muted:#5b6776;--line:#dfe3e8;--accent:#1f5f99;--ok:#1d7a46;--warn:#9a6400;--bad:#b42318;--chip:#eef2f6}
+@media (prefers-color-scheme:dark){:root{--bg:#0f141a;--panel:#161d25;--ink:#e6ebf1;--muted:#97a3b1;--line:#27313c;--accent:#6aa8e0;--ok:#4cc38a;--warn:#e0a63a;--bad:#f07167;--chip:#1e2731}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "Segoe UI",system-ui,sans-serif}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--panel)}
+h1{font-size:16px;margin:0}h2{font-size:15px;margin:0 0 10px}h3{font-size:13px;margin:14px 0 6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;background:var(--chip);border:1px solid var(--line)}
+.badge.bad{color:var(--bad)}.badge.ok{color:var(--ok)}.badge.warn{color:var(--warn)}
+.wrap{display:flex;min-height:calc(100vh - 54px)}nav{width:200px;flex:none;border-right:1px solid var(--line);background:var(--panel);padding:8px}
+nav button{display:block;width:100%;text-align:left;background:none;border:0;color:var(--ink);padding:8px 10px;border-radius:6px;cursor:pointer;font:inherit}
+nav button.on{background:var(--chip);color:var(--accent);font-weight:600}
+main{flex:1;padding:18px;min-width:0}.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}.kpi .v{font-size:20px;font-weight:600}.kpi .l{color:var(--muted);font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:600}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+textarea{width:100%;min-height:90px;font-family:Consolas,monospace;font-size:12px}
+.btn{font:inherit;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:6px;padding:6px 12px}
+.btn.alt{background:none;color:var(--accent)}.btn.bad{border-color:var(--bad);background:var(--bad)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0}.muted{color:var(--muted)}.alert{padding:8px 10px;border-radius:6px;margin:4px 0;border-left:3px solid var(--warn);background:var(--chip)}
+.alert.high{border-color:var(--bad)}details{margin-top:8px}summary{cursor:pointer;color:var(--accent)}
+pre{white-space:pre-wrap;word-break:break-word;font-size:12px;background:var(--bg);padding:8px;border-radius:6px;max-height:340px;overflow:auto}
+.dc4{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.dc4>div{border:1px solid var(--line);border-radius:6px;padding:10px}.dc4 b{display:block;color:var(--muted);font-size:12px;text-transform:uppercase}
+#toast{position:fixed;bottom:14px;right:14px;max-width:420px;padding:10px 14px;border-radius:8px;background:var(--panel);border:1px solid var(--line);display:none;box-shadow:0 4px 18px #0003}
+@media (max-width:760px){.wrap{flex-direction:column}nav{width:auto;display:flex;flex-wrap:wrap;border-right:0;border-bottom:1px solid var(--line)}nav button{width:auto}main{padding:12px 16px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Genesis Capital Intelligence</h1>
+  <div class="row" id="hdr"></div>
+</header>
+<div class="wrap">
+<nav id="nav"></nav>
+<main id="main"><div class="card">Loading…</div></main>
+</div>
+<div id="toast"></div>
+<script>
+const TOKEN="__TOKEN__";
+const SECTIONS=[["command","Command Center"],["markets","Global Markets"],["portfolio","Portfolio"],["research","Research"],["risk","Risk"],["compounding","Compounding"],["decisions","Decision Memory"],["agents","Agent Operations"],["ledgers","Capital Ledgers"],["approvals","Approvals"],["audit","Audit"],["settings","Settings"]];
+let cur=location.hash.slice(1)||"command";
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??"—").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const money=v=>v==null?"—":"$"+Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+async function get(p){const r=await fetch(p);return r.json()}
+async function post(p,b){const r=await fetch(p,{method:"POST",headers:{"Content-Type":"application/json","X-GCI-Token":TOKEN},body:JSON.stringify(b||{})});const j=await r.json();if(!r.ok){toast(j.error||"Failed",true);throw new Error(j.error)}return j}
+function toast(m,bad){const t=$("#toast");t.textContent=m;t.style.display="block";t.style.borderColor=bad?"var(--bad)":"var(--ok)";clearTimeout(t._h);t._h=setTimeout(()=>t.style.display="none",6000)}
+function tbl(rows,cols){if(!rows||!rows.length)return'<p class="muted">None yet.</p>';return`<table><thead><tr>${cols.map(c=>`<th class="${c[2]||""}">${c[1]}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${cols.map(c=>`<td class="${c[2]||""}">${typeof c[0]=="function"?c[0](r):esc(r[c[0]])}</td>`).join("")}</tr>`).join("")}</tbody></table>`}
+function nav(){$("#nav").innerHTML=SECTIONS.map(([k,l])=>`<button class="${k==cur?"on":""}" onclick="go('${k}')">${l}</button>`).join("")}
+function go(k){if(location.hash.slice(1)===k){cur=k;render()}else location.hash=k}
+window.addEventListener("hashchange",()=>{cur=location.hash.slice(1)||"command";render()});
+async function header(){const s=await get("/api/status");$("#hdr").innerHTML=`<span class="badge ${s.dataset=="SYNTHETIC"?"warn":"ok"}">Data: ${s.dataset}${s.dataset=="SYNTHETIC"?" (simulated)":""}</span><span class="badge bad">Brokerage: NOT CONNECTED</span><span class="badge">Orders: disabled by design</span><span class="badge ${s.chain.ok?"ok":"bad"}">Audit chain ${s.chain.ok?"intact":"BROKEN"}</span><span class="badge muted">v${s.version}</span>`;return s}
+const V={};
+V.command=async()=>{const s=await header();const p=s.portfolio;return`<div class="card"><h2>Command Center</h2><div class="grid">
+${[["Total value",money(p.total_value)],["Cash (Ledger A)",money(p.cash)],["Net contributions",money(p.net_contributions)],["Investment gain (excl. deposits)",money(p.investment_gain_total)],["Realized",money(p.realized_gain)],["Unrealized",money(p.unrealized_gain)],["Pending approvals",s.pending_approvals]].map(([l,v])=>`<div class="kpi card"><div class="l">${l}</div><div class="v">${v}</div></div>`).join("")}</div>
+${p.all_positions_priced?"":'<div class="alert">Some holdings have no recorded price; values exclude them.</div>'}
+<h3>Alerts</h3>${s.alerts.length?s.alerts.map(a=>`<div class="alert ${a.level}">${esc(a.text)}</div>`).join(""):'<p class="muted">No alerts.</p>'}
+<p class="muted">Balances come only from your own entries and imported broker statements. GCI never shows invented brokerage balances.</p></div>`};
+V.markets=async()=>{const m=await get("/api/markets");if(!m.available)return`<div class="card">${esc(m.message)}</div>`;return`<div class="card"><h2>Global Markets</h2><p class="badge warn">${esc(m.label)}</p>
+<div class="row"><button class="btn" onclick="refreshRates()">Try live Treasury refresh</button><span id="rr" class="muted"></span></div>
+<h3>Rates (as of ${esc(m.rates.as_of)})</h3>${tbl(Object.entries(m.rates).filter(e=>e[0]!="as_of").map(([k,v])=>({k,v})),[["k","Series"],["v","Value (%)","num"]])}
+<h3>Data freshness</h3>${tbl(Object.entries(m.freshness).map(([k,v])=>({k,...v})),[["k","Input"],["as_of","As of"],["age_days","Age (days)","num"],[r=>r.stale?'<span class="badge bad">STALE</span>':'<span class="badge ok">fresh</span>',"Status"]])}
+<h3>Market regime (rules v${esc(m.regime.rules_version)}, coverage ${esc(m.regime.coverage)})</h3>${tbl(Object.entries(m.regime.tags).map(([k,v])=>({k,v,rule:m.regime_rules[k]||""})),[["k","Dimension"],["v","Tag"],["rule","Rule"]])}
+<h3>Regional coverage</h3><p>${esc(m.regions_note)}</p><h3>Broker facts</h3><pre>${esc(JSON.stringify(m.broker,null,2))}</pre>
+<h3>Sources</h3>${tbl(m.sources,[[r=>`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title)}</a>`,"Source"],["retrieved_at","Retrieved"]])}</div>`};
+window.refreshRates=async()=>{const r=await post("/api/refresh-rates");$("#rr").textContent=r.ok?`Live: 13-wk ${r.data.tbill_13w_coupon_equiv_pct}% as of ${r.data.as_of}`:r.message+" ("+r.error+")"};
+V.portfolio=async()=>{const s=await get("/api/status");const p=s.portfolio;return`<div class="card"><h2>Portfolio</h2>${tbl(p.holdings,[["symbol","Symbol"],["qty","Qty","num"],[r=>money(r.cost_basis),"Cost basis","num"],[r=>money(r.price),"Price","num"],["price_as_of","Price as of"],[r=>money(r.market_value),"Value","num"],[r=>money(r.unrealized_gain),"Unrealized","num"]])}
+<p>Cash: <b>${money(p.cash)}</b></p></div>
+<div class="card"><h2>Record a trade you already placed at J.P. Morgan</h2><p class="muted">This records a completed trade. It does not place one.</p><div class="row">
+<select id="t_side"><option>BUY</option><option>SELL</option></select><input id="t_sym" placeholder="Symbol" size="7"><input id="t_qty" placeholder="Quantity" size="9"><input id="t_px" placeholder="Price" size="9"><input id="t_fee" placeholder="Fee" size="6" value="0"><input id="t_conf" placeholder="Confirmation #" size="12">
+<button class="btn" onclick="recTrade()">Record trade</button></div>
+<div class="row"><input id="c_amt" placeholder="Amount" size="9"><button class="btn alt" onclick="recContrib()">Record deposit (contribution)</button></div>
+<div class="row"><input id="p_sym" placeholder="Symbol" size="7"><input id="p_px" placeholder="Price" size="9"><input id="p_asof" type="date"><button class="btn alt" onclick="recPrice()">Record price</button></div></div>`};
+window.recTrade=async()=>{await post("/api/trade",{side:$("#t_side").value,symbol:$("#t_sym").value,qty:$("#t_qty").value,price:$("#t_px").value,fee:$("#t_fee").value,confirmation_id:$("#t_conf").value});toast("Trade recorded");render()};
+window.recContrib=async()=>{await post("/api/contribution",{amount:$("#c_amt").value});toast("Contribution recorded");render()};
+window.recPrice=async()=>{await post("/api/price",{symbol:$("#p_sym").value,price:$("#p_px").value,as_of:$("#p_asof").value});toast("Price recorded");render()};
+V.research=async()=>{const r=await get("/api/research");return`<div class="card"><h2>Research</h2><div class="row"><label>Amount $<input id="a_amt" value="40" size="7"></label><label>Horizon (years) <input id="a_h" size="4" placeholder="?"></label><label>Emergency fund in place <select id="a_e"><option value="">unknown</option><option value="true">yes</option><option value="false">no</option></select></label><button class="btn" onclick="analyze()">Run allocation analysis</button></div>
+<p class="muted">Runs Market Intelligence → Research → Capital Protection → Judgment → Auditor, then queues a decision card in Approvals. Deterministic agents: $0 research cost.</p>
+<h3>Candidates (evidence snapshot)</h3>${tbl(r.candidates,[["symbol","Symbol"],["name","Name"],["asset_class","Class"],[c=>(Number(c.expense_ratio)*100).toFixed(2)+"%","Expense","num"],[c=>money(c.price),"Price","num"],["price_as_of","As of"],[c=>c.accessible_in_account?'<span class="badge ok">eligible*</span>':'<span class="badge bad">no</span>',"JPM fractional"]])}
+<p class="muted">* Eligibility list dated 2024-11-19 — confirm in your J.P. Morgan app.</p>
+<h3>Recent research jobs</h3>${tbl(r.jobs,[["id","Job"],["ts","When"],["task_type","Task"],[j=>JSON.parse(j.agents).join(", "),"Agents"],[j=>money(j.cost),"Cost","num"],[j=>j.output.auditor?(j.output.auditor.certified?'<span class="badge ok">certified</span>':'<span class="badge bad">issues</span>'):"—","Audit"]])}</div>`};
+window.analyze=async()=>{const b={amount:$("#a_amt").value};if($("#a_h").value)b.horizon_years=Number($("#a_h").value);if($("#a_e").value)b.emergency_fund_ok=$("#a_e").value=="true";const r=await post("/api/analyze",b);toast(`Decision ${r.decision_id} queued for your approval`);go("approvals")};
+V.risk=async()=>{const r=await get("/api/risk");return`<div class="card"><h2>Risk</h2><h3>Allocation</h3>${tbl(r.allocation,[["symbol","Symbol"],["pct","% of total","num"]])}<p>Cash: ${money(r.cash)}</p><h3>Stress tests</h3>${tbl(r.stress_tests,[["scenario","Scenario"],[x=>money(x.estimated_change),"Estimated change","num"]])}<p class="muted">${esc(r.note)}</p></div>`};
+V.compounding=async()=>{const q=new URLSearchParams({start:$("#cp_s")?.value||"40",monthly:$("#cp_m")?.value||"0",years:$("#cp_y")?.value||"10"});const r=await get("/api/compounding?"+q);return`<div class="card"><h2>Compounding</h2><div class="row"><label>Start $<input id="cp_s" value="${q.get("start")}" size="7"></label><label>Monthly $<input id="cp_m" value="${q.get("monthly")}" size="6"></label><label>Years <input id="cp_y" value="${q.get("years")}" size="3"></label><button class="btn" onclick="render()">Recalculate</button></div>
+${tbl(r.projections,[["scenario","Scenario"],["annual_return_assumed","Assumed return","num"],[x=>money(x.ending_value),"Ending value","num"],[x=>money(x.of_which_contributions),"Your contributions","num"],[x=>money(x.of_which_growth),"Growth","num"]])}<p class="muted">${esc(r.disclaimer)}</p></div>`};
+V.decisions=async()=>{const d=await get("/api/decisions");return`<div class="card"><h2>Decision Memory</h2><p>Reviews due: ${d.due.length?d.due.map(esc).join(", "):"none"}</p><h3>Decision quality</h3><pre>${esc(JSON.stringify(d.metrics,null,2))}</pre>
+${d.decisions.map(x=>`<div class="card"><b>${esc(x.id)}</b> · ${esc(x.instrument)} · <span class="badge">${esc(x.status)}</span> · owner: ${esc(x.owner_decision)} · review ${esc(x.review_date)}
+<p>${esc(x.thesis)}</p><h3>What would prove this wrong</h3>${tbl(x.falsification,[["metric","Metric"],["op","Op"],["threshold","Threshold","num"],["justification","Why"]])}
+<details><summary>Contrary evidence, assumptions, regime, sources</summary><pre>${esc(JSON.stringify({contrary:x.contrary_evidence,confidence:x.confidence,assumptions:x.assumptions,regime:x.regime.tags,sources:x.sources.map(s=>s.url)},null,2))}</pre></details>
+<div class="row"><input id="rv_${x.id}" placeholder='{"expense_ratio":0.0006}' size="40"><button class="btn alt" onclick="review('${x.id}')">Run falsification check</button></div>
+${x.reviews.length?`<pre>${esc(JSON.stringify(x.reviews,null,2))}</pre>`:""}</div>`).join("")||'<p class="muted">No decisions yet.</p>'}
+<h3>Regime matrix</h3>${tbl(d.regime_matrix,[["regime","Regime"],["category","Category"],["n","n","num"],["resolved","Resolved","num"],["hit_rate","Hit rate","num"],["sample_warning","Sample"]])}</div>`};
+window.review=async id=>{let obs;try{obs=JSON.parse($("#rv_"+id).value||"{}")}catch(e){return toast("Observed metrics must be JSON",true)}const r=await post("/api/review",{id,observed:obs});toast(r.thesis_falsified?"FALSIFIED: "+r.triggered.map(t=>t.metric).join(", "):"No falsification triggered ("+r.unevaluated.length+" metrics not observed)");render()};
+V.agents=async()=>{const a=await get("/api/agents");return`<div class="card"><h2>Agent Operations</h2><h3>Roles</h3>${tbl(Object.entries(a.roles).map(([k,v])=>({k,v})),[["k","Id"],["v","Role"]])}<h3>Routing (minimum sufficient specialists)</h3>${tbl(Object.entries(a.routes).map(([k,v])=>({k,v:v.join(" → ")})),[["k","Task"],["v","Agents"]])}<h3>Unit economics</h3><pre>${esc(JSON.stringify(a.economics,null,2))}</pre></div>`};
+V.ledgers=async()=>{const l=await get("/api/ledgers");return`<div class="card"><h2>Capital Ledgers</h2><div class="grid">${[["A · Investment capital",l.balances.A],["B · Research operations",l.balances.B],["C · Protected reserve",l.balances.C]].map(([n,v])=>`<div class="kpi card"><div class="l">${n}</div><div class="v">${money(v)}</div></div>`).join("")}</div>
+<p>Internal reconciliation: ${l.reconciliation.ok?'<span class="badge ok">OK</span>':'<span class="badge bad">FAILED</span>'} ${l.suspended?'<span class="badge bad">Research spending suspended: '+esc(l.suspended.reason)+'</span> <button class="btn alt" onclick="resume()">Resume (owner)</button>':""}</p>
+<h3>Owner authorization (single use)</h3><div class="row"><select id="au_a"><option>TRANSFER:A->B</option><option>TRANSFER:A->C</option><option>TRANSFER:C->A</option><option>C:RESERVE_RELEASE</option><option>B:BUDGET_AUTHORIZED</option><option>A:DISTRIBUTION</option></select><input id="au_amt" placeholder="Max amount" size="9"><button class="btn" onclick="authz()">Authorize</button><span id="au_out" class="muted"></span></div>
+<h3>Transfer between ledgers</h3><div class="row"><select id="tr_r"><option value="A,C">A → C (reserve)</option><option value="C,A">C → A</option><option value="A,B">A → B (research)</option></select><input id="tr_amt" placeholder="Amount" size="8"><input id="tr_auth" placeholder="Authorization id" size="20"><button class="btn" onclick="xfer()">Transfer</button></div>
+<h3>Certify realized gains (Independent Auditor)</h3><div class="row"><input id="ce_s" type="date"><input id="ce_e" type="date"><button class="btn" onclick="certify()">Certify period</button></div>
+${tbl(l.certifications,[["id","Id"],["period_start","From"],["period_end","To"],["status","Status"],[c=>money(c.record.net_realized),"Net realized","num"],[c=>money(c.record.eligible_net_gain),"Eligible (after tax)","num"],[c=>money(c.record.proposed_research_allocation),"Research alloc. (proposed)","num"]])}
+<h3>Matching contribution proposal</h3><div class="row"><input id="m_c" placeholder="Certification id" size="18"><input id="m_r" placeholder="Ratio e.g. 1.0" size="8"><input id="m_cash" placeholder="Your available cash" size="10"><input id="m_res" placeholder="Your reserve need" size="10"><button class="btn" onclick="matchP()">Propose</button></div>
+${tbl(l.matching,[["id","Id"],["status","Status"],[m=>money(m.proposed_amount),"Proposed","num"],[m=>m.status=="PROPOSED"?`<button class="btn alt" onclick="matchC('${m.id}','${m.proposed_amount}')">Confirm deposit arrived</button>`:"","" ]])}
+<p class="muted">Funding policy (proposed, pending owner approval): research share ${esc(l.funding_policy.research_share)}, tax provision ${esc(l.funding_policy.tax_rate)}, per-job cap ${money(l.funding_policy.per_job_cost_cap)}.</p>
+<h3>Entries</h3>${tbl(l.entries,[["id","#"],["ledger","Ledger"],["ts","When"],["kind","Kind"],[e=>money(e.amount),"Amount","num"],["memo","Memo"],["authorization_id","Authorization"]])}</div>`};
+window.authz=async()=>{const r=await post("/api/authorize",{action:$("#au_a").value,amount:$("#au_amt").value||null});$("#au_out").textContent=r.authorization_id;$("#tr_auth")&&($("#tr_auth").value=r.authorization_id);toast("Authorization "+r.authorization_id)};
+window.xfer=async()=>{const [s,d]=$("#tr_r").value.split(",");await post("/api/transfer",{src:s,dst:d,amount:$("#tr_amt").value,authorization_id:$("#tr_auth").value});toast("Transferred");render()};
+window.certify=async()=>{const r=await post("/api/certify",{period_start:$("#ce_s").value,period_end:$("#ce_e").value+"T23:59:59Z"});toast(r.status+": eligible "+money(r.eligible_net_gain));render()};
+window.matchP=async()=>{const r=await post("/api/match/propose",{cert_id:$("#m_c").value,ratio:$("#m_r").value,owner_cash:$("#m_cash").value,owner_reserve:$("#m_res").value});toast("Proposed "+money(r.proposed_amount));render()};
+window.matchC=async(id,a)=>{await post("/api/match/confirm",{id,amount:a});toast("Contribution recorded as new capital");render()};
+window.resume=async()=>{await post("/api/resume");toast("Resumed");render()};
+V.approvals=async()=>{const a=await get("/api/approvals");return`<div class="card"><h2>Approvals</h2><p class="muted">Approving records your decision. It never places a trade.</p>${a.approvals.map(x=>`<div class="card"><div class="row"><b>${esc(x.id)}</b><span class="badge ${x.status=="PENDING"?"warn":""}">${esc(x.status)}</span><span class="muted">${esc(x.created_ts)} · decision ${esc(x.decision_id)}</span></div>
+<div class="dc4"><div><b>1 · Action</b>${esc(x.card.action)}</div><div><b>2 · Reason</b>${esc(x.card.reason)}</div><div><b>3 · If you do nothing</b>${esc(x.card.inaction)}</div><div><b>4 · Reject if</b><ul>${x.card.rejection_conditions.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div></div>
+<details><summary>Sources, risks, fees, assumptions, alternatives, reviewers</summary><pre>${esc(JSON.stringify(x.card.details,null,2))}</pre></details>
+${["PENDING","DEFERRED"].includes(x.status)?`<div class="row"><input id="n_${x.id}" placeholder="Note (optional)" size="30"><button class="btn" onclick="decide('${x.id}','APPROVED')">Approve</button><button class="btn alt" onclick="decide('${x.id}','DEFERRED')">Defer</button><button class="btn bad" onclick="decide('${x.id}','REJECTED')">Reject</button></div>`:`<p class="muted">Decided ${esc(x.decided_ts)} ${esc(x.note)}</p>`}</div>`).join("")||'<p class="muted">Nothing awaiting your decision. Run an analysis from Research.</p>'}</div>`};
+window.decide=async(id,d)=>{const r=await post("/api/approve",{id,decision:d,note:$("#n_"+id).value});toast(r.message);render()};
+V.audit=async()=>{const a=await get("/api/audit");return`<div class="card"><h2>Audit</h2><p>Hash chain: ${a.chain.ok?'<span class="badge ok">intact</span>':'<span class="badge bad">BROKEN at '+a.chain.broken_at_seq+'</span>'} · ${a.chain.events_checked} events</p>
+<h3>Import broker activity CSV</h3><textarea id="imp" placeholder="date,type,symbol,quantity,price,amount,fees,description"></textarea><div class="row"><button class="btn" onclick="imp()">Import activity</button></div>
+<h3>Reconcile against broker positions CSV</h3><textarea id="rec" placeholder="symbol,quantity"></textarea><div class="row"><input id="rec_cash" placeholder="Broker cash balance" size="12"><button class="btn" onclick="recon()">Reconcile</button></div><pre id="rec_out" style="display:none"></pre>
+<h3>Immutable event history</h3>${tbl(a.events,[["seq","#","num"],["ts","When"],["actor","Actor"],["kind","Event"],[e=>`<code>${esc(JSON.stringify(e.payload).slice(0,160))}</code>`,"Details"],[e=>`<code>${esc(e.hash.slice(0,10))}</code>`,"Hash"]])}</div>`};
+window.imp=async()=>{const r=await post("/api/import",{csv:$("#imp").value,source:"dashboard"});toast(`Imported ${r.added}, skipped ${r.duplicates_skipped} duplicates, ${r.errors.length} errors`,r.errors.length>0)};
+window.recon=async()=>{const r=await post("/api/reconcile",{csv:$("#rec").value,cash:$("#rec_cash").value||null});const o=$("#rec_out");o.style.display="block";o.textContent=JSON.stringify(r,null,2);toast(r.ok?"Reconciled":"Exceptions found; research spending suspended",!r.ok)};
+V.settings=async()=>{const s=await get("/api/settings");const p=s.owner_profile||{};return`<div class="card"><h2>Settings</h2><h3>Integrations</h3><pre>${esc(JSON.stringify(s.brokerage,null,2))}</pre><p class="muted">GCI never asks for or stores your bank or brokerage password. Data-provider API keys (optional) are stored with Windows DPAPI encryption.</p>
+<h3>Owner profile</h3><div class="row"><label>Horizon (years) <input id="op_h" value="${esc(p.horizon_years??"")}" size="4"></label><label>Emergency fund in place <select id="op_e"><option value="">unknown</option><option ${p.emergency_fund_ok===true?"selected":""} value="true">yes</option><option ${p.emergency_fund_ok===false?"selected":""} value="false">no</option></select></label><button class="btn" onclick="saveProfile()">Save profile</button></div>
+<h3>Funding policy</h3><div class="row"><label>Research share <input id="fp_s" value="${esc(s.funding_policy.research_share)}" size="5"></label><label>Tax provision <input id="fp_t" value="${esc(s.funding_policy.tax_rate)}" size="5"></label><label>Per-job cap $<input id="fp_c" value="${esc(s.funding_policy.per_job_cost_cap)}" size="6"></label><label><input type="checkbox" id="fp_a" ${s.funding_policy.research_share_approved?"checked":""}> I approve this research share</label><button class="btn" onclick="savePolicy()">Save policy</button></div>
+<h3>Data</h3><p>Dataset: <b>${esc(s.dataset)}</b> · Database file: ${esc(s.db)}</p><div class="row"><button class="btn alt" onclick="doBackup()">Back up now</button><button class="btn bad" onclick="tryOrder()">Test: attempt to place an order</button></div></div>`};
+window.saveProfile=async()=>{const b={};if($("#op_h").value)b.horizon_years=Number($("#op_h").value);if($("#op_e").value)b.emergency_fund_ok=$("#op_e").value=="true";await post("/api/profile",b);toast("Profile saved")};
+window.savePolicy=async()=>{await post("/api/policy",{research_share:$("#fp_s").value,tax_rate:$("#fp_t").value,per_job_cost_cap:$("#fp_c").value,research_share_approved:$("#fp_a").checked});toast("Policy saved");render()};
+window.doBackup=async()=>{const r=await post("/api/backup");toast("Backup written: "+r.file)};
+window.tryOrder=async()=>{try{await post("/api/place-order",{symbol:"VT"})}catch(e){}};
+async function render(){nav();try{if(cur!="command")await header();$("#main").innerHTML=await V[cur]()}catch(e){$("#main").innerHTML=`<div class="card alert high">${esc(e.message)}</div>`}}
+render();
+</script>
+</body>
+</html>
