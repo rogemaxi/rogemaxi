@@ -127,6 +127,8 @@ def check(spec, question, answer):
     """Return (status, expected, evidence). status in CORRECT / INCORRECT / UNSUPPORTED."""
     f, P = spec['form'], spec['parts']
     a = _n(answer)
+    if f not in ('prime_or_factor',) and not re.search(r'\d|[a-z]\s*[\^(]', a):
+        raise ValueError('answer has no mathematics to check')        # unreadable -> human review, never an accusation
     if f == 'inequality':
         want, got = _solve_ineq(P[0]), _rel_set(a)
         return (('CORRECT' if want == got else 'INCORRECT'), str(want), f'solution set of {P[0]} over the reals = {want}')
@@ -166,6 +168,8 @@ def check(spec, question, answer):
         (x1, y1), (x2, y2) = [_pair(f'({p})') for p in P]
         want = (y2 - y1) / (x2 - x1)
         got = _num_answer(a)
+        if got is None:
+            raise ValueError('slope not found in the answer')
         return ('CORRECT' if got == want else 'INCORRECT', str(want), f'm = ({y2} - {y1})/({x2} - {x1}) = {want}')
     if f in ('line_point_slope', 'line_parallel'):
         if f == 'line_point_slope':
