@@ -118,8 +118,11 @@ class BlotatoTests(unittest.TestCase):
         job = vp.produce_on_blotato(client(f), b, owner_confirmed=True, character_url='https://cdn.example/ldb.png')
         sent = [c for c in f.calls if c[1].endswith('/videos/from-templates')][0][3]
         self.assertEqual(sent['templateId'], vp.PLATFORMS['blotato']['templates']['character'])
-        self.assertEqual(sent['inputs'], {'characterImage': 'https://cdn.example/ldb.png'})
-        self.assertIn('College statistics stressing you out?', sent['prompt'])
+        self.assertEqual(sent['inputs']['characterDescription'], 'https://cdn.example/ldb.png')
+        self.assertEqual(sent['inputs']['aspectRatio'], '9:16')
+        self.assertEqual([sc['narration'] for sc in sent['inputs']['scenes']], [l['voice'] for l in LINES])
+        self.assertNotIn('BYRDWAY MATHEMATICS', sent['inputs']['scenes'][0]['description'])   # character comes from the image
+        self.assertNotIn('prompt', sent)
         self.assertTrue(sent['render'])
         res = client(f).wait_visual(job['visual_id'])
         self.assertEqual(res, {'id': 'vid-1', 'status': 'done', 'mediaUrl': 'https://cdn.example/v.mp4'})

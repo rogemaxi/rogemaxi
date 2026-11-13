@@ -215,7 +215,9 @@ class Blotato:
     def create_visual(self, template_id, prompt, inputs=None, title=None, owner_confirmed=False):
         if not owner_confirmed:
             raise BlotatoError('generation uses Blotato credits: owner confirmation required')
-        body = {'templateId': template_id, 'inputs': inputs or {}, 'prompt': prompt, 'render': True}
+        body = {'templateId': template_id, 'inputs': inputs or {}, 'render': True}
+        if prompt:
+            body['prompt'] = prompt
         if title:
             body['title'] = title
         return self.call('POST', '/videos/from-templates', body)['item']['id']
@@ -294,21 +296,23 @@ def platform_setup_check(client):
 
 
 def produce_on_blotato(client, b, owner_confirmed, kind='character', character_url=None):
-    """Video Producer: one paid Blotato generation from the brief (after owner confirmation)."""
+    """Video Producer: one paid Blotato generation from the brief (after owner confirmation).
+    Inputs follow the live template schema (verified 2026-11-13 on the owner's account + help.blotato.com):
+    character template = scenes[{description, narration}], style, characterDescription (text OR image URL), aspectRatio."""
     if not b['ready']:
         raise BlotatoError('brief not ready: ' + '; '.join(b['problems']))
     tid = PLATFORMS['blotato']['templates'][kind]
-    spec = client.template(tid)
-    inputs = {}
-    if spec and character_url:                         # attach the reference image to the template's image input, if any
-        for k, v in (spec.get('inputs') or {}).items() if isinstance(spec.get('inputs'), dict) else []:
-            if 'image' in k.lower() and isinstance(v, dict) and v.get('type', 'string') in ('string', 'url'):
-                inputs[k] = character_url
-                break
-    prompt = (f"{b['duration_s']}-second vertical 9:16 commercial. {b['character']} "
-              + ' '.join(f"Shot {s['n']} ({s['t0']}-{s['t1']} s, {s['beat']}): {s['prompt'].replace(b['character'], '').strip()} "
-                         f"He says: \"{s['voice']}\"" for s in b['shots'])
-              + f" End card: {b['footer']}." + (f" Character reference image: {character_url}" if character_url else ''))
+    shot = lambda s: s['prompt'].replace(b['character'], '').replace(b['style'], '').strip(' .')
+    if kind == 'character':
+        inputs = {'scenes': [{'description': shot(s), 'narration': s['voice']} for s in b['shots']],
+                  'style': 'cartoon', 'characterDescription': character_url or b['character'], 'aspectRatio': '9:16'}
+    elif kind == 'story':
+        inputs = {'scenes': [{'mediaSource': f"{b['character']} {shot(s)}", 'script': s['voice']} for s in b['shots']],
+                  'aspectRatio': '9:16', 'captionPosition': 'bottom', 'animateAiImages': True}
+    else:
+        inputs = {}
+    prompt = None if inputs else (f"{b['duration_s']}-second vertical commercial. {b['character']} "
+                                  + ' '.join(f"{shot(s)} He says: \"{s['voice']}\"" for s in b['shots']))
     vid = client.create_visual(tid, prompt, inputs, title=b['product']['title'][:80], owner_confirmed=owner_confirmed)
     return {'visual_id': vid, 'template': tid, 'inputs_set': sorted(inputs)}
 
