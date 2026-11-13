@@ -1,5 +1,7 @@
 @echo off
 cd /d "%~dp0"
-py -3 -m gci acceptance --out acceptance_output
-py -3 -m unittest discover -s tests -t .
+set "GCI_PY=python"
+where py >nul 2>nul && set "GCI_PY=py -3"
+%GCI_PY% -m gci acceptance --out acceptance_output
+%GCI_PY% -m unittest discover -s tests -t .
 pause

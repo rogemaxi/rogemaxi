@@ -339,19 +339,29 @@ def make_handler(app: App):
     return H
 
 
-def start_background_jobs(app, interval_seconds=1800):
-    """Quiet daily/weekly jobs while the app is open. Idempotent, so this and Task Scheduler can both run them."""
+def start_background_jobs(app, interval_seconds=1800, first_delay_seconds=20):
+    """Quiet daily/weekly jobs while the app is open. Uses its OWN database connection and never holds the UI
+    lock, so a slow job (network fetch, Windows toast) cannot freeze the dashboard. Jobs are idempotent, so this
+    and Windows Task Scheduler can both run them safely."""
     from .ops import Scheduler
 
     def loop():
         import time
+        time.sleep(first_delay_seconds)
+        store = None
         while True:
             try:
-                with app.lock:
-                    Scheduler(app.s, Path(app.s.path).parent / "reports").run_due()
-            except Exception as exc:  # recorded by the job table; never crash the UI
-                app.s.log("system", "SCHEDULER_LOOP_ERROR", {"error": str(exc)})
+                if store is None:
+                    store = Store.open(app.s.path, app.s.dataset)
+                Scheduler(store, Path(app.s.path).parent / "reports").run_due()
+            except Exception as exc:  # recorded; never crash the UI
+                try:
+                    app.s.log("system", "SCHEDULER_LOOP_ERROR", {"error": str(exc)})
+                except Exception:
+                    pass
             time.sleep(interval_seconds)
+    if app.s.path == ":memory:":
+        return None
     th = threading.Thread(target=loop, daemon=True, name="gci-scheduler")
     th.start()
     return th
@@ -363,7 +373,7 @@ def serve(db_path, dataset="REAL", port=8765, open_browser=True):
     srv = ThreadingHTTPServer(("127.0.0.1", port), make_handler(app))
     url = f"http://127.0.0.1:{srv.server_address[1]}/"
     start_background_jobs(app)
-    print(f"GCI {VERSION} running at {url}  (dataset: {dataset}, db: {db_path}). Close this window to stop.")
+    print(f"GCI {VERSION} running at {url}  (dataset: {dataset}, db: {db_path}). Close this window to stop.", flush=True)
     if open_browser:
         webbrowser.open(url)
     try:

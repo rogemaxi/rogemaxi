@@ -131,7 +131,10 @@ def default_notifier(title: str, body: str) -> bool:
     try:
         import os
         env = {**os.environ, "GCI_T": title[:60], "GCI_B": body[:200]}
-        r = subprocess.run(["powershell", "-NoProfile", "-Command", script], env=env, capture_output=True, timeout=20)
-        return r.returncode == 0
+        # Fire and forget: a notification must never block monitoring or the dashboard.
+        subprocess.Popen(["powershell", "-NoProfile", "-WindowStyle", "Hidden", "-Command", script], env=env,
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                         creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        return True
     except Exception:
         return False

@@ -145,9 +145,10 @@ class Store:
         path = str(path)
         if path != ":memory:":
             Path(path).parent.mkdir(parents=True, exist_ok=True)
-        conn = sqlite3.connect(path, isolation_level=None, check_same_thread=False)
+        conn = sqlite3.connect(path, isolation_level=None, check_same_thread=False, timeout=30)
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA foreign_keys=ON")
+        conn.execute("PRAGMA busy_timeout=30000")  # UI and background jobs use separate connections
         conn.execute("PRAGMA journal_mode=WAL" if path != ":memory:" else "PRAGMA journal_mode=MEMORY")
         conn.executescript(SCHEMA)
         cols = [r[1] for r in conn.execute("PRAGMA table_info(ledger_entries)")]

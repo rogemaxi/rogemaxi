@@ -52,12 +52,14 @@ jobs:
         working-directory: ${{ env.GCI_DIR }}
         run: |
           Copy-Item "$env:RUNNER_TEMP\evidence\acceptance\operations\ops.db" "$env:RUNNER_TEMP\ui.db"
-          $p = Start-Process cmd.exe -ArgumentList '/c','"Launch GCI.bat" --no-browser --port 8765 --dataset SYNTHETIC --db "%RUNNER_TEMP%\ui.db" < NUL' -PassThru -RedirectStandardOutput "$env:RUNNER_TEMP\evidence\server.log"
+          $env:PYTHONUNBUFFERED = "1"
+          $p = Start-Process cmd.exe -ArgumentList '/c','call "Launch GCI.bat" --no-browser --port 8765 --dataset SYNTHETIC --db "%RUNNER_TEMP%\ui.db" < NUL' -PassThru -RedirectStandardOutput "$env:RUNNER_TEMP\evidence\server.log" -RedirectStandardError "$env:RUNNER_TEMP\evidence\server.err.log"
           $ok = $false
-          for ($i = 0; $i -lt 60; $i++) { try { Invoke-WebRequest http://127.0.0.1:8765/api/status -UseBasicParsing | Out-Null; $ok = $true; break } catch { Start-Sleep 1 } }
-          if (-not $ok) { Get-Content "$env:RUNNER_TEMP\evidence\server.log"; throw "dashboard did not start" }
+          for ($i = 0; $i -lt 90; $i++) { try { Invoke-WebRequest http://127.0.0.1:8765/api/status -UseBasicParsing -TimeoutSec 5 | Out-Null; $ok = $true; break } catch { Start-Sleep 1 } }
+          if (-not $ok) { "--- stdout"; Get-Content "$env:RUNNER_TEMP\evidence\server.log"; "--- stderr"; Get-Content "$env:RUNNER_TEMP\evidence\server.err.log"; throw "dashboard did not start" }
+          "dashboard answered after $i s" | Tee-Object -FilePath "$env:RUNNER_TEMP\evidence\endpoints.txt"
           foreach ($e in "status","markets","research","doctrine","risk","compounding","decisions","agents","ledgers","approvals","audit","settings","policy","bridge","ops","reports","security") {
-            $r = Invoke-WebRequest "http://127.0.0.1:8765/api/$e" -UseBasicParsing
+            $r = Invoke-WebRequest "http://127.0.0.1:8765/api/$e" -UseBasicParsing -TimeoutSec 60
             "$e $($r.StatusCode)" | Tee-Object -FilePath "$env:RUNNER_TEMP\evidence\endpoints.txt" -Append
           }
           npm install --no-save playwright@1.48.2
