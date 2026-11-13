@@ -1,7 +1,7 @@
 # GCI v0.3.0 — Requirement Status (Final Master SSOI, institutional-grade)
 
 Classification: **IMPLEMENTED** (built and exercised by a test that checks the required behavior) · **PARTIAL** · **MISSING** · **FAILED** · **BLOCKED** · **UNVERIFIED**.
-Evidence commands: `python -m unittest discover -s tests -t .` (110 tests) · `python -m gci acceptance` (investment $40 20/20, $10,000 20/20, operations 19/19) · `node tools/ui_check.js` (15 sections plus controls) · CI workflow `windows-acceptance` (clean Windows).
+Evidence commands: `python -m unittest discover -s tests -t .` (108 run on Windows; DPAPI test is Windows-only) · `python -m gci acceptance` (investment $40 20/20, $10,000 20/20, operations 19/19) · `node tools/ui_check.js` (15 sections plus controls) · CI workflow `windows-acceptance` (clean Windows).
 
 ## P0 Security and recovery
 | Requirement | Status | Evidence / note |
@@ -73,5 +73,6 @@ Also fixed: duplicated drift alerts, and exposed business credentials wrongly su
 |---|---|---|
 | 15-section dashboard, all controls real | IMPLEMENTED | `docs/screenshots/01–15`; `tools/ui_check.js` exit 0 |
 | Persistence, backups, safe restart | IMPLEMENTED | Restart steps in both demos; backup/restore test |
-| Clean Windows extraction + launch of the exact ZIP | **See CI** | `.github/workflows/windows-acceptance.yml` on `windows-latest`. The result is reported with the delivery. |
+| Clean Windows extraction + launch of the exact ZIP | IMPLEMENTED (CI, clean `windows-latest`) | [Run 43466240282](https://github.com/rogemaxi/rogemaxi/actions/runs/43466240282), commit `3ae154d`: ZIP SHA-256 verified → extracted to an empty folder → 108 tests passed (including **DPAPI encryption round-trip**) → acceptance $40 20/20, $10,000 20/20, operations 19/19 → the real `Launch GCI.bat` answered in 1 s → 17 API endpoints 200 → UI check ok across all 15 sections → Task Scheduler task created (next run 06:40), `run-jobs` executed, task removed. Evidence artifact attached to the run. |
+| Windows defects found by that CI and fixed | IMPLEMENTED | [Run 43464963630](https://github.com/rogemaxi/rogemaxi/actions/runs/43464963630) failed at launch. Fixes: background jobs no longer hold the UI lock (separate DB connection), notifications fire-and-forget, launcher falls back to `python.exe`, `cmd /c` quoting. |
 | Owner's own PC acceptance | **UNVERIFIED until you run it** | `docs/ACCEPTANCE_CHECKLIST.md` |
