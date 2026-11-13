@@ -149,6 +149,15 @@ class BlotatoTests(unittest.TestCase):
         self.assertEqual(bodies['tiktok']['post']['target']['privacyLevel'], 'PUBLIC_TO_EVERYONE')
         self.assertTrue(bodies['tiktok']['post']['target']['isAiGenerated'])
         self.assertEqual(bodies['youtube']['post']['target']['privacyStatus'], 'public')
+        self.assertEqual(bodies['youtube']['post']['target']['title'], PRODUCT['title'])
+        tk_tags = [w for w in bodies['tiktok']['post']['content']['text'].split() if w.startswith('#')]
+        self.assertEqual(len(tk_tags), 4, 'TikTok: exactly four hashtags')
+        # retry: the same commercial is never posted twice
+        n_posts = sum(1 for c_ in f.calls if c_[1].endswith('/v2/posts'))
+        again = vp.publish(c, 'https://cdn.example/v.mp4', PRODUCT, list(vp.CHANNELS),
+                           {'owner': 'Dr. Byrd', 'explicit': True, 'qa_decision': 'PASS'}, previous=out['results'])
+        self.assertEqual(sum(1 for c_ in f.calls if c_[1].endswith('/v2/posts')), n_posts)
+        self.assertTrue(all('not posted again' in r['note'] for r in again['results']))
         for p, bd in bodies.items():
             self.assertEqual(bd['post']['content']['platform'], bd['post']['target']['targetType'])
             self.assertEqual(bd['post']['content']['mediaUrls'], ['https://cdn.example/v.mp4'])
@@ -195,3 +204,22 @@ class ReviewTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class KeyImportTests(unittest.TestCase):
+    def test_starter_pack_key_moves_to_secret_store_and_file_is_deleted(self):
+        saved = {}
+        orig = vp.store_key
+        vp.store_key = lambda k: saved.setdefault('k', k)
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                kf = Path(d) / 'blotato_api_key.txt'
+                kf.write_text('blt_TESTKEY=\n', encoding='utf-8')
+                self.assertTrue(vp.import_key_file(kf))
+                self.assertFalse(kf.exists())
+                self.assertEqual(saved['k'], 'blt_TESTKEY=')
+                bad = Path(d) / 'other.txt'
+                bad.write_text('not a key', encoding='utf-8')
+                self.assertFalse(vp.import_key_file(bad))
+        finally:
+            vp.store_key = orig

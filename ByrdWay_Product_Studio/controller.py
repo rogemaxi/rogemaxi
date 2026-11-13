@@ -255,6 +255,18 @@ class Studio:
     # Video platform (Blotato / Google Flow / Adobe Firefly) + Blotato social publishing: Media Division agents
     def video_platform_status(self):
         import videoplatform as vp, commercial
+        import sys
+        dl = Path.home() / 'Downloads'
+        cands = [Path(sys.executable).parent / 'blotato_api_key.txt', Path(__file__).parent / 'blotato_api_key.txt',
+                 self.root / 'blotato_api_key.txt']
+        for pat in ('ByrdWay_Owner_Starter_Pack*/blotato_api_key.txt', 'ByrdWay_Owner_Starter_Pack*/*/blotato_api_key.txt'):
+            cands += sorted(dl.glob(pat)) if dl.is_dir() else []
+        for kf in cands:
+            try:
+                if vp.import_key_file(kf):
+                    activity(self.root, 'Social Publisher', 'Blotato key imported from the Starter Pack into the OS secret store; file deleted')
+            except Exception:
+                pass
         ref = assets.registry(self.root).get(vp.CHARACTER_ASSET_ID)
         return {'blotato_key': bool(vp.get_key()), 'platforms': vp.PLATFORMS, 'channels': vp.CHANNELS,
                 'character_reference': bool(ref), 'approved_voice': bool(assets.registry(self.root).get(commercial.VOICE_ASSET_ID))}
@@ -326,11 +338,12 @@ class Studio:
         rec = json.loads((brief_dir / 'REVIEW.json').read_text(encoding='utf-8'))
         b = json.loads((brief_dir / 'BRIEF.json').read_text(encoding='utf-8'))
         c = client or vp.Blotato()
+        prev = json.loads((brief_dir / 'PUBLISH.json').read_text(encoding='utf-8'))['results'] if (brief_dir / 'PUBLISH.json').exists() else []
         out = vp.publish(c, rec['mp4'], b['product'], platforms,
                          {'owner': owner, 'explicit': explicit is True, 'qa_decision': rec['decision'],
                           'first_post_override': first_post_override is True,
                           'data_capped_only': rec['score'].get('data_capped_only', False)},
-                         ai_generated=b['platform'] != 'owner_footage', scheduled_time=scheduled_time)
+                         ai_generated=b['platform'] != 'owner_footage', scheduled_time=scheduled_time, previous=prev)
         (brief_dir / 'PUBLISH.json').write_text(json.dumps(out, indent=1), encoding='utf-8')
         activity(self.root, 'Social Publisher', 'published via Blotato (owner approved)', approved_by=owner,
                  results=[(r['platform'], r['status']) for r in out['results']])
@@ -345,19 +358,32 @@ class Studio:
 
     def command_center(self):
         import powerhouse, salesintel
+        try:
+            self.video_platform_status()                  # first run: picks up the Starter Pack Blotato key
+        except Exception:
+            pass
         org = powerhouse.organization()
         acts = read_activity(self.root, 2000)
-        last = lambda names: next((a for a in reversed(acts) if a.get('role') in names), None)
+        KW = {1: ('imported', 'baseline', 'pages read', 'read '), 2: ('verif', 'academic', 'answer'), 3: ('baseline', 'finding', 'diagnos'),
+              4: ('repair', 'patch'), 5: ('review', 'accepted', 'rejected', 'send back'), 6: ('release qa', 'qa decision'),
+              7: ('lesson',), 8: ('blueprint', 'table of contents', 'build plan'), 9: ('built', 'build unit'), 10: ('assembl',),
+              11: ('build qa', 'mastery', 'conformance'), 12: ('chief judge', 'judge')}
+        def last(names, aid=None):
+            for a in reversed(acts):
+                msg = str(a.get('message', '')).lower()
+                if a.get('role') in names or (aid and any(k in msg for k in KW.get(aid, ()))):
+                    return a
+            return None
         prods, jobs, builds, lessons = self.products(), self.jobs(), self.builds(), self.lessons()
         st = lambda j: str(j.get('status', ''))
         waiting = [j for j in jobs if 'AWAITING' in st(j) or 'READY' in st(j)]
         failing = [j for j in jobs if 'FAIL' in st(j) or 'BLOCKED' in st(j)]
-        diag = {d.parent.name for d in (self.root / 'reports').glob('diag_*/diagnosis.json')}
+        diag = {d.parent.name for d in (self.root / 'reports').glob('diag_*/diagnosis.json')} | {j.get('product_id') for j in jobs}
         units_open = sum(1 for b in builds for u in (b.get('units') or []) if 'APPROVED' not in str(u.get('status', '') if isinstance(u, dict) else u).upper())
         today_eng = {
             1: f'{len(prods)} product(s) protected; {max(len(prods) - len(diag), 0)} not yet read end to end',
             2: f'{len(prods)} product(s) to recompute; every answer, step and unit re-verified independently',
-            3: f'{len(diag)} diagnosis report(s) on file; defect register per product',
+            3: f'{len(diag)} product(s) diagnosed; defect register per product',
             4: f'{len(failing)} job(s) sent back for repair' if failing else 'no repair waiting',
             5: f'{len(jobs)} repair job(s) on record; every fix re-read before QA',
             6: f'{len(waiting)} job(s) at QA PASS waiting for your approval' if waiting else 'no release waiting',
@@ -371,7 +397,7 @@ class Studio:
         eng = []
         for group, agents in org['engineering'].items():
             for a in agents:
-                la = last(self.ENG_LOG_ROLES.get(a['id'], (a['name'],)) + (a['name'],))
+                la = last(self.ENG_LOG_ROLES.get(a['id'], (a['name'],)) + (a['name'],), a['id'])
                 eng.append(dict(a, group=group, today=today_eng.get(a['id'], ''),
                                 last=(f"{la['ts'][:16].replace('T', ' ')}  {la['message']}" if la else 'no action yet')))
         rd = None

@@ -63,8 +63,8 @@ class App(tk.Tk):
             pass
         top = ttk.Frame(self, padding=(12, 10))
         top.pack(fill='x')
-        ttk.Label(top, text='BYRDWAY PRODUCT ENGINEERING STUDIO', font=('Segoe UI', 16, 'bold')).pack(anchor='w')
-        ttk.Label(top, text='BYRD POWERHOUSE: 12 engineering agents • Protected originals • Independent verification • '
+        ttk.Label(top, text='BYRD POWERHOUSE AI  -  ByrdWay Mathematics & Science', font=('Segoe UI', 16, 'bold')).pack(anchor='w')
+        ttk.Label(top, text='22 agents: 12 Engineering + 10 Revenue & Media • Protected originals • Independent verification • '
                             'Owner approval • Nothing is ever published automatically').pack(anchor='w')
         self.status = tk.StringVar(value='Ready.')
         ttk.Label(self, textvariable=self.status, relief='sunken', anchor='w', padding=4).pack(side='bottom', fill='x')
@@ -1174,6 +1174,7 @@ class App(tk.Tk):
              'Video platforms:']
         L += [f"  {k:14} {v['name']} [{v['mode']}] - {v['how']}  ({v['url']})" for k, v in st['platforms'].items()]
         L += ['', 'Your channels:'] + [f'  {k:10} {u}' for k, u in st['channels'].items()]
+        st = self.studio.video_platform_status()      # imports the Starter Pack key on first run
         if not st['character_reference'] and messagebox.askyesno('Lil Dr. Byrd', 'Register the approved Lil Dr. Byrd image now?'):
             p = filedialog.askopenfilename(title='Approved Lil Dr. Byrd image', filetypes=[('Image', '*.png *.jpg *.jpeg')])
             if p:
@@ -1182,7 +1183,7 @@ class App(tk.Tk):
             p = filedialog.askopenfilename(title='Approved Lil Dr. Byrd voice', filetypes=[('Audio', '*.mp3 *.wav *.m4a')])
             if p:
                 self.studio.register_asset(p, 'lil_dr_byrd_voice', 'voice', 'approved character voice', True)
-        if messagebox.askyesno('Blotato', 'Enter or replace your Blotato API key now? (Blotato Settings > API)'):
+        if not st['blotato_key'] and messagebox.askyesno('Blotato', 'Enter your Blotato API key now? (Blotato Settings > API)'):
             k = simpledialog.askstring('Blotato API key', 'Paste the full key (including any trailing "="):', show='*')
             if k:
                 self.studio.set_blotato_key(k)
@@ -1256,6 +1257,7 @@ class App(tk.Tk):
             if not first:
                 return
         plats = simpledialog.askstring('Platforms', 'Publish to (comma separated):', initialvalue='facebook,instagram,tiktok,youtube')
+        when = simpledialog.askstring('Schedule (optional)', 'Leave empty to publish now, or enter a UTC time like 2026-11-20T15:00:00Z:') or None
         owner = simpledialog.askstring('Owner approval', 'Type your name to approve publishing:')
         if not plats or not owner or not messagebox.askyesno('Publish', f'Publish {rec["mp4"]} to {plats} now?'):
             return
@@ -1263,7 +1265,8 @@ class App(tk.Tk):
             self._rev_print(['PUBLISHED VIA BLOTATO (each platform reported separately):'] + [
                 f"  {r['platform']:10} {r['status']}  {r.get('publicUrl') or r.get('errorMessage') or r.get('problems') or ''}" for r in out['results']])
         self.run_bg('Publishing via Blotato', lambda: self.studio.commercial_publish(
-            d, [x.strip() for x in plats.split(',') if x.strip()], owner, explicit=True, first_post_override=first), done)
+            d, [x.strip() for x in plats.split(',') if x.strip()], owner, explicit=True, first_post_override=first,
+            scheduled_time=when), done)
 
     def sales_show_library(self):
         lib = self.studio.sales_library()

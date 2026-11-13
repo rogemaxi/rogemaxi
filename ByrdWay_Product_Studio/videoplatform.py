@@ -272,12 +272,34 @@ def target_fields(platform, title, ai_generated, page_id=None):
     raise BlotatoError(f'unsupported platform {platform}')
 
 
+TIKTOK_HASHTAGS = ['#mathteacher', '#studytok', '#ByrdWay', '#teacherspayteachers']     # exactly four (owner rule)
+
+
 def captions(product, platform):
-    """Per-platform post text (Sales QA checks it before publishing)."""
-    base = f"{product['title']} - Lil Dr. Byrd explains it step by step. Get it on Teachers Pay Teachers: {product['destination_url']}"
-    tags = {'tiktok': ' #mathteacher #studytok #ByrdWay', 'instagram': ' #mathteacher #teachersofinstagram #ByrdWay',
-            'youtube': ' #shorts #ByrdWay', 'facebook': ''}
-    return base + tags.get(platform, '')
+    """Per-platform post text (Sales QA checks it before publishing). TikTok: caption + exactly 4 hashtags.
+    YouTube: the text is the description; the title goes in the target (<= 100 characters)."""
+    url = product['destination_url']
+    if platform == 'tiktok':
+        return f"{product['title']}: Lil Dr. Byrd makes it click. Link in bio / TpT: {url} " + ' '.join(TIKTOK_HASHTAGS)
+    if platform == 'youtube':
+        return (f"{product['title']}\n\nLil Dr. Byrd walks you through it step by step.\n"
+                f"Get it on Teachers Pay Teachers: {url}\n\nByrdWay Mathematics & Science\n#shorts #ByrdWay")
+    if platform == 'instagram':
+        return f"{product['title']} - Lil Dr. Byrd explains it step by step. Get it on TpT: {url} #mathteacher #teachersofinstagram #ByrdWay"
+    return f"{product['title']} - Lil Dr. Byrd explains it step by step. Get it on Teachers Pay Teachers: {url}"
+
+
+def import_key_file(path):
+    """First run: move a private key file (from the owner's Starter Pack) into the OS secret store, then delete it."""
+    p = Path(path)
+    if not p.is_file():
+        return False
+    key = p.read_text(encoding='utf-8').strip()
+    if not key.startswith('blt_'):
+        return False
+    store_key(key)
+    p.unlink()
+    return True
 
 
 # ---------------------------------------------------------------- the agent workflow
@@ -358,7 +380,8 @@ def review(mp4, b, root=None, ai_voice=False):
     return {'review': rev, 'score': sc, 'voice_check': vc}
 
 
-def publish(client, mp4_or_url, product, platforms, approval, accounts=None, ai_generated=True, scheduled_time=None):
+def publish(client, mp4_or_url, product, platforms, approval, accounts=None, ai_generated=True, scheduled_time=None,
+            previous=None):
     """Social Publisher. approval must be {'owner': name, 'explicit': True, 'qa_decision': 'PASS...'}.
     One Blotato submission per platform; each outcome reported separately."""
     ok = str((approval or {}).get('qa_decision', '')).startswith('PASS') or (
@@ -370,7 +393,11 @@ def publish(client, mp4_or_url, product, platforms, approval, accounts=None, ai_
     url = mp4_or_url if str(mp4_or_url).startswith('http') else client.upload(mp4_or_url)
     accounts = accounts or platform_setup_check(client)
     results = []
+    done_before = {r['platform']: r for r in (previous or []) if r.get('status') in ('published', 'scheduled', 'in-progress')}
     for p in platforms:
+        if p in done_before:                       # retry safety: never post the same commercial twice
+            results.append(dict(done_before[p], note='already submitted earlier - not posted again'))
+            continue
         row = accounts.get(p) or {}
         if not row.get('connected'):
             results.append({'platform': p, 'status': 'not connected in Blotato'})
