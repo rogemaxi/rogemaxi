@@ -771,6 +771,16 @@ def extract_source_items(path, text):
     repair can replace the answer with an exact-once patch.
     """
     items = []
+    if str(path).lower().endswith('.json'):
+        try:
+            data = json.loads(text)
+        except ValueError:
+            data = None
+        if data is not None:
+            for rec in _walk_records(data):
+                items.append({'question': str(rec['question']), 'answer': rec.get('answer'), 'file': path,
+                              'choices': rec.get('choices'), 'verify': rec.get('verify'), 'line': None})
+            return items
     json_spans = [m.span(1) for m in re.finditer(
         r'<script[^>]*type=["\']application/json["\'][^>]*>(.*?)</script>', text, re.S | re.I)]
     for start, end in object_spans(text):

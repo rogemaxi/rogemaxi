@@ -91,6 +91,27 @@ class ConstructionLoop(unittest.TestCase):
         self.assertEqual(u['status'], 'SENT_BACK_BY_CHIEF_JUDGE')
 
 
+class ReleaseQAGaps(unittest.TestCase):
+    """Regressions found by loop QA on 2026-11-13."""
+    def test_mastery_copies_keep_their_verification_spec(self):
+        bp = mastery_blueprint()
+        q = bp['modules'][0]['practice'][0]
+        q['verify'] = {'type': 'solve', 'equation': '2*x + 3 = 11', 'var': 'x'}
+        bp['modules'][0]['worked_examples'][0]['verify'] = {'type': 'solve', 'equation': '3*x + 5 = 20', 'var': 'x'}
+        M = builders.mastery_data(bp, bp['modules'][0], review=[q])
+        self.assertEqual(M['placement'][0]['verify'], q['verify'])
+        self.assertIn('verify', M['faded'][0])
+        self.assertEqual(M['review'][0]['verify'], q['verify'])
+
+    def test_json_answer_keys_are_verified_structurally(self):
+        import academic
+        key = json.dumps({'items': [{'question': 'F?', 'answer': '49 N', 'verify': {'type': 'physics', 'formula': 'F = m*a',
+                                     'given': {'m': '5 kg', 'a': '9.8 m/s^2'}, 'find': 'F'}}]})
+        items = academic.extract_source_items('ch01_answer_key.json', key)
+        self.assertEqual(len(items), 1)
+        self.assertEqual(academic.verify_item(items[0])['status'], academic.CORRECT)
+
+
 class Assembler(unittest.TestCase):
     def test_refuses_units_that_did_not_pass(self):
         toc = [{'unit': 1, 'title': 'A', 'tiles': [{'title': 't', 'honors': False}]}]

@@ -236,6 +236,12 @@ def detect_all(settings, site_dir, shots_dir, label, run_browser=True, decisions
         res['academic'] += r
         res['findings'] += f2
         res['checks'] += c2
+    keys = {k: v for k, v in files.items() if k.lower().endswith('_answer_key.json')}
+    if keys and not html:                          # packaged Explainer chapters: verify the machine-readable key
+        r, f2, c2 = av.verify_sources(keys)
+        res['academic'] += r
+        res['findings'] += f2
+        res['checks'] += c2
     for rel in pdfs:
         res['types'].add('pdf')
         rep, f, c, texts = ExplainerRepairAgent().detect(Path(site_dir) / rel, rel, Path(shots_dir) / f'{label}_{PurePosixPath(rel).stem}')

@@ -404,13 +404,15 @@ def mastery_data(bp, m, review=(), mascot_uri=None):
         if sk not in seen and not q.get('choices'):
             seen.add(sk)
             placement.append({'question': q['question'], 'answer': str(q.get('answer', '')),
-                              'accept': [str(a) for a in q.get('accept', [])], 'skill': sk})
+                              'accept': [str(a) for a in q.get('accept', [])], 'skill': sk,
+                              **({'verify': q['verify']} if q.get('verify') else {})})
     faded = []
     for w in m.get('worked_examples') or []:
         steps = list(w.get('steps') or [])
         if len(steps) >= 2:
             faded.append({'question': w['question'], 'shown': steps[:-1], 'answer': str(w['answer']),
-                          'accept': [str(a) for a in w.get('accept', [])]})
+                          'accept': [str(a) for a in w.get('accept', [])],
+                          **({'verify': w['verify']} if w.get('verify') else {})})
     sim = m.get('simulation')
     if isinstance(sim, str):
         sim = BUILTIN_SIMS.get(sim)
@@ -419,7 +421,8 @@ def mastery_data(bp, m, review=(), mascot_uri=None):
     return {'product': bp.get('product_title', ''), 'module': m['id'], 'threshold': MASTERY_THRESHOLD,
             'placement': placement, 'faded': faded, 'generators': list(m.get('generators') or []),
             'review': [{'question': q['question'], 'answer': str(q.get('answer', '')), 'hint': q.get('hint', ''),
-                        'accept': [str(a) for a in q.get('accept', [])]} for q in review if not q.get('choices')][:4],
+                        'accept': [str(a) for a in q.get('accept', [])], **({'verify': q['verify']} if q.get('verify') else {})}
+                       for q in review if not q.get('choices')][:4],
             'simulation': sim, 'blocks': [list(b) for b in (m.get('session_blocks') or DEFAULT_BLOCKS)],
             'mascot': mascot_uri, 'next_module': m.get('_next_title')}
 
@@ -685,8 +688,15 @@ def assemble(root, build_id, owner_confirmed=False):
             for u in s['order']:
                 z.write(s['units'][u]['output'], f'{u}/index.html')
         else:
-            for u in s['order']:
+            for i, u in enumerate(s['order']):
                 z.write(s['units'][u]['output'], f'{u}.pdf')
+                ch = bp['chapters'][i]
+                key = [dict(question=w['question'], answer=str(w['answer']), **({'verify': w['verify']} if w.get('verify') else {}))
+                       for sec in ch['sections'] if not sec.get('honors') or bp.get('honors_approved')
+                       for w in sec.get('worked_examples', [])]
+                key += [dict(question=q['question'], answer=str(q['answer']), **({'verify': q['verify']} if q.get('verify') else {}))
+                        for q in ch.get('practice', [])]
+                z.writestr(f'{u}_answer_key.json', json.dumps({'chapter': ch['title'], 'items': key}, indent=1))
         z.writestr('BUILD_PROVENANCE.json', json.dumps({'build': build_id, 'kind': s['kind'],
                                                         'sample_content': is_sample(bp),
                                                         'blueprint_sha256': s['blueprint_sha256'],
