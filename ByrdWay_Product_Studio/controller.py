@@ -13,6 +13,22 @@ from orchestrator import Orchestrator
 class Studio:
     def __init__(self, root):
         self.root = engine.workspace(root)
+        self.recovered = self.recover_interrupted()
+
+    def recover_interrupted(self):
+        """A job still marked REPAIRING / QA when the app starts was cut off (app closed, power loss). Mark it
+        INTERRUPTED with the recovery path; the original is untouched and the working copy keeps its checkpoints."""
+        o, out = Orchestrator(self.root), []
+        for j in o.list_jobs():
+            if j.get('status') in ('REPAIRING', 'QA'):
+                was = j['status']
+                j['status'] = 'INTERRUPTED'
+                j['interrupted'] = {'was': was, 'recover': 'Rerun QA (Jobs tab) to finish checking the working copy, '
+                                    'or run the repair job again from the Products tab. The original was never changed.'}
+                o.save_job(j)
+                activity(self.root, 'Orchestrator', f'job {j.get("id")} was interrupted during {was}; marked INTERRUPTED for recovery')
+                out.append(j.get('id'))
+        return out
 
     # products
     def products(self):
@@ -541,6 +557,8 @@ def next_action(job):
     """One plain-English instruction for the owner, derived only from recorded job state."""
     qa = job.get('qa') or {}
     st = job.get('status')
+    if st == 'INTERRUPTED':
+        return (job.get('interrupted') or {}).get('recover', 'Job was interrupted: rerun QA or run the repair job again.')
     if st == 'ERROR':
         return f'Job crashed ({job.get("error")}). Send logs\\activity.jsonl to your developer.'
     if st == 'EXPORTED':

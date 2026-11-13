@@ -221,3 +221,23 @@ class RevenueMedia(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class InterruptedJobRecovery(unittest.TestCase):
+    def test_job_cut_off_mid_repair_is_marked_interrupted_on_next_start(self):
+        import tempfile, json
+        from pathlib import Path
+        from controller import Studio
+        from orchestrator import Orchestrator
+        with tempfile.TemporaryDirectory() as d:
+            s = Studio(Path(d) / 'ws')
+            o = Orchestrator(s.root)
+            jd = s.root / 'jobs' / 'j1'
+            jd.mkdir(parents=True)
+            (jd / 'job.json').write_text(json.dumps({'id': 'j1', 'status': 'REPAIRING', 'created_at': '2026'}), encoding='utf-8')
+            s2 = Studio(Path(d) / 'ws')                 # app restarted
+            self.assertEqual(s2.recovered, ['j1'])
+            j = o.load_job('j1')
+            self.assertEqual(j['status'], 'INTERRUPTED')
+            self.assertIn('Rerun QA', j['interrupted']['recover'])
+            self.assertEqual(Studio(Path(d) / 'ws').recovered, [])   # only once
