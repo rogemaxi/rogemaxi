@@ -134,3 +134,8 @@ Fix before commercial use: Jordan logo on the mascot's sneakers; Bentley-like wi
 - Construction QA loop (construction.py) for Power Tools (incl. the 9-point Mastery standard tested in Chromium) and
   Explainers; Concept Tiles Assembler (concepttiles.assemble_product + qa_product). Physics + Honors: all 100 tiles
   built and assembled (content private, deliverables/physics_build).
+
+### Owner decision (2026-11-13): approved Lil Dr. Byrd voice
+- The College Statistics recording (median pitch ~291 Hz) is THE approved Lil Dr. Byrd voice (asset `lil_dr_byrd_voice`).
+  Geometry (~242 Hz) and Algebra 1 (~145 Hz) recordings do not match it and are blocked by the Reviewer until re-recorded.
+- Video platform: Blotato (owner-paid, API) + Google Flow / Adobe Firefly via shot lists. The Studio does not hand-make ads.

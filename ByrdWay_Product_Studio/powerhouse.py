@@ -49,7 +49,8 @@ ENGINEERING = [
 ]
 
 REVENUE_STATUS = {   # honest status of each Revenue & Media role inside the app
-    'market_research': ('PARTIAL', 'library methods + free research notes; web research is done outside the app'),
+    'market_research': ('WORKING', 'bizintel.rank_segments: 11 buyer segments, cited public evidence (NAEP, College Board, NHERI, '
+                                   'IXL/TpT, EdChoice), ranked by contribution profit, demand, cost, time, risk'),
     'offer_pricing': ('WORKING', 'salesintel.offer_proposals / value_score / van_westendorp - PROPOSALS only'),
     'prospector': ('WORKING', 'salesintel.rank_prospects on the owner\'s local list - no paid lookups'),
     'script_storyboard': ('WORKING', 'salesintel.media_package from VERIFIED products'),

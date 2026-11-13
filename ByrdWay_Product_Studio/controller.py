@@ -454,8 +454,12 @@ class Studio:
         ss = salesintel.settings(self.root)
         acts = [a for a in rep['roadmap']['daily_plan']['actions'] if a['role'] == key]
         res = {'assignment': acts, 'stage': rep['roadmap']['stage'], 'bottleneck': rep['roadmap']['bottleneck']}
+        import bizintel
+        dash = salesintel.dashboard(self.root)
+        cat = ss.get('catalog', [])
+        net30 = round(sum(w['net'] for w in dash['weeks'][-4:]), 2) if dash.get('real_rows') else None
         if key == 'offer_pricing':
-            res['deliverables'] = out['offers']
+            res['deliverables'] = {'offer_proposals': out['offers'], 'offer_tests': [bizintel.offer_test(p) for p in cat]}
         elif key == 'prospector':
             res['deliverables'] = salesintel.rank_prospects(ss.get('prospects', []))
         elif key == 'script_storyboard':
@@ -465,7 +469,9 @@ class Studio:
         elif key == 'retention':
             res['deliverables'] = out['retention']
         elif key == 'revenue_tracker':
-            res['deliverables'] = salesintel.dashboard(self.root)
+            res['deliverables'] = {'financials (labeled)': bizintel.financials(dash),
+                                   'acquisition_plan': bizintel.acquisition_plan(),
+                                   'capital_allocation': bizintel.capital_allocation(net30, ss.get('monthly_operating_cost'))}
         elif key == 'sales_qa':
             res['deliverables'] = rep['sales_qa']
         elif key in ('video_producer', 'social_publisher'):
@@ -479,7 +485,10 @@ class Studio:
                 recs.append(r)
             res['deliverables'] = {'commercials': recs, 'platform': self.video_platform_status()}
         else:
-            res['deliverables'] = {'methods': [m for m in salesintel.library()['methods'] if 'market_research' in m.get('roles', [])][:6]}
+            res['deliverables'] = {'ranked_segments': [{'rank': i + 1, 'segment': x['segment'], 'buyer': x['buyer'], 'score': x['score'],
+                                                        'problem': x['problem'], 'evidence': x['evidence'], 'channel': x['channel'],
+                                                        'products': x['products']} for i, x in enumerate(bizintel.rank_segments())],
+                                   'methods': [m['id'] for m in salesintel.library()['methods'] if 'market_research' in m.get('roles', [])]}
         activity(self.root, dict((k, n) for k, n, *_ in salesintel.ROLES)[key], 'ran today\'s assignment from the Command Center')
         return res
 
