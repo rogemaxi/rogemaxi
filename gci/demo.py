@@ -58,7 +58,9 @@ def run(db_path, scenario_amount="40", out_dir=None, horizon_years=10) -> dict:
     step(8, "Independent risk and judgment reviews",
          result["job"]["risk"]["verdict"] in ("PASS", "REVIEW", "REJECT") and bool(result["job"]["judgment"]["challenges"]),
          {"risk": result["job"]["risk"]["verdict"], "judgment": result["job"]["judgment"]["recommendation"],
-          "auditor_certified": result["job"]["auditor"]["certified"]})
+          "auditor_certified": result["job"]["auditor"]["certified"],
+          "doctrine_responses": result["job"]["judgment"].get("doctrine_responses"),
+          "council_tally": {k: len(v) for k, v in result["council"]["tally_by_distinct_lens"].items()}})
     dm = DecisionMemory(s)
     dec = dm.get(result["decision_id"])
     step(9, "Falsification conditions recorded before outcome", len(dec["falsification"]) >= 1,
@@ -72,17 +74,26 @@ def run(db_path, scenario_amount="40", out_dir=None, horizon_years=10) -> dict:
     step(12, "Decision stored in permanent memory", dm.get(result["decision_id"])["owner_decision"] == "APPROVED",
          {"decision_id": result["decision_id"]})
 
-    price = D(next(c for c in snap["candidates"] if c["symbol"] == "VT")["price"])
-    qty = (amount / price).quantize(D("0.00001"), rounding="ROUND_DOWN")
-    pf.record_buy("VT", qty, price, 0, external_id="SIM-FILL-1")
-    pf.set_price("VT", price, snap["rates"]["as_of"], "Yahoo Finance via snapshot " + snap["snapshot_id"])
-    step(13, "Simulated portfolio ledger updated", pf.position("VT")["qty"] == qty,
-         {"VT_qty": str(qty), "cash_left": str(cents(led.balance("A"))), "label": "SIMULATED FILL"})
+    prices = {c["symbol"]: D(c["price"]) for c in snap["candidates"]}
+    fills = {}
+    for i, leg in enumerate(result["allocation"], 1):  # follow the council-selected allocation
+        sym = leg["symbol"]
+        q = (D(leg["amount"]) / prices[sym]).quantize(D("0.00001"), rounding="ROUND_DOWN")
+        pf.record_buy(sym, q, prices[sym], 0, external_id=f"SIM-FILL-{i}")
+        pf.set_price(sym, prices[sym], snap["rates"]["as_of"], "Yahoo Finance via snapshot " + snap["snapshot_id"])
+        fills[sym] = q
+    step(13, "Simulated portfolio ledger updated (council-selected allocation)",
+         all(pf.position(s)["qty"] == q for s, q in fills.items()),
+         {"allocation": result["choice"], "fills": {s: str(q) for s, q in fills.items()},
+          "cash_left": str(cents(led.balance("A"))), "label": "SIMULATED FILLS"})
 
-    # 14: hypothetical gain and loss
-    g = pf.record_sell("VT", (qty / 2).quantize(D("0.00001")), price * D("1.10"), 0, external_id="SIM-SELL-GAIN")
-    pf.record_buy("SGOV", D("0.1"), D("100.53"), 0, external_id="SIM-BUY-SGOV")
-    l = pf.record_sell("SGOV", D("0.1"), D("100.00"), 0, external_id="SIM-SELL-LOSS")
+    # 14: hypothetical gain on half the VT, hypothetical loss on a small SGOV round trip
+    vq = fills["VT"]
+    g = pf.record_sell("VT", (vq / 2).quantize(D("0.00001")), prices["VT"] * D("1.10"), 0, external_id="SIM-SELL-GAIN")
+    sq = D("0.01")
+    if "SGOV" not in fills:
+        pf.record_buy("SGOV", sq, prices["SGOV"], 0, external_id="SIM-BUY-SGOV")
+    l = pf.record_sell("SGOV", sq, D("100.00"), 0, external_id="SIM-SELL-LOSS")
     pf.record_income("DIVIDEND", "0.12", "VT", external_id="SIM-DIV-1")
     step(14, "Hypothetical realized gain and loss", g["realized_gain"] > 0 and l["realized_gain"] < 0,
          {"gain": str(cents(g["realized_gain"])), "loss": str(cents(l["realized_gain"])), "dividend": "0.12",

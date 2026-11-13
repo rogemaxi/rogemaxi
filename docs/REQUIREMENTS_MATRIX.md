@@ -43,3 +43,17 @@ Test suite: `python -m unittest discover -s tests -t .` gives 70 tests, all pass
 | 19 | "Launch the actual Windows application" | **NOT VERIFIED** | Owner must run on Windows |
 | 20 | Release ZIP + SHA-256 + docs | WORKING | `tools/package.py`, `dist/` |
 | 20 | Clean-Windows extract-and-launch | **NOT DONE** | See `ACCEPTANCE_CHECKLIST.md` |
+
+## SSOI Addendum — Global Investment Doctrine Library (v0.2.0)
+
+| Requirement | Status | Evidence |
+|---|---|---|
+| Library covering all 38 named investors/managers + Thorp | WORKING | `data/doctrine/library.json` (39 entries: principles, lens map, region, school, sources, source quality, $40 applicability, cautions); `TestLibrary` |
+| Doctrine as research frameworks, not trading instructions | WORKING | Lenses return SUPPORT/CHALLENGE/CAUTION/NEUTRAL/INSUFFICIENT_DATA/NOT_APPLICABLE only; never approve (`test_lenses_never_approve`) |
+| Shared library across the existing six roles (no 38 new agents) | WORKING | `doctrine.ROLE_LENSES`; each role's output carries `doctrine_lenses` |
+| Competing principles challenge recommendations; no deference to fame | WORKING | One vote per distinct lens (`test_fame_neutral_counting`); dissent records; Judgment answers every CHALLENGE |
+| Leverage/derivatives/activism/concentration doctrines not actionable | WORKING | `small_capital` = STUDY_ONLY/PARTIAL; concentration dissent marked POLICY_BLOCKED |
+| No fabricated attribution ("X recommends…") | WORKING | `validate_citations` in Auditor; `test_fabricated_attribution_rejected` |
+| Doctrine changes real outcomes, transparently | WORKING | Deterministic selection rule: with a 0.80pp equity premium and a single return stream, the $40 recommendation moves from 100% VT to $20 VT + $20 SGOV; reverses if premium > 3pp (`test_rich_equity_premium_keeps_all_equity`) |
+| Lens inputs beyond equity valuation (CPI, VIX, credit spreads) | **PARTIAL** | Not in snapshot → INSUFFICIENT_DATA / NOT_APPLICABLE, never guessed |
+| Doctrine library fact-check by a human | **UNVERIFIED** | Principles are paraphrased from widely documented public works; owner/analyst review recommended, especially entries marked `source_quality: limited` |

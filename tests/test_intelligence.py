@@ -51,7 +51,8 @@ class TestRouting(unittest.TestCase):  # items 1, 20
         r1 = analyze_starter_allocation(s, 40, PROFILE)
         hm = HeadManager(s)
         snap = load_snapshot()
-        dup = hm.run("allocation_change", {}, dedupe_key=f"starter-40-{snap['snapshot_id']}")
+        from gci.service import dedupe_key
+        dup = hm.run("allocation_change", {}, dedupe_key=dedupe_key(40, snap, PROFILE))
         self.assertTrue(dup["duplicate"])
         self.assertEqual(dup["job_id"], r1["job_id"])
 
@@ -349,7 +350,7 @@ class TestServer(unittest.TestCase):  # items 21, 28 via HTTP
 
     def test_all_sections_load(self):
         for p in ("/api/status", "/api/markets", "/api/research", "/api/risk", "/api/compounding", "/api/decisions",
-                  "/api/agents", "/api/ledgers", "/api/approvals", "/api/audit", "/api/settings"):
+                  "/api/agents", "/api/ledgers", "/api/approvals", "/api/audit", "/api/settings", "/api/doctrine"):
             code, _ = self.call(p)
             self.assertEqual(code, 200, p)
 

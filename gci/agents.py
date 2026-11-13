@@ -103,8 +103,26 @@ def judgment(ctx, research_out, risk_out):
     ]
     if risk_out["verdict"] != "PASS":
         challenges.append(f"Risk verdict is {risk_out['verdict']}; recommend not acting until resolved.")
+    responses = []
+    cn = ctx.get("council")
+    if cn:
+        resolved = ctx.get("resolved_by_allocation", [])
+        for c in cn["challenges"]:
+            if c["derived"].get("policy_blocked"):
+                disp = "POLICY_BLOCKED: acting on it would breach the Phase 7 research-cost gate and the concentration policy."
+            else:
+                disp = "UNRESOLVED: owner decides; listed as a rejection condition."
+            responses.append({"lens": c["lens"], "doctrines": c["doctrines"], "evidence": c["evidence"], "disposition": disp})
+            if not c["derived"].get("policy_blocked"):
+                challenges.append(f"Doctrine dissent ({c['lens']}: {', '.join(c['doctrines'][:3])}): {c['evidence']}")
+        for l in resolved:
+            responses.append({"lens": l, "disposition": "RESOLVED_BY_ALLOCATION: the chosen allocation answers this challenge "
+                                                         "raised against the 100%-equity alternative."})
+        challenges.append("Fame check: evidence is counted once per distinct lens "
+                          f"({len(cn['tally_by_distinct_lens']['SUPPORT'])} support, {len(cn['tally_by_distinct_lens']['CHALLENGE'])} challenge), "
+                          "not by how many famous investors share a view.")
     recommend = "PROCEED_TO_OWNER" if risk_out["verdict"] in ("PASS", "REVIEW") else "REJECT"
-    return {"challenges": challenges, "recommendation": recommend, "confidence_ceiling": 0.6}
+    return {"challenges": challenges, "doctrine_responses": responses, "recommendation": recommend, "confidence_ceiling": 0.6}
 
 
 def compounding(ctx):
@@ -130,6 +148,11 @@ def auditor(ctx, outputs):
     # Narrative drift: every percentage cited in the thesis must exist in the evidence.
     allowed = set(re.findall(r"\d+\.?\d*", json.dumps(ctx["evidence"], default=str)))
     allowed |= {format(float(n) * 100, "g") for n in list(allowed) if float(n) < 1}  # 0.0006 -> "0.06" (percent form)
+    allowed |= set(re.findall(r"\d+\.?\d*", json.dumps(ctx.get("derived", {}), default=str)))  # recorded calculations
+    if ctx.get("council"):
+        from .doctrine import validate_citations
+        issues += validate_citations(ctx["council"])
+        issues += validate_citations(ctx.get("thesis", ""))
     for num in re.findall(r"(\d+\.?\d*)\s*%", ctx.get("thesis", "")):
         if num not in allowed:
             issues.append(f"Thesis cites {num}% which does not appear in the recorded evidence (narrative drift).")
@@ -189,6 +212,13 @@ class HeadManager:
         if "auditor" in agents:
             self.check_not_self_review("research", "auditor")
             out["auditor"] = auditor(ctx, {k: v for k, v in out.items() if k in AGENTS})
+        if ctx.get("council"):
+            from .doctrine import ROLE_LENSES
+            for role in agents:
+                if role in out and isinstance(out[role], dict) and role != "judgment":
+                    out[role]["doctrine_lenses"] = {l: {"verdict": ctx["council"]["lenses"][l]["verdict"],
+                                                        "evidence": ctx["council"]["lenses"][l]["evidence"]}
+                                                    for l in ROLE_LENSES[role]}
         if task_type in CONSEQUENTIAL:
             missing = {"risk", "judgment", "auditor"} - set(agents)
             if missing:

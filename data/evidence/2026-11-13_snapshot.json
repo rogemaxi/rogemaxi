@@ -4,10 +4,22 @@
   "retrieved_via": "Firecrawl web retrieval from the named primary sources (issuer, U.S. Treasury, broker). Prices via Yahoo Finance quote feed (not exchange-licensed).",
   "label": "RESEARCH SNAPSHOT - real public data, dated. Not live. Verify in your brokerage before acting.",
   "freshness_inputs": {
-    "rates": {"as_of": "2026-11-12", "max_age_days": 7},
-    "prices": {"as_of": "2026-11-12", "max_age_days": 3},
-    "expense_ratios": {"as_of": "2026-04-28", "max_age_days": 400},
-    "jpm_fractional_list": {"as_of": "2024-11-19", "max_age_days": 365}
+    "rates": {
+      "as_of": "2026-11-12",
+      "max_age_days": 7
+    },
+    "prices": {
+      "as_of": "2026-11-12",
+      "max_age_days": 3
+    },
+    "expense_ratios": {
+      "as_of": "2026-04-28",
+      "max_age_days": 400
+    },
+    "jpm_fractional_list": {
+      "as_of": "2024-11-19",
+      "max_age_days": 365
+    }
   },
   "rates": {
     "as_of": "2026-11-12",
@@ -34,43 +46,183 @@
     "fractional_min_usd": 5,
     "fractional_scope": "S&P 500 and NASDAQ 100 stocks and listed ETFs; eligibility list dated 2024-11-19",
     "sell_transaction_fee": "USD 0.01-0.03 per USD 1,000 principal on sales",
-    "foreign_equity_commission_pct": 0.20,
+    "foreign_equity_commission_pct": 0.2,
     "read_only_api": "None verified for retail accounts"
   },
   "candidates": [
-    {"symbol": "VT", "name": "Vanguard Total World Stock ETF", "asset_class": "global_equity", "wrapper": "ETF",
-     "expense_ratio": "0.0006", "expense_ratio_as_of": "2026-02-27", "price": "155.75", "price_as_of": "2026-11-12",
-     "holdings_count": 10185, "benchmark": "FTSE Global All Cap Index", "jpm_fractional_eligible": true},
-    {"symbol": "VTI", "name": "Vanguard Total Stock Market ETF", "asset_class": "us_equity", "wrapper": "ETF",
-     "expense_ratio": "0.0003", "expense_ratio_as_of": "2026-11-13", "price": "372.62", "price_as_of": "2026-11-12",
-     "benchmark": "CRSP US Total Market Index", "jpm_fractional_eligible": true},
-    {"symbol": "VXUS", "name": "Vanguard Total International Stock ETF", "asset_class": "international_equity", "wrapper": "ETF",
-     "expense_ratio": "0.0005", "expense_ratio_as_of": "2026-11-13", "price": "82.66", "price_as_of": "2026-11-12",
-     "benchmark": "FTSE Global All Cap ex US Index", "jpm_fractional_eligible": true},
-    {"symbol": "SGOV", "name": "iShares 0-3 Month Treasury Bond ETF", "asset_class": "fixed_income_cash_equivalent", "wrapper": "ETF",
-     "expense_ratio": "0.0009", "expense_ratio_as_of": "2026-11-12", "price": "100.53", "price_as_of": "2026-11-12",
-     "sec_yield_30d_pct": 3.86, "sec_yield_as_of": "2026-11-11", "benchmark": "ICE 0-3 Month US Treasury Securities Index", "jpm_fractional_eligible": true},
-    {"symbol": "BND", "name": "Vanguard Total Bond Market ETF", "asset_class": "fixed_income", "wrapper": "ETF",
-     "expense_ratio": "0.0003", "expense_ratio_as_of": "2026-04-28", "price": "70.65", "price_as_of": "2026-11-12",
-     "sec_yield_30d_pct": 4.99, "sec_yield_as_of": "2026-11-10", "avg_duration_years": 5.7,
-     "benchmark": "Bloomberg US Agg Float Adjusted Index", "jpm_fractional_eligible": true}
+    {
+      "symbol": "VT",
+      "name": "Vanguard Total World Stock ETF",
+      "asset_class": "global_equity",
+      "wrapper": "ETF",
+      "expense_ratio": "0.0006",
+      "expense_ratio_as_of": "2026-02-27",
+      "price": "155.75",
+      "price_as_of": "2026-11-12",
+      "holdings_count": 10185,
+      "benchmark": "FTSE Global All Cap Index",
+      "jpm_fractional_eligible": true,
+      "trailing_pe": 19.84,
+      "fifty_two_week_high": "162.71",
+      "fifty_two_week_low": "133.65",
+      "two_hundred_day_average": "153.28"
+    },
+    {
+      "symbol": "VTI",
+      "name": "Vanguard Total Stock Market ETF",
+      "asset_class": "us_equity",
+      "wrapper": "ETF",
+      "expense_ratio": "0.0003",
+      "expense_ratio_as_of": "2026-11-13",
+      "price": "372.62",
+      "price_as_of": "2026-11-12",
+      "benchmark": "CRSP US Total Market Index",
+      "jpm_fractional_eligible": true,
+      "trailing_pe": 23.55,
+      "fifty_two_week_high": "385.12",
+      "fifty_two_week_low": "310.40",
+      "two_hundred_day_average": "360.65"
+    },
+    {
+      "symbol": "VXUS",
+      "name": "Vanguard Total International Stock ETF",
+      "asset_class": "international_equity",
+      "wrapper": "ETF",
+      "expense_ratio": "0.0005",
+      "expense_ratio_as_of": "2026-11-13",
+      "price": "82.66",
+      "price_as_of": "2026-11-12",
+      "benchmark": "FTSE Global All Cap ex US Index",
+      "jpm_fractional_eligible": true,
+      "trailing_pe": 15.61,
+      "fifty_two_week_high": "88.62",
+      "fifty_two_week_low": "72.11",
+      "two_hundred_day_average": "83.56"
+    },
+    {
+      "symbol": "SGOV",
+      "name": "iShares 0-3 Month Treasury Bond ETF",
+      "asset_class": "fixed_income_cash_equivalent",
+      "wrapper": "ETF",
+      "expense_ratio": "0.0009",
+      "expense_ratio_as_of": "2026-11-12",
+      "price": "100.53",
+      "price_as_of": "2026-11-12",
+      "sec_yield_30d_pct": 3.86,
+      "sec_yield_as_of": "2026-11-11",
+      "benchmark": "ICE 0-3 Month US Treasury Securities Index",
+      "jpm_fractional_eligible": true,
+      "fifty_two_week_high": "100.74",
+      "fifty_two_week_low": "100.27"
+    },
+    {
+      "symbol": "BND",
+      "name": "Vanguard Total Bond Market ETF",
+      "asset_class": "fixed_income",
+      "wrapper": "ETF",
+      "expense_ratio": "0.0003",
+      "expense_ratio_as_of": "2026-04-28",
+      "price": "70.65",
+      "price_as_of": "2026-11-12",
+      "sec_yield_30d_pct": 4.99,
+      "sec_yield_as_of": "2026-11-10",
+      "avg_duration_years": 5.7,
+      "benchmark": "Bloomberg US Agg Float Adjusted Index",
+      "jpm_fractional_eligible": true,
+      "fifty_two_week_high": "75.23",
+      "fifty_two_week_low": "69.65",
+      "two_hundred_day_average": "72.74"
+    }
   ],
   "assumptions": [
-    {"id": "spread_bps", "value": 5, "basis": "ASSUMPTION: highly liquid broad ETFs; the retrieved Yahoo bid/ask snapshots were pre-market and flagged unreliable, so they are not used."},
-    {"id": "fx_cost_bps", "value": 0, "basis": "U.S.-listed USD ETFs; currency conversion happens inside the fund, reflected in its returns, not as a trade cost."}
+    {
+      "id": "spread_bps",
+      "value": 5,
+      "basis": "ASSUMPTION: highly liquid broad ETFs; the retrieved Yahoo bid/ask snapshots were pre-market and flagged unreliable, so they are not used."
+    },
+    {
+      "id": "fx_cost_bps",
+      "value": 0,
+      "basis": "U.S.-listed USD ETFs; currency conversion happens inside the fund, reflected in its returns, not as a trade cost."
+    }
   ],
   "sources": [
-    {"kind": "rates", "title": "U.S. Treasury Daily Treasury Bill Rates, Nov 2026", "url": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_bill_rates&field_tdr_date_value_month=202611", "retrieved_at": "2026-11-13T12:35:00Z"},
-    {"kind": "broker", "title": "Chase: Fractional shares (from $5)", "url": "https://www.chase.com/personal/investments/online-investing/fractional-shares", "retrieved_at": "2026-11-13T12:36:00Z"},
-    {"kind": "broker", "title": "J.P. Morgan SDI fractional-eligible securities list (as of 11/19/2024)", "url": "https://www.chase.com/content/dam/chase-ux/documents/personal/investments/fractionalshares.pdf", "retrieved_at": "2026-11-13T12:37:00Z"},
-    {"kind": "broker", "title": "J.P. Morgan SDI Fee and Commission Schedule", "url": "https://www.jpmorgan.com/content/dam/jpm/securities/documents/JPMS-Fee-and-Commission-Schedule-SDI.pdf", "retrieved_at": "2026-11-13T12:36:30Z"},
-    {"kind": "broker", "title": "Chase: J.P. Morgan Self-Directed Investing ($0 online trades)", "url": "https://www.chase.com/personal/investments/online-investing", "retrieved_at": "2026-11-13T12:36:00Z"},
-    {"kind": "fund", "symbol": "VT", "title": "Vanguard VT profile", "url": "https://investor.vanguard.com/investment-products/etfs/profile/vt", "retrieved_at": "2026-11-13T12:39:00Z"},
-    {"kind": "fund", "symbol": "VTI", "title": "Vanguard VTI profile", "url": "https://investor.vanguard.com/investment-products/etfs/profile/vti", "retrieved_at": "2026-11-13T12:38:30Z"},
-    {"kind": "fund", "symbol": "VXUS", "title": "Vanguard VXUS profile", "url": "https://investor.vanguard.com/investment-products/etfs/profile/vxus", "retrieved_at": "2026-11-13T12:38:30Z"},
-    {"kind": "fund", "symbol": "SGOV", "title": "iShares SGOV product page", "url": "https://www.ishares.com/us/products/314116/ishares-0-3-month-treasury-bond-etf", "retrieved_at": "2026-11-13T12:38:30Z"},
-    {"kind": "fund", "symbol": "BND", "title": "Vanguard BND profile", "url": "https://investor.vanguard.com/investment-products/etfs/profile/bnd", "retrieved_at": "2026-11-13T12:39:00Z"},
-    {"kind": "prices", "title": "Yahoo Finance quotes VT, VTI, VXUS, SGOV, BND (close 2026-11-12)", "url": "https://finance.yahoo.com/quote/VT/", "retrieved_at": "2026-11-13T12:38:00Z"}
+    {
+      "kind": "rates",
+      "title": "U.S. Treasury Daily Treasury Bill Rates, Nov 2026",
+      "url": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_bill_rates&field_tdr_date_value_month=202611",
+      "retrieved_at": "2026-11-13T12:35:00Z"
+    },
+    {
+      "kind": "broker",
+      "title": "Chase: Fractional shares (from $5)",
+      "url": "https://www.chase.com/personal/investments/online-investing/fractional-shares",
+      "retrieved_at": "2026-11-13T12:36:00Z"
+    },
+    {
+      "kind": "broker",
+      "title": "J.P. Morgan SDI fractional-eligible securities list (as of 11/19/2024)",
+      "url": "https://www.chase.com/content/dam/chase-ux/documents/personal/investments/fractionalshares.pdf",
+      "retrieved_at": "2026-11-13T12:37:00Z"
+    },
+    {
+      "kind": "broker",
+      "title": "J.P. Morgan SDI Fee and Commission Schedule",
+      "url": "https://www.jpmorgan.com/content/dam/jpm/securities/documents/JPMS-Fee-and-Commission-Schedule-SDI.pdf",
+      "retrieved_at": "2026-11-13T12:36:30Z"
+    },
+    {
+      "kind": "broker",
+      "title": "Chase: J.P. Morgan Self-Directed Investing ($0 online trades)",
+      "url": "https://www.chase.com/personal/investments/online-investing",
+      "retrieved_at": "2026-11-13T12:36:00Z"
+    },
+    {
+      "kind": "fund",
+      "symbol": "VT",
+      "title": "Vanguard VT profile",
+      "url": "https://investor.vanguard.com/investment-products/etfs/profile/vt",
+      "retrieved_at": "2026-11-13T12:39:00Z"
+    },
+    {
+      "kind": "fund",
+      "symbol": "VTI",
+      "title": "Vanguard VTI profile",
+      "url": "https://investor.vanguard.com/investment-products/etfs/profile/vti",
+      "retrieved_at": "2026-11-13T12:38:30Z"
+    },
+    {
+      "kind": "fund",
+      "symbol": "VXUS",
+      "title": "Vanguard VXUS profile",
+      "url": "https://investor.vanguard.com/investment-products/etfs/profile/vxus",
+      "retrieved_at": "2026-11-13T12:38:30Z"
+    },
+    {
+      "kind": "fund",
+      "symbol": "SGOV",
+      "title": "iShares SGOV product page",
+      "url": "https://www.ishares.com/us/products/314116/ishares-0-3-month-treasury-bond-etf",
+      "retrieved_at": "2026-11-13T12:38:30Z"
+    },
+    {
+      "kind": "fund",
+      "symbol": "BND",
+      "title": "Vanguard BND profile",
+      "url": "https://investor.vanguard.com/investment-products/etfs/profile/bnd",
+      "retrieved_at": "2026-11-13T12:39:00Z"
+    },
+    {
+      "kind": "prices",
+      "title": "Yahoo Finance quotes VT, VTI, VXUS, SGOV, BND (close 2026-11-12)",
+      "url": "https://finance.yahoo.com/quote/VT/",
+      "retrieved_at": "2026-11-13T12:38:00Z"
+    }
   ],
-  "research_cost": {"firecrawl_credits": 85, "usd": null, "note": "Credit-to-USD rate not configured; recorded as credits. Owner sets the rate in Settings."}
+  "research_cost": {
+    "firecrawl_credits": 85,
+    "usd": null,
+    "note": "Credit-to-USD rate not configured; recorded as credits. Owner sets the rate in Settings."
+  },
+  "valuation_note": "trailing_pe and 52-week/200-day figures from the same Yahoo Finance quotes (2026-11-12). Trailing P/E is a crude valuation proxy."
 }

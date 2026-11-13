@@ -96,6 +96,19 @@ class App:
         dm = DecisionMemory(self.s)
         return {"decisions": dm.list(), "due": dm.due_reviews(), "metrics": dm.metrics(), "regime_matrix": dm.regime_matrix()}
 
+    def doctrine(self, q):
+        from .doctrine import load_library, LENS_RULES, ROLE_LENSES
+        from .service import choose_allocation
+        snap = _safe_snapshot()
+        lib = load_library()
+        out = {"library": lib, "lens_rules": LENS_RULES, "role_lenses": ROLE_LENSES}
+        if snap:
+            ch = choose_allocation(snap, self.s.setting("owner_profile", {}) or {})
+            out["councils"] = {k: {kk: v[kk] for kk in ("proposal", "lenses", "tally_by_distinct_lens", "school_conflicts",
+                                                        "preservation_challenges", "note")} for k, v in ch["councils"].items()}
+            out["pick"], out["rule"], out["resolved"] = ch["pick"], ch["rule"], ch["resolved_by_allocation"]
+        return out
+
     def agents(self, q):
         return {"roles": AGENTS, "routes": ROUTES, "economics": HeadManager(self.s).unit_economics()}
 
@@ -187,7 +200,7 @@ def _safe_snapshot():
 GET_ROUTES = {"/api/status": "status", "/api/markets": "markets", "/api/research": "research", "/api/risk": "risk",
               "/api/compounding": "compounding", "/api/decisions": "decisions", "/api/agents": "agents",
               "/api/ledgers": "ledgers", "/api/approvals": "approvals", "/api/audit": "audit", "/api/settings": "settings",
-              "/api/portfolio": "status"}
+              "/api/portfolio": "status", "/api/doctrine": "doctrine"}
 
 
 def make_handler(app: App):

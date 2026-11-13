@@ -27,6 +27,7 @@ python tools/package.py      # release ZIP + SHA-256
 | `funding.py` | Realized-gain certification, loss carryforward, research budget, auto-suspension |
 | `matching.py` | Owner matching-contribution proposals (capital, never return) |
 | `viability.py` | Capital-threshold gate |
+| `doctrine.py` + `data/doctrine/library.json` | Global Investment Doctrine Library (39 investors) and fame-neutral Doctrine Council used by all six roles |
 | `agents.py` | 6 specialists + deterministic Head Manager (routing, no self-review, dedupe, unit economics) |
 | `decisions.py` / `regime.py` | Decision memory, falsification, calibration, regime tagging and matrix |
 | `backtest.py` | Walk-forward, rolling windows, cost sensitivity, look-ahead and survivorship guards |
