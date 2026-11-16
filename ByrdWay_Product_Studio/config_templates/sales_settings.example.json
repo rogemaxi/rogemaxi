@@ -1,0 +1,25 @@
+{
+ "week1_start": "YYYY-MM-DD",
+ "monthly_operating_cost": null,
+ "team_size": 1,
+ "sender": {
+  "name": "Your name, ByrdWay Mathematics & Science",
+  "email": "you@yourdomain.example",
+  "postal_address": "Your mailing address (required by CAN-SPAM)"
+ },
+ "catalog": [
+  {
+   "title": "Exact TpT product title",
+   "url": "https://www.teacherspayteachers.com/Product/...",
+   "price": 0.0,
+   "qa": "PASS",
+   "owner_approved": false,
+   "course": "Algebra 1",
+   "scope": "full course",
+   "answer_keys": true,
+   "preview": true,
+   "problem": "what the learner struggles with",
+   "outcome": "specific educational outcome"
+  }
+ ]
+}

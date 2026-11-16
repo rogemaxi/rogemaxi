@@ -441,7 +441,7 @@ class Studio:
         posts = sum(1 for a in acts if a.get('role') == 'Social Publisher' and 'published' in a.get('message', ''))
         kpis = [('Products protected', len(prods)), ('Repair jobs', len(jobs)), ('Awaiting your approval', len(waiting)),
                 ('Lessons learned', len(lessons)), ('Builds in progress', len(builds)),
-                ('Paid units this week', f"{cur['units'] if cur else 0} / {cur['minimum'] if cur else 125}"),
+                ('Paid units this week', f"{cur['units'] if cur else 0} / {cur['stretch'] if cur else salesintel.START_UNITS}"),
                 ('Net revenue (imported)', f"${dash.get('net_total', 0)}"), ('Posts published', posts)]
         return {'kpis': kpis, 'engineering': eng, 'revenue': rev, 'feed': acts[-60:][::-1],
                 'stage': (rd or {}).get('diagnosis'), 'bottleneck': (rd or {}).get('bottleneck'),
@@ -489,8 +489,33 @@ class Studio:
                                                         'problem': x['problem'], 'evidence': x['evidence'], 'channel': x['channel'],
                                                         'products': x['products']} for i, x in enumerate(bizintel.rank_segments())],
                                    'methods': [m['id'] for m in salesintel.library()['methods'] if 'market_research' in m.get('roles', [])]}
-        activity(self.root, dict((k, n) for k, n, *_ in salesintel.ROLES)[key], 'ran today\'s assignment from the Command Center')
+        import marketingskills as ms
+        res['marketing_skills'] = [{'skill': sk, 'purpose': rs['purpose'][:160], 'first_steps': [x['step'] for x in rs['steps'][:5]],
+                                    'guardrails': rs['guardrails'][len(ms.GUARDRAILS['*']):]}
+                                   for sk in ms.ROLE_SKILLS.get(key, []) for rs in [ms.run_sheet(sk, {'goal': res['assignment'][0]['action'] if res['assignment'] else None})]]
+        activity(self.root, dict((k, n) for k, n, *_ in salesintel.ROLES)[key], 'ran today\'s assignment from the Command Center',
+                 skills=ms.ROLE_SKILLS.get(key, []))
         return res
+
+    # Marketing Skills (6.0) + compliance
+    def marketing_skills(self):
+        import marketingskills as ms
+        return ms.report()
+
+    def marketing_skill_sheet(self, skill, context=None):
+        import marketingskills as ms
+        r = ms.run_sheet(skill, context)
+        activity(self.root, 'Marketing Skills', f'run sheet: {skill}')
+        return r
+
+    def email_presend_check(self, draft):
+        import compliance, salesintel
+        ss = salesintel.settings(self.root)
+        return compliance.presend_check(self.root, draft, ss.get('catalog', []), ss.get('sender', {}))
+
+    def pressure_tests(self):
+        import compliance
+        return compliance.pressure_tests(self.root)
 
     # Revenue & Media Division (drafts and measurement only: nothing is sent, published, priced or paid)
     def sales_daily(self):

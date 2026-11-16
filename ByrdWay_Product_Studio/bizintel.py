@@ -140,9 +140,12 @@ def financials(dash):
             'long_term': [L(f'${v:,} per month', TARGET, note='aspiration, not a forecast') for v in (10_000, 100_000, 1_000_000, 10_000_000)]}
 
 
-def acquisition_plan(target_units_week=125, avg_price=None, measured=None):
+def acquisition_plan(target_units_week=None, avg_price=None, measured=None):
     """What it takes to reach a unit target. Conversion inputs are ASSUMPTIONS until real numbers are measured
     (measured = {'visit_to_buy': x, 'view_to_visit': y, 'views_per_post': z} from imported data -> FACT)."""
+    if target_units_week is None:
+        import salesintel
+        target_units_week = salesintel.START_UNITS
     m = measured or {}
     v2b = L(m['visit_to_buy'], FACT) if 'visit_to_buy' in m else L(0.02, ASSUMPTION, note='2 % listing visit -> purchase; replace with TpT stats')
     v2v = L(m['view_to_visit'], FACT) if 'view_to_visit' in m else L(0.01, ASSUMPTION, note='1 % video view -> listing visit')

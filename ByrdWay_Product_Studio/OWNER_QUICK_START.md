@@ -1,4 +1,4 @@
-# Owner Quick Start — ByrdWay Product Engineering Studio v0.5.0
+# Owner Quick Start — ByrdWay Product Engineering Studio v6.0.0
 
 ## Install once (about 10 minutes, no Python needed)
 1. GitHub → **rogemaxi/rogemaxi → Releases → ByrdWay Product Engineering Studio v0.5.0** (a *draft* only you can
@@ -75,3 +75,14 @@ publishes through Blotato after you approve.
 5. **Publish via Blotato…**: only after Reviewer PASS (or, for a first post, everything passing except the audience-data
    categories) and your typed approval. Each platform is reported separately with its live link.
 The Windows ZIP includes ffmpeg (folder `ffmpeg`, GPL license file inside) for the Reviewer.
+
+## 6.0 Marketing Skills (tab 8, row 4)
+- **Marketing Skills library (53):** every skill, its version, which of your 10 Revenue roles uses it, and why 10 are not activated.
+- **Run a marketing skill…:** type a name (product-marketing, offers, cold-email, social, sales-enablement, cro, seo-audit…)
+  to get its step-by-step run sheet with your rules on top. Free; no AI cost.
+- **Check an email draft (pre-send QA)…:** pick a draft JSON (template in `config_templates/email_draft.example.json`).
+  READY means it passed every check; you send it from your own email; it is then recorded so it can never be sent twice.
+  Put your sender name, email and mailing address in the sales settings (template in `config_templates/`).
+- **Pressure tests:** SECRET → DISTRIBUTION → PRESSURE TEST records; numbers you have not measured show NOT MEASURED.
+- In the Command Center, a Revenue agent's **Details** lists its skills and **RUN** includes its skill run sheets.
+- Using Claude Code on this folder: the same 53 skills load automatically from `.claude/skills/`.

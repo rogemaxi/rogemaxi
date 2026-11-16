@@ -138,15 +138,15 @@ class RevenueMedia(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.d, ignore_errors=True)
 
-    def test_targets_are_125_then_10_to_17_percent_to_1000(self):
+    def test_targets_6_0_week1_1000_ceiling_18_percent(self):
+        # owner directive 6.0 (2026-11-16): week 1 = 1,000 verified paid units; ceiling 1,000 x 1.18^(n-1)
         t = si.weekly_targets(30)
-        self.assertEqual((t[0]['minimum'], t[0]['stretch']), (125, 125))
-        self.assertEqual(t[1]['minimum'], 138)               # 125 x 1.10 = 137.5 -> 138
-        self.assertEqual(t[1]['stretch'], 147)               # 125 x 1.17 = 146.25 -> 147
-        self.assertEqual(si.milestone_week(0.10), 23)
-        self.assertEqual(si.milestone_week(0.17), 15)
-        self.assertGreaterEqual(t[22]['minimum'], 1000)
-        self.assertLess(t[21]['minimum'], 1000)
+        self.assertEqual((t[0]['minimum'], t[0]['stretch']), (1000, 1000))
+        self.assertEqual(t[1]['minimum'], 1100)              # 1,000 x 1.10
+        self.assertEqual(t[1]['stretch'], 1180)              # 1,000 x 1.18
+        self.assertEqual(t[9]['stretch'], 4436)              # ceil(1,000 x 1.18^9 = 4435.33)
+        self.assertEqual(si.milestone_week(0.18), 15)        # 10,000 units/week on the ceiling path
+        self.assertEqual(si.milestone_week(0.10), 26)
         o = powerhouse.organization()
         self.assertIn('99.997 %', o['quality_target'])
         self.assertIn('100 % of mandatory', o['quality_target'])

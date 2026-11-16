@@ -42,7 +42,7 @@ class Roadmap(unittest.TestCase):
     def test_demand_and_retention_bottlenecks(self):
         ev = {'weekly_units': [10, 12, 15, 20], 'team_size': 1, 'products_qa_pass': 5, 'channel_weeks_with_sales': 4}
         self.assertEqual(roadmap.assess(ev)['bottleneck']['constraint'], 'DEMAND')
-        ev['weekly_units'] = [130, 140, 150, 160]
+        ev['weekly_units'] = [1100, 1200, 1300, 1400]          # above the 6.0 week-1 target of 1,000
         self.assertEqual(roadmap.assess(ev)['bottleneck']['constraint'], 'RETENTION')
 
     def test_plan_keeps_owner_constraints(self):

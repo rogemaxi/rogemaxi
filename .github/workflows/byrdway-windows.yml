@@ -107,10 +107,38 @@ jobs:
           Stop-Process -Id $g.Id -Force
           "Downloadable exe: self-test passed, version $got, GUI ran 20s and created its workspace" | Tee-Object -FilePath gui_smoke.txt
 
+      - name: Package ByrdWay_Powerhouse_6.0_Marketing_Enhanced.zip, extract it fresh, run it, scan for secrets
+        run: |
+          $v = $env:VERSION
+          $P = "$env:RUNNER_TEMP\pkg6\ByrdWay_Powerhouse_6.0_Marketing_Enhanced"
+          New-Item -ItemType Directory -Force "$P\docs", "$P\evidence", "$P\source" | Out-Null
+          Copy-Item dist\ByrdWayStudio "$P\ByrdWayStudio" -Recurse
+          Expand-Archive "ByrdWay_Product_Studio_v${v}_source.zip" -DestinationPath "$P\source"
+          Copy-Item README.md, CHANGELOG.md, UPGRADE_6_0_REPORT.md, MARKETING_SKILLS_REPORT.md, OWNER_QUICK_START.md, KNOWN_LIMITATIONS.md, USER_GUIDE.md "$P\docs\"
+          Copy-Item config_templates "$P\config_templates" -Recurse
+          Copy-Item SETUP_AND_LAUNCH_WINDOWS.txt, README.md, CHANGELOG.md "$P\"
+          Copy-Item test_results_windows.txt, selftest_report_exe.json "$P\evidence\"
+          $z = "ByrdWay_Powerhouse_6.0_Marketing_Enhanced.zip"
+          Compress-Archive -Path $P -DestinationPath $z -Force
+          $x = "$env:RUNNER_TEMP\fresh6"
+          Expand-Archive $z -DestinationPath $x -Force
+          $root = "$x\ByrdWay_Powerhouse_6.0_Marketing_Enhanced"
+          foreach ($f in "ByrdWayStudio\ByrdWayStudio.exe", "ByrdWayStudio\ffmpeg\ffprobe.exe", "source\ByrdWay_Product_Studio_v$v\.claude\skills\SOURCE.json", "docs\CHANGELOG.md", "docs\MARKETING_SKILLS_REPORT.md", "config_templates\settings.example.json", "SETUP_AND_LAUNCH_WINDOWS.txt") {
+            if (-not (Test-Path "$root\$f")) { Write-Error "missing in 6.0 ZIP: $f"; exit 1 }
+          }
+          $n = (Get-ChildItem "$root\source\ByrdWay_Product_Studio_v$v\.claude\skills" -Filter SKILL.md -Recurse).Count
+          if ($n -ne 53) { Write-Error "expected 53 skills, found $n"; exit 1 }
+          Remove-Item "$env:RUNNER_TEMP\selftest_report.json" -ErrorAction SilentlyContinue
+          $p = Start-Process -FilePath "$root\ByrdWayStudio\ByrdWayStudio.exe" -ArgumentList "--selftest" -Wait -PassThru -WorkingDirectory $env:RUNNER_TEMP
+          if ($p.ExitCode -ne 0) { Write-Error "6.0 ZIP exe self-test failed"; exit 1 }
+          $sec = Get-ChildItem $root -Recurse -File -Include *.py,*.json,*.md,*.txt,*.bat | Where-Object { $_.FullName -notmatch '\\tests\\' } | Select-String -Pattern 'blt_[A-Za-z0-9/+=]{20,}','sk-[A-Za-z0-9]{20,}','sk-proj-' -List
+          if ($sec) { $sec | Select-Object -First 5 | ForEach-Object { $_.Path }; Write-Error "possible secret in 6.0 ZIP"; exit 1 }
+          "6.0 ZIP: fresh extraction OK, required files present, 53 skills, exe self-test PASS, secret scan clean" | Tee-Object -FilePath zip6_check.txt
+
       - name: Verification manifest
         run: |
           $v = $env:VERSION
-          $files = "ByrdWayStudio_v${v}_Windows_exe.zip", "ByrdWay_Product_Studio_v${v}_source.zip", "E2E_Explainer_Evidence_v$v.zip"
+          $files = "ByrdWay_Powerhouse_6.0_Marketing_Enhanced.zip", "ByrdWayStudio_v${v}_Windows_exe.zip", "ByrdWay_Product_Studio_v${v}_source.zip", "E2E_Explainer_Evidence_v$v.zip"
           $tests = (Select-String -Path test_results_windows.txt -Pattern "^Ran \d+ tests").Line
           $ok = (Select-String -Path test_results_windows.txt -Pattern "^OK").Line
           $m = @("ByrdWay Product Engineering Studio v$v - verification manifest",
@@ -120,6 +148,7 @@ jobs:
                  "tests: $tests $ok (no skips allowed)",
                  "exe self-test (run from the downloadable ZIP): $((Get-Content selftest_report_exe.json | ConvertFrom-Json).passed)",
                  "exe-only browser install + self-test: $(Test-Path exe_only_install.txt)",
+                 "6.0 ZIP check: $(Get-Content zip6_check.txt)",
                  "", "SHA-256 of downloadable files:")
           foreach ($f in $files) { $m += "$((Get-FileHash $f -Algorithm SHA256).Hash.ToLower())  $f" }
           $m | Tee-Object -FilePath VERIFICATION_MANIFEST.txt
@@ -133,7 +162,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $v = $env:VERSION
-          $files = "ByrdWayStudio_v${v}_Windows_exe.zip", "ByrdWay_Product_Studio_v${v}_source.zip", "E2E_Explainer_Evidence_v$v.zip", "VERIFICATION_MANIFEST.txt"
+          $files = "ByrdWay_Powerhouse_6.0_Marketing_Enhanced.zip", "ByrdWayStudio_v${v}_Windows_exe.zip", "ByrdWay_Product_Studio_v${v}_source.zip", "E2E_Explainer_Evidence_v$v.zip", "VERIFICATION_MANIFEST.txt"
           # A manual run publishes a TEST BUILD draft named after its commit. Numbered drafts (e.g. v0.5.0) are never
           # replaced or deleted here; only earlier test-build drafts are removed.
           $sha = $env:GITHUB_SHA.Substring(0,7)
@@ -163,4 +192,5 @@ jobs:
             ByrdWay_Product_Studio/gui_smoke.txt
             ByrdWay_Product_Studio/exe_only_install.txt
             ByrdWay_Product_Studio/VERIFICATION_MANIFEST.txt
+            ByrdWay_Product_Studio/zip6_check.txt
             ByrdWay_Product_Studio/E2E_Explainer_Evidence_*.zip

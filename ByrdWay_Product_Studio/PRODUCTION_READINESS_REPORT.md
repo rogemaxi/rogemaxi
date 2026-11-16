@@ -1,4 +1,4 @@
-# Production Readiness Report — ByrdWay Product Engineering Studio v0.5.0
+# Production Readiness Report — ByrdWay Product Engineering Studio v6.0.0
 
 ## How a release is identified (no hand-copied numbers)
 Every Windows CI run on a pushed commit writes **VERIFICATION_MANIFEST.txt** into the draft GitHub release

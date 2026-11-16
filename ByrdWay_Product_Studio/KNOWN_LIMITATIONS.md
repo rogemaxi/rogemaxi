@@ -1,4 +1,4 @@
-# Known limitations, unverified items and unresolved defects (v0.5.0, 2026-11-09)
+# Known limitations, unverified items and unresolved defects (v6.0.0, 2026-11-09)
 
 Labels: **IMPLEMENTED+TESTED** · **IMPLEMENTED, NOT VERIFIED ON TARGET** · **PARTIAL** · **NOT IMPLEMENTED**
 
@@ -110,3 +110,7 @@ None known in the implemented scope at the time of the final test run (see TEST_
 - Google Flow and Adobe Firefly have no API this app can call: the Studio exports the shot list; the owner renders.
 - Blotato AI templates use an AI voice: the Reviewer BLOCKS such a render until it is dubbed with the approved Lil Dr. Byrd recording.
 - Hook / retention / emotional impact are capped below 9 until real audience data (3-second hold, average view) is entered.
+
+## 6.0.0 (2026-11-16)
+See UPGRADE_6_0_REPORT.md "Known limitations (6.0)". In short: skills run as free run sheets in the app (AI execution
+needs your funded OpenAI key); the app never sends email; Gmail/n8n are not integrated; targets are not sales.

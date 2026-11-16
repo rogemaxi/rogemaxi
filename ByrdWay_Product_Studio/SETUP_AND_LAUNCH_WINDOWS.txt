@@ -1,0 +1,21 @@
+BYRD POWERHOUSE AI 6.0 - WINDOWS SETUP AND LAUNCH
+
+1. Right-click ByrdWay_Powerhouse_6.0_Marketing_Enhanced.zip -> Extract All -> choose Documents -> Extract.
+2. Open the extracted folder -> ByrdWayStudio -> double-click ByrdWayStudio.exe
+   (if "Windows protected your PC" appears: More info -> Run anyway; first time only).
+3. First run only: Help -> Install browser engine (about 150 MB), then Help -> Run self-test -> PASSED.
+4. Tab 8 Revenue & Media -> "Video platform & Blotato setup..." -> register the Lil Dr. Byrd image and approved
+   voice (from your private Starter Pack) and paste your Blotato key (stored in Windows Credential Manager).
+5. Optional: tab 4 -> OpenAI key + spending limit (defaults to $0 authorized).
+6. Daily: the app opens on the BYRD POWERHOUSE COMMAND CENTER - press RUN on any of the 22 agents.
+   Marketing Skills: tab 8, row 4.
+
+Folder contents:
+  ByrdWayStudio\        the application (no Python needed; ffmpeg included)
+  source\               complete project source, incl. .claude\skills (53 Marketing Skills) and tests
+  docs\                 README, CHANGELOG, UPGRADE_6_0_REPORT (before/after, security, cost, limitations),
+                        MARKETING_SKILLS_REPORT (inventory + compatibility), OWNER_QUICK_START, KNOWN_LIMITATIONS
+  config_templates\     settings templates WITHOUT secrets
+  evidence\             Windows test results and self-test report of this exact build
+To run the automated tests from source (optional, needs Python 3.12): install_windows.bat, then
+  python -m unittest discover -s tests -v

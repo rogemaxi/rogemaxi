@@ -161,8 +161,10 @@ class CommandCenter(tk.Frame):
             self.say(f"{a['id']}. {a['name']}  ({a['group']})\n\nASSIGNMENT\n{a['job']}\n\nTODAY\n{a['today']}\n\n"
                      f"STATUS BY PRODUCT FAMILY\n{fam}\n\nCODE\n{a['code']}\n\nLAST ACTION\n{a['last']}")
         else:
+            import marketingskills as ms
             self.say(f"{a['name']}  [{a['status']}]\n\nASSIGNMENT\n{a['job']}\n\nTODAY\n{a['today']}\n\n"
-                     f"METHODS APPLIED (strategy library)\n{', '.join(a['methods'])}\n\nLAST ACTION\n{a['last']}")
+                     f"METHODS APPLIED (strategy library)\n{', '.join(a['methods'])}\n\n"
+                     f"MARKETING SKILLS\n{', '.join(ms.ROLE_SKILLS.get(a['key'], [])) or '-'}\n\nLAST ACTION\n{a['last']}")
 
     ENG_RUN = {1: 'diagnose', 2: 'diagnose', 3: 'diagnose', 4: 'run_job', 5: 'run_job', 6: 'run_job',
                7: 'powerhouse_lessons', 8: 'bp_new', 9: 'build_next', 10: 'assemble', 11: 'construct_next', 12: 'construct_next'}

@@ -1080,7 +1080,9 @@ class App(tk.Tk):
                  ('Load product catalog (JSON)…', self.sales_load_catalog)],
                 [('Video platform & Blotato setup…', self.vp_setup), ('Lil Dr. Byrd commercial brief…', self.vp_brief),
                  ('Generate on Blotato…', self.vp_generate), ('Review platform video…', self.vp_review),
-                 ('Publish via Blotato…', self.vp_publish)]]
+                 ('Publish via Blotato…', self.vp_publish)],
+                [('Marketing Skills library (53)', self.ms_library), ('Run a marketing skill…', self.ms_run),
+                 ('Check an email draft (pre-send QA)…', self.ms_email_check), ('Pressure tests', self.ms_pressure)]]
         for row in rows:                                  # two rows so every button fits a 1280-px window
             bar = ttk.Frame(f)
             bar.pack(fill='x', pady=2)
@@ -1267,6 +1269,49 @@ class App(tk.Tk):
         self.run_bg('Publishing via Blotato', lambda: self.studio.commercial_publish(
             d, [x.strip() for x in plats.split(',') if x.strip()], owner, explicit=True, first_post_override=first,
             scheduled_time=when), done)
+
+    # ---- Powerhouse 6.0: Marketing Skills, email compliance, pressure tests
+    def ms_library(self):
+        r = self.studio.marketing_skills()
+        L = [f"MARKETING SKILLS  {r['installed']} installed ({r['active']} active in your 10 Revenue roles)",
+             f"Source: {r['source']} @ {r['commit'][:7]}  License: {r['license']}",
+             f"Excluded: {r['excluded_files']} files - {r['exclusion_reason']}", '']
+        for sk in r['skills']:
+            L.append(f"  {sk['skill']:28} v{sk['version'] or '?':8} {sk['status']:26} roles: {', '.join(sk['roles']) or '-'}")
+            if sk['not_activated_reason']:
+                L.append(f"      not activated: {sk['not_activated_reason']}")
+        self._rev_print(L)
+
+    def ms_run(self):
+        sk = simpledialog.askstring('Marketing skill', 'Skill name (e.g. product-marketing, cold-email, social, offers):')
+        if not sk:
+            return
+        try:
+            r = self.studio.marketing_skill_sheet(sk.strip())
+        except (KeyError, PermissionError) as e:
+            return messagebox.showerror('Marketing skill', str(e))
+        L = [f"SKILL {r['skill']} v{r['version']}", r['purpose'], '', 'GUARDRAILS:'] + [f'  - {g}' for g in r['guardrails']]
+        L += ['', 'SECTIONS: ' + ' | '.join(r['sections'][:15]), '', 'STEPS:'] + [f"  [{x['section']}] {x['step']}" for x in r['steps']]
+        self._rev_print(L)
+
+    def ms_email_check(self):
+        p = filedialog.askopenfilename(title='Email draft (.json)', filetypes=[('JSON', '*.json')])
+        if not p:
+            return
+        r = self.studio.email_presend_check(json.loads(Path(p).read_text(encoding='utf-8')))
+        L = [f"PRE-SEND QA: {'READY - you may send it from your own email' if r['ready'] else 'NOT READY'}", r['rule'], '']
+        L += [f"  {'PASS' if ok else 'FAIL'}  {k}" for k, ok in r['checks'].items()] + [''] + [f'  - {x}' for x in r['problems']]
+        self._rev_print(L)
+
+    def ms_pressure(self):
+        t = self.studio.pressure_tests()
+        L = ['PRESSURE TESTS (SECRET -> DISTRIBUTION -> PRESSURE TEST). Unmeasured numbers are never estimated.', '']
+        for x in t:
+            L.append(f"{x['id']} [{x['decision']}] {x['hypothesis']}")
+            L.append(f"    audience: {x['audience']}  offer: {x['offer']}  page: {x['product_url']}")
+            L.append(f"    exposure {x['exposure']}  clicks {x['clicks']} ({x['click_rate']})  responses {x['responses']}  "
+                     f"orders {x['verified_orders']}  paid units {x['paid_units']}  proceeds {x['seller_proceeds']}")
+        self._rev_print(L or ['No pressure tests yet.'])
 
     def sales_show_library(self):
         lib = self.studio.sales_library()

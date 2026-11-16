@@ -20,7 +20,9 @@ from pathlib import Path
 import sys as _sys
 LIB_PATH = (Path(getattr(_sys, '_MEIPASS', '')) / 'sales_library.json') if getattr(_sys, 'frozen', False) \
     else Path(__file__).with_name('sales_library.json')
-START_UNITS, MIN_GROWTH, STRETCH_GROWTH, MILESTONE = 125, 0.10, 0.17, 1000
+# Owner directive 6.0 (2026-11-16): week 1 = 1,000 VERIFIED paid TpT units; weekly target ceiling 1,000 x 1.18^(n-1);
+# minimum path keeps the owner's earlier +10 %/week floor. TARGETS, never actual sales or forecasts.
+START_UNITS, MIN_GROWTH, STRETCH_GROWTH, MILESTONE = 1000, 0.10, 0.18, 10000
 
 ROLES = [
     # key, name, job, methods it applies (library ids)

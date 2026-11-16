@@ -1,0 +1,12 @@
+{
+ "recipient_email": "teacher@school.example.org",
+ "recipient_name": "",
+ "recipient_verified_source": "where the address was found (public, permitted)",
+ "campaign": "short-campaign-id",
+ "subject": "honest subject",
+ "body": "message ... include your postal address and an opt-out line",
+ "product_title": "exact catalog title",
+ "product_url": "https://www.teacherspayteachers.com/Product/...",
+ "price_mentioned": null,
+ "relationship": "business_cold"
+}

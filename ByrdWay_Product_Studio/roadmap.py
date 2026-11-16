@@ -121,7 +121,8 @@ def bottleneck(diag, evidence):
         return {'constraint': 'SUPPLY', 'why': 'no product is Studio QA PASS and owner-approved, so nothing may be marketed',
                 'fix': 'approve the verified products waiting in the Jobs tab', 'owner_role': 'sales_qa'}
     w = evidence.get('weekly_units') or []
-    target = 125
+    import salesintel
+    target = salesintel.START_UNITS
     if not w or w[-1] < target:
         return {'constraint': 'DEMAND', 'why': f'last week {w[-1] if w else 0} paid units vs the week-1 target of {target}',
                 'fix': 'more qualified buyers reaching verified listings (organic discovery + conversion)', 'owner_role': 'social_publisher'}

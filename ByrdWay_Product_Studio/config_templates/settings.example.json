@@ -1,0 +1,52 @@
+{
+ "version": 2,
+ "repair": {
+  "max_iterations": 6,
+  "max_runtime_seconds": 900,
+  "no_progress_limit": 2,
+  "repeat_failure_limit": 2,
+  "quality_target": 99.9
+ },
+ "budget": {
+  "funded_usd": 0.0,
+  "reserve_usd": 1.0,
+  "max_job_usd": 0.5,
+  "max_daily_usd": 2.0,
+  "estimate_safety_factor": 1.5
+ },
+ "models": {
+  "simple": "gpt-6-luna",
+  "standard": "gpt-6.1-terra",
+  "complex": "gpt-6.1-sol"
+ },
+ "pricing": {
+  "gpt-6-astra": {
+   "input_per_1m": 10.0,
+   "output_per_1m": 50.0
+  },
+  "gpt-6.1-sol": {
+   "input_per_1m": 2.0,
+   "output_per_1m": 10.0
+  },
+  "gpt-6.1-terra": {
+   "input_per_1m": 1.0,
+   "output_per_1m": 5.0
+  },
+  "gpt-6-luna": {
+   "input_per_1m": 0.1,
+   "output_per_1m": 0.5
+  }
+ },
+ "pricing_source": "https://developers.openai.com/api/docs/pricing",
+ "pricing_copied_on": "2026-11-09",
+ "ai": {
+  "max_input_chars": 12000,
+  "max_output_tokens": 1500,
+  "timeout_seconds": 45
+ },
+ "browser": {
+  "timeout_ms": 15000,
+  "max_clicks": 80,
+  "chromium_path": ""
+ }
+}
