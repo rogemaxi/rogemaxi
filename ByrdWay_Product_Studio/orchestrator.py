@@ -436,7 +436,7 @@ class Orchestrator:
             cp = wc.checkpoint('baseline')
             shots = jd / 'evidence'
             say(f'Stage 1/4: protected working copy created (original SHA-256 {manifest["sha256"][:16]}... is never changed)')
-            dkw = {'decisions': decisions, 'progress': progress} if decisions else {'progress': progress}
+            dkw = {'decisions': decisions, 'progress': progress} if decisions else ({'progress': progress} if progress else {})
             say('Stage 2/4: reading every page of the copy (baseline)...')
             state = detect_all(self.settings, wc.files, shots, 'baseline', run_browser, **dkw)
             job['roles_used'] += [ROLE_PT] if 'power_tool' in state['types'] else []
@@ -771,7 +771,7 @@ class ReleaseQAAgent:
                            f'changes not explained by recorded patches: {silent}' if silent
                            else 'replaying recorded patches on the original reproduces the candidate exactly'))
         state = detect_all(self.settings, fresh, qa_dir / 'evidence', 'qa', run_browser,
-                           decisions=job.get('image_decisions'), progress=progress)
+                           decisions=job.get('image_decisions'), **({'progress': progress} if progress else {}))
         checks += state['checks']
         # visual comparison against the original
         visual = {}
