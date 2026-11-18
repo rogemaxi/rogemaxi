@@ -1,0 +1,80 @@
+{
+  "account": {
+    "broker": "J.P. Morgan Self-Directed Investing",
+    "account_type": "self_directed_cash",
+    "account_owner": "Genesis 2 & 7, LLC (business General Investment account)",
+    "account_last4": "____"
+  },
+  "eligible_instruments": [
+    "VT",
+    "VTI",
+    "VXUS",
+    "SGOV",
+    "BND"
+  ],
+  "initial_funding": "0",
+  "max_monthly_contribution": "100",
+  "target_allocation": {
+    "VT": 50,
+    "SGOV": 50
+  },
+  "allocation_bands_pp": 10,
+  "reinvest_dividends": true,
+  "liquidity_requirement": {
+    "emergency_fund_months_outside_gci": 3,
+    "confirmed": false
+  },
+  "risk_limits": {
+    "max_loss_tolerance_pct": null,
+    "max_single_fund_pct": 100,
+    "max_single_stock_pct": 5
+  },
+  "prohibited": [
+    "margin",
+    "options",
+    "leveraged_or_inverse_etfs",
+    "short_selling",
+    "crypto",
+    "unapproved_foreign_market_orders",
+    "unapproved_concentrated_positions",
+    "unapproved_transfers"
+  ],
+  "review_schedule": "quarterly",
+  "suspension_conditions": [
+    "reconciliation failure",
+    "duplicate or unexpected transaction",
+    "contribution above ceiling",
+    "credentials exposed",
+    "stale data beyond limits",
+    "allocation outside bands for 2 consecutive weekly reports"
+  ],
+  "recurring_plans": [
+    {
+      "amount_per_period": "50",
+      "frequency": "monthly",
+      "start_date": "2026-12-03",
+      "funding_source": "internal_bank",
+      "note": "2 business days after pension check #1 normally lands \u2014 set your real date",
+      "legs": [
+        {
+          "symbol": "VT",
+          "amount": "50"
+        }
+      ]
+    },
+    {
+      "amount_per_period": "50",
+      "frequency": "monthly",
+      "start_date": "2026-12-10",
+      "funding_source": "internal_bank",
+      "note": "2 business days after pension check #2 normally lands \u2014 set your real date",
+      "legs": [
+        {
+          "symbol": "SGOV",
+          "amount": "50"
+        }
+      ]
+    }
+  ],
+  "funding_treatment": "Personal pension money \u2192 owner capital contribution to Genesis 2 & 7, LLC (confirm treatment with your CPA)"
+}
