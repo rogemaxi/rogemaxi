@@ -239,8 +239,8 @@ def classify_findings(findings):
 
 def repair_summary(job, baseline_findings, elapsed_s):
     """Terminal, evidence-based summary of a repair job (no estimated or simulated numbers)."""
-    bl = [dict(f, proposed_correction=f.get('proposed_correction') or (describe_fix(f.get('fix')) if f.get('fix') else f.get('proposal')))
-          for f in baseline_findings]
+    bl = [dict(f, proposed_correction=f.get('proposed_correction') or f.get('proposal') or ('fix' if f.get('fix') else None))
+          for f in baseline_findings]                 # only whether a correction exists matters for the classes
     cls = classify_findings(bl)
     ok_ids = {a['finding'] for i in job['iterations'] for a in i.get('applied', [])}
     fail_reason = {}

@@ -317,8 +317,9 @@ class App(tk.Tk):
             qa = job.get('qa') or {}
             self.log_line(f'JOB {job["id"]}: {job["status"]} (QA {qa.get("decision")}, score {qa.get("score")})')
             sm = job.get('summary')
-            if sm:
-                messagebox.showinfo(f'Repair & verify: {sm["terminal"]}', sm['line'].replace('. NEXT: ', '.\n\nNEXT: '))
+            if sm:                                   # non-blocking: Activity log + status bar (no modal dialog)
+                self.log_line(sm['line'])
+                self.after(200, lambda: self.status.set(f'Repair & verify: {sm["terminal"]} - see Activity for the next step'))
             self.nb.select(self.jobs_frame)
             self.refresh_jobs()
             if self.jtree.exists(job['id']):
