@@ -15,7 +15,7 @@ from .control import Control
 from .db import Store, now_iso
 from .decisions import DecisionMemory
 from .doctrine import load_library, validate_citations
-from .ips import InvestmentPolicy, expected_schedule, validate as validate_ips
+from .ips import InvestmentPolicy, expected_schedule, validate as validate_ips, plans as ips_plans, has_legs
 from .ledgers import Ledgers
 from .marketdata import load_snapshot, fetch_treasury_bills, DataUnavailable
 from .money import D, ZERO, cents
@@ -95,11 +95,12 @@ def job_risk_monitor(s, now):
 def recurring_status(s, now=None, tolerance_days=4) -> dict:
     """Compare J.P. Morgan Autoinvest's expected purchases with imported broker activity."""
     ip = InvestmentPolicy(s).active()
-    if not ip or not ip["policy"]["recurring"].get("legs"):
+    if not ip or not has_legs(ip["policy"]):
         return {"status": "NOT_CONFIGURED", "message": "No signed policy with an Autoinvest plan."}
     pol = ip["policy"]
     today = _today(now)
-    start = pol["recurring"].get("start_date") or ip["signed_ts"][:10]
+    starts = [r.get("start_date") for r in ips_plans(pol) if r.get("legs")]
+    start = min(x for x in starts if x) if all(starts) else ip["signed_ts"][:10]
     sched = expected_schedule(pol, start, (today + timedelta(days=45)).isoformat())
     lots = [dict(r) for r in s.conn.execute("SELECT * FROM lots WHERE acquired_ts >= ?", (start,))]
     used, rows = set(), []
@@ -127,7 +128,7 @@ def recurring_status(s, now=None, tolerance_days=4) -> dict:
         m = l["acquired_ts"][:7]
         month_spend[m] = month_spend.get(m, ZERO) + D(l["cost_total"])
     ceiling = D(pol["max_monthly_contribution"])
-    over = {m: str(cents(v)) for m, v in month_spend.items() if v > ceiling}
+    over = {m: str(cents(v)) for m, v in month_spend.items() if cents(v) > ceiling}  # fractional-share rounding is not overspend
     nxt = next((r for r in rows if r["status"] == "UPCOMING"), None)
     status = "OVER_CEILING" if over else ("MISSING_PURCHASES" if any(r["status"] == "MISSING" for r in rows) else "ON_TRACK")
     return {"status": status, "schedule": rows, "unexpected_purchases": [{"symbol": l["symbol"], "date": l["acquired_ts"][:10],
@@ -141,7 +142,7 @@ def job_recurring_monitor(s, now):
     if r["status"] == "OVER_CEILING":
         pol = InvestmentPolicy(s).active()["policy"]
         from .ips import BROKER_RULES
-        dl = BROKER_RULES["edit_deadline_business_days"][pol["recurring"]["funding_source"]]
+        dl = max(BROKER_RULES["edit_deadline_business_days"][r["funding_source"]] for r in ips_plans(pol) if r.get("legs"))
         ctl.trip("limit_exceeded", f"Purchases exceed the signed monthly ceiling in {list(r['months_over_ceiling'])}")
         ctl.raise_exception("owner_action_deadline",
                             f"Pause or edit Autoinvest in the Chase app at least {dl} business day(s) before the next trade "
@@ -425,7 +426,7 @@ class ShadowMode:
         win = s.setting("windows_acceptance_evidence")
         checks = {
             "policy_signed": (bool(ip), f"version {ip['version']}" if ip else "no signed policy"),
-            "autoinvest_plan_valid": (bool(ip) and not validate_ips(ip["policy"]) and bool(ip["policy"]["recurring"]["legs"]),
+            "autoinvest_plan_valid": (bool(ip) and not validate_ips(ip["policy"]) and has_legs(ip["policy"]),
                                       "valid" if ip else "no policy"),
             "daily_jobs_ran": (days >= required_days, f"{days}/{required_days} days"),
             "weekly_report_generated": (bool(s.conn.execute("SELECT 1 FROM weekly_reports").fetchone()), ""),

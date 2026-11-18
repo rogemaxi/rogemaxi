@@ -123,7 +123,7 @@ class App:
         drafts = [v for v in ip.versions() if v["status"] == "DRAFT"]
         snap = _safe_snapshot()
         return {"active": a, "versions": ip.versions(), "template": TEMPLATE, "broker_rules": BROKER_RULES,
-                "setup_steps": autoinvest_setup_steps(a["policy"]) if a and a["policy"]["recurring"]["legs"] else [],
+                "setup_steps": autoinvest_setup_steps(a["policy"]) if a and __import__("gci.ips", fromlist=["x"]).has_legs(a["policy"]) else [],
                 "latest_draft_problems": validate(drafts[0]["policy"], snap) if drafts else None,
                 "latest_draft_version": drafts[0]["version"] if drafts else None}
 

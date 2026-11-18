@@ -288,3 +288,36 @@ class TestWindowsOnly(unittest.TestCase):
             self.assertNotIn("example-not-a-real-key", open(p).read())
             cs.revoke("market_data_api_key")
             self.assertIsNone(cs.get("market_data_api_key"))
+
+
+class TestTwoPensionPlans(unittest.TestCase):
+    """Owner's real plan: two pension deposits ~7 days apart, $50 invested after each, $100/month ceiling."""
+    def pol(self):
+        p = policy()
+        p.pop("recurring")
+        p["recurring_plans"] = [
+            {"amount_per_period": "50", "frequency": "monthly", "start_date": "2026-12-04", "funding_source": "internal_bank",
+             "legs": [{"symbol": "VT", "amount": "50"}]},
+            {"amount_per_period": "50", "frequency": "monthly", "start_date": "2026-12-11", "funding_source": "internal_bank",
+             "legs": [{"symbol": "SGOV", "amount": "50"}]}]
+        return p
+
+    def test_valid_and_steps(self):
+        self.assertEqual(validate(self.pol(), load_snapshot()), [])
+        steps = autoinvest_setup_steps(self.pol())
+        self.assertTrue(any("VT, $50.00, monthly starting 2026-12-04" in x for x in steps))
+        self.assertTrue(any("SGOV, $50.00, monthly starting 2026-12-11" in x for x in steps))
+
+    def test_ceiling_counts_both_plans(self):
+        p = self.pol(); p["max_monthly_contribution"] = "75"
+        self.assertTrue(any("ceiling" in e for e in validate(p, load_snapshot())))
+
+    def test_schedule_and_monitoring(self):
+        sched = expected_schedule(self.pol(), "2026-12-01", "2027-01-31")
+        self.assertEqual([x["date"] for x in sched], ["2026-12-04", "2026-12-11", "2027-01-04", "2027-01-11"])
+        s = mem(); signed(s, self.pol()); Ledgers(s).post("A", "CONTRIBUTION", "200"); pf = Portfolio(s)
+        pf.record_buy("VT", "0.32103", "155.75", ts="2026-12-04")
+        pf.record_buy("SGOV", "0.49736", "100.53", ts="2026-12-12")  # broker shifted a day: within tolerance
+        r = recurring_status(s, datetime(2026, 12, 20, tzinfo=timezone.utc))
+        self.assertEqual(r["status"], "ON_TRACK", r)
+        self.assertEqual(r["next_purchase"]["date"], "2027-01-04")

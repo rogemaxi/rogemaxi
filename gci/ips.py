@@ -66,49 +66,65 @@ def validate(policy: dict, snapshot: dict = None) -> list:
         errs.append("Autoinvest requires a Self-Directed cash account (margin accounts are not eligible).")
     if not acct.get("account_owner"):
         errs.append("State who owns the brokerage account (Genesis 2 & 7, LLC or the owner personally).")
-    rec = p.get("recurring", {})
-    if rec.get("frequency") not in BROKER_RULES["frequencies"]:
-        errs.append(f"Frequency must be one of {list(BROKER_RULES['frequencies'])}.")
-    if rec.get("funding_source") not in BROKER_RULES["funding_sources"]:
-        errs.append(f"Funding source must be one of {BROKER_RULES['funding_sources']}.")
     cands = {c["symbol"]: c for c in (snapshot or {}).get("candidates", [])}
-    total = ZERO
-    for leg in rec.get("legs", []):
-        sym, amt = leg.get("symbol", "").upper(), D(leg.get("amount", 0))
-        total += amt
-        if sym not in [s.upper() for s in p.get("eligible_instruments", [])]:
-            errs.append(f"{sym} is not in the policy's eligible instruments.")
-        if instrument_violations({"symbol": sym, **cands.get(sym, {})}):
-            errs.append(f"{sym} violates the prohibited-instrument policy.")
-        if amt < D(BROKER_RULES["min_recurring_stock_etf"]):
-            errs.append(f"{sym}: J.P. Morgan's minimum recurring amount is $5 (got ${amt}).")
-        if cands and cands.get(sym, {}).get("asset_class") not in ALLOWED_CLASSES:
-            errs.append(f"{sym}: asset class not allowed by policy.")
-    if rec.get("legs"):
-        if rec.get("amount_per_period") is None or D(rec["amount_per_period"]) != total:
-            errs.append(f"Leg amounts (${total}) must add up to amount_per_period.")
+    monthly_total, monthly_by_symbol = ZERO, {}
+    for n, rec in enumerate(plans(p), 1):
+        tag = f"Plan {n}: " if len(plans(p)) > 1 else ""
+        if rec.get("frequency") not in BROKER_RULES["frequencies"]:
+            errs.append(f"{tag}Frequency must be one of {list(BROKER_RULES['frequencies'])}.")
+        if rec.get("funding_source") not in BROKER_RULES["funding_sources"]:
+            errs.append(f"{tag}Funding source must be one of {BROKER_RULES['funding_sources']}.")
+        per_year = D(BROKER_RULES["frequencies"].get(rec.get("frequency"), 12))
+        total = ZERO
+        for leg in rec.get("legs", []):
+            sym, amt = leg.get("symbol", "").upper(), D(leg.get("amount", 0))
+            total += amt
+            monthly_by_symbol[sym] = monthly_by_symbol.get(sym, ZERO) + amt * per_year / D(12)
+            if sym not in [s.upper() for s in p.get("eligible_instruments", [])]:
+                errs.append(f"{tag}{sym} is not in the policy's eligible instruments.")
+            if instrument_violations({"symbol": sym, **cands.get(sym, {})}):
+                errs.append(f"{tag}{sym} violates the prohibited-instrument policy.")
+            if amt < D(BROKER_RULES["min_recurring_stock_etf"]):
+                errs.append(f"{tag}{sym}: J.P. Morgan's minimum recurring amount is $5 (got ${amt}).")
+            if cands and cands.get(sym, {}).get("asset_class") not in ALLOWED_CLASSES:
+                errs.append(f"{tag}{sym}: asset class not allowed by policy.")
+        if rec.get("legs") and (rec.get("amount_per_period") is None or D(rec["amount_per_period"]) != total):
+            errs.append(f"{tag}Leg amounts (${total}) must add up to amount_per_period.")
+        monthly_total += total * per_year / D(12)
+    if any(r.get("legs") for r in plans(p)):
         if p.get("max_monthly_contribution") is None:
             errs.append("Set a maximum monthly contribution (the ceiling).")
-        else:
-            monthly = total * D(BROKER_RULES["frequencies"].get(rec.get("frequency"), 12)) / D(12)
-            if monthly > D(p["max_monthly_contribution"]):
-                errs.append(f"Recurring plan ≈${monthly:.2f}/month exceeds the authorized ceiling ${p['max_monthly_contribution']}.")
+        elif monthly_total > D(p["max_monthly_contribution"]):
+            errs.append(f"Recurring plans total ≈${monthly_total:.2f}/month, above the authorized ceiling ${p['max_monthly_contribution']}.")
     tgt = p.get("target_allocation", {})
     if tgt:
         s = sum(D(str(v)) for v in tgt.values())
         if s != D("100"):
             errs.append(f"Target allocation must total 100% (got {s}%).")
-        if rec.get("legs") and total > 0:
-            for leg in rec["legs"]:
-                share = D(leg["amount"]) / total * 100
-                t = D(str(tgt.get(leg["symbol"], 0)))
-                if abs(share - t) > D(str(p.get("allocation_bands_pp", 10))):
-                    errs.append(f"{leg['symbol']} recurring share {share:.0f}% is outside target {t}% ± band.")
+        if monthly_total > 0:
+            for sym in set(monthly_by_symbol) | set(tgt):
+                share = monthly_by_symbol.get(sym, ZERO) / monthly_total * 100
+                tv = D(str(tgt.get(sym, 0)))
+                if abs(share - tv) > D(str(p.get("allocation_bands_pp", 10))):
+                    errs.append(f"{sym} recurring share {share:.0f}% is outside target {tv}% ± band.")
     if p.get("risk_limits", {}).get("max_loss_tolerance_pct") is None:
         errs.append("State the maximum loss you could tolerate (risk_limits.max_loss_tolerance_pct).")
     if not p.get("liquidity_requirement", {}).get("confirmed"):
         errs.append("Confirm your emergency fund outside GCI (liquidity_requirement.confirmed).")
     return errs
+
+
+def plans(policy: dict) -> list:
+    """All recurring plans. `recurring_plans` (list) supports e.g. two monthly buys timed to two pension deposits;
+    a single `recurring` dict is still accepted."""
+    if policy.get("recurring_plans"):
+        return policy["recurring_plans"]
+    r = policy.get("recurring") or {}
+    return [r] if r else []
+
+
+def has_legs(policy: dict) -> bool:
+    return any(r.get("legs") for r in plans(policy))
 
 
 def policy_hash(policy: dict) -> str:
@@ -172,12 +188,15 @@ class InvestmentPolicy:
 
 
 def autoinvest_setup_steps(policy: dict) -> list:
-    rec = policy["recurring"]
-    dl = BROKER_RULES["edit_deadline_business_days"][rec["funding_source"]]
-    steps = ["Open the Chase app → Invest → your Self-Directed cash account → Recurring investments (Autoinvest)."]
-    for leg in rec["legs"]:
-        steps.append(f"Create a recurring investment: {leg['symbol']}, ${D(leg['amount']):.2f}, {rec['frequency'].replace('_', ' ')}, "
-                     f"funded from {rec['funding_source'].replace('_', ' ')}.")
+    steps = ["Open the Chase app → Invest → your Self-Directed General Investment (cash) account → Recurring investments (Autoinvest)."]
+    deadlines = set()
+    for n, rec in enumerate(plans(policy), 1):
+        when = f" starting {rec['start_date']}" if rec.get("start_date") else ""
+        for leg in rec.get("legs", []):
+            steps.append(f"Create a recurring investment: {leg['symbol']}, ${D(leg['amount']):.2f}, {rec['frequency'].replace('_', ' ')}{when}, "
+                         f"funded from {rec['funding_source'].replace('_', ' ')}.")
+        deadlines.add(BROKER_RULES["edit_deadline_business_days"][rec["funding_source"]])
+    dl = max(deadlines) if deadlines else 1
     steps += [f"Dividend reinvestment: {'turn ON' if policy.get('reinvest_dividends') else 'leave OFF'} for these holdings.",
               f"To pause or change a plan, do it in the Chase app at least {dl} business day(s) before the trade date.",
               "Do not enter your Chase password anywhere in GCI. GCI only reads the statements you export."]
@@ -185,10 +204,17 @@ def autoinvest_setup_steps(policy: dict) -> list:
 
 
 def expected_schedule(policy: dict, start: str, end: str) -> list:
-    """Expected Autoinvest trade dates in [start, end], anchored on recurring.start_date (day capped at 28).
+    """Expected Autoinvest trade dates in [start, end] across all plans, each anchored on its start_date (day capped at 28).
     Approximate: the broker may shift dates for weekends/holidays, so monitoring allows a tolerance window."""
+    out = []
+    for rec in plans(policy):
+        if rec.get("legs"):
+            out += _plan_schedule(rec, start, end)
+    return sorted(out, key=lambda x: x["date"])
+
+
+def _plan_schedule(rec: dict, start: str, end: str) -> list:
     from datetime import date, timedelta
-    rec = policy["recurring"]
     s, e = date.fromisoformat(start[:10]), date.fromisoformat(end[:10])
     anchor = date.fromisoformat(rec.get("start_date") or start[:10])
     anchor = anchor.replace(day=min(anchor.day, 28))
