@@ -1,4 +1,4 @@
-# ByrdWay Product Engineering Studio v6.0.0
+# ByrdWay Product Engineering Studio v6.0.1
 
 > **6.0.0 (2026-11-16): Marketing Intelligence Upgrade.** 53 Marketing Skills (MIT, coreyhaines31/marketingskills) added to the
 > existing 10 Revenue roles, email pre-send compliance, SECRET → DISTRIBUTION → PRESSURE TEST ledger, targets 1,000 × 1.18^(n−1).

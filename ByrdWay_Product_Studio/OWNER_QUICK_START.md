@@ -1,4 +1,4 @@
-# Owner Quick Start — ByrdWay Product Engineering Studio v6.0.0
+# Owner Quick Start — ByrdWay Product Engineering Studio v6.0.1
 
 ## Install once (about 10 minutes, no Python needed)
 1. GitHub → **rogemaxi/rogemaxi → Releases → ByrdWay Product Engineering Studio v0.5.0** (a *draft* only you can

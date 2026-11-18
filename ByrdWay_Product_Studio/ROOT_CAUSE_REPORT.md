@@ -1,4 +1,4 @@
-# Root Cause Report — ByrdWay Product Engineering Studio v6.0.0
+# Root Cause Report — ByrdWay Product Engineering Studio v6.0.1
 
 Scope: Studio software only. Each entry: **file / function — cause — impact — correction — proof**.
 Accountability note: earlier messages stated the system was *not yet* production-ready, but the release I

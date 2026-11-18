@@ -218,6 +218,62 @@ class ExplainerRepairAgent:
 
 
 # ============================================================== detection
+def classify_findings(findings):
+    """Every finding lands in exactly ONE class, and the classes always add up to the total:
+    auto_fixable           - the repair job corrects it on a copy without owner input (code/text fixes);
+    needs_owner_confirmation - a correction is proposed but it was READ FROM A PAGE IMAGE (OCR): the owner
+                             confirms or rejects it in tab 2 before anything is changed (no speculative fixes);
+    needs_person           - a defect with no safe automatic correction;
+    informational          - INFO notes (e.g. 'pages are image-only, read by OCR'): no action required."""
+    c = {'auto_fixable': 0, 'needs_owner_confirmation': 0, 'needs_person': 0, 'informational': 0}
+    for f in findings:
+        if f.get('proposed_correction'):
+            k = 'needs_owner_confirmation' if f.get('image_item') or str(f.get('check', '')).startswith('image.') else 'auto_fixable'
+        else:
+            k = 'informational' if f.get('severity') == 'INFO' else 'needs_person'
+        f['classification'] = k
+        c[k] += 1
+    assert sum(c.values()) == len(findings)
+    return c
+
+
+def repair_summary(job, baseline_findings, elapsed_s):
+    """Terminal, evidence-based summary of a repair job (no estimated or simulated numbers)."""
+    bl = [dict(f, proposed_correction=f.get('proposed_correction') or (describe_fix(f.get('fix')) if f.get('fix') else f.get('proposal')))
+          for f in baseline_findings]
+    cls = classify_findings(bl)
+    applied = sum(len(i.get('applied', [])) for i in job['iterations'])
+    failed = sum(len(i.get('rejected', [])) for i in job['iterations'])
+    qa = job.get('qa') or {}
+    remaining = len(qa.get('open_findings') or job.get('final_open_findings') or [])
+    dec = qa.get('decision')
+    if dec == 'PASS':
+        term, nxt = 'SUCCESS', 'Open tab 2, review the evidence and Approve (or Reject) the repaired copy.'
+    elif applied and remaining:
+        term, nxt = 'PARTIAL', 'Some corrections were applied; the rest need you (tab 2: Review Image Findings / evidence).'
+    elif cls['needs_owner_confirmation'] and not job.get('image_decisions'):
+        term = 'WAITING FOR YOUR CONFIRMATION'
+        nxt = (f'Tab 2 -> "Review Image Findings...": confirm or reject each of the {cls["needs_owner_confirmation"]} '
+               f'findings read from page images, then press "Repair Confirmed on a Copy...". Nothing is changed '
+               f'from an OCR reading until you confirm it.')
+    else:
+        term, nxt = 'NOT VERIFIED' if dec == 'NOT_VERIFIED' else 'FAILED', 'Open tab 2 for the evidence and the items that need a person.'
+    return {'total_findings': len(bl), **cls, 'queued_for_repair': cls['auto_fixable'], 'attempted': applied + failed,
+            'applied': applied, 'failed': failed, 'remaining': remaining, 'verification': dec,
+            'elapsed_s': round(elapsed_s), 'terminal': term, 'next_step': nxt,
+            'original_unchanged': bool(job.get('original_intact', True)),
+            'line': (f'RESULT {term} in {round(elapsed_s)} s: {len(bl)} findings ({cls["auto_fixable"]} automatic, '
+                     f'{cls["needs_owner_confirmation"]} need your confirmation, {cls["needs_person"]} need a person, '
+                     f'{cls["informational"]} informational); corrections attempted {applied + failed}, applied {applied}, '
+                     f'failed {failed}; still open {remaining}; independent verification: {dec}. NEXT: {nxt}')}
+
+
+def accounting_line(d):
+    n = len(d['findings'])
+    return (f'{n} findings = {d["auto_fixable"]} correctable automatically + {d["needs_owner_confirmation"]} need your '
+            f'confirmation (read from page images) + {d["needs_person"]} need a person + {d["informational"]} informational')
+
+
 def detect_all(settings, site_dir, shots_dir, label, run_browser=True, decisions=None, progress=None):
     """Run every applicable specialist against a directory of product files."""
     files = _files_map(site_dir)
@@ -343,7 +399,9 @@ class Orchestrator:
             wc = WorkingCopy.create(self.root, pid, job_id)
             cp = wc.checkpoint('baseline')
             shots = jd / 'evidence'
-            dkw = {'decisions': decisions, 'progress': progress} if decisions else {}
+            say(f'Stage 1/4: protected working copy created (original SHA-256 {manifest["sha256"][:16]}... is never changed)')
+            dkw = {'decisions': decisions, 'progress': progress} if decisions else {'progress': progress}
+            say('Stage 2/4: reading every page of the copy (baseline)...')
             state = detect_all(self.settings, wc.files, shots, 'baseline', run_browser, **dkw)
             job['roles_used'] += [ROLE_PT] if 'power_tool' in state['types'] else []
             job['roles_used'] += [ROLE_EX] if 'pdf' in state['types'] else []
@@ -397,10 +455,13 @@ class Orchestrator:
                         applied.append({'finding': f['id'], 'key': list(map(str, _fkey(f))), 'check': f['check'],
                                         'file': fx['file'], 'severity': f['severity'], 'detail': f['detail'],
                                         'reason': fx['reason'], 'line': rec.get('line')})
+                        say(f'  applied {f["id"]} ({len(applied) + len(rejected)} of {len(fixable)} attempted)')
                     except Exception as e:  # any failed fix is rolled back, counted, never fatal
                         fail_count[_fixkey(f)] += 1
                         rejected.append({'finding': f['id'], 'error': str(e)})
                         wc.rollback(single_cp, f'fix failed: {e}')
+                        say(f'  FAILED {f["id"]} - rolled back ({len(applied) + len(rejected)} of {len(fixable)} attempted): {e}')
+                say(f'Iteration {it}: re-reading the repaired copy to check every fix and look for regressions...')
                 new_state = detect_all(self.settings, wc.files, shots, f'iter{it}', run_browser, **dkw)
                 reg, new_defects = _regressions(state, new_state)
                 rec = {'iteration': it, 'applied': applied, 'rejected': rejected, 'regressions': reg,
@@ -447,7 +508,12 @@ class Orchestrator:
             job['changes'] = wc.changed_files()
             job['status'] = 'QA'
             self.save_job(job)
-            qa = ReleaseQAAgent(self.root, self.settings).evaluate(job, run_browser)
+            n_try = sum(len(i.get('applied', [])) + len(i.get('rejected', [])) for i in job['iterations'])
+            say(f'Stage 3/4: repair finished - corrections attempted {n_try}, applied '
+                f'{sum(len(i.get("applied", [])) for i in job["iterations"])}, failed '
+                f'{sum(len(i.get("rejected", [])) for i in job["iterations"])}')
+            say('Stage 4/4: independent Release QA re-reads the repaired copy from scratch...')
+            qa = ReleaseQAAgent(self.root, self.settings).evaluate(job, run_browser, progress=progress)
             for qround in range(1, int(r.get('qa_sendback_rounds', 2)) + 1):
                 tried = {tuple(x) for x in job.get('qa_sendback_keys', [])}
                 back = [f for f in qa.get('open_findings') or [] if f.get('fix') and
@@ -473,11 +539,13 @@ class Orchestrator:
                 job.update({'candidate': str(cand), 'candidate_sha256': sha256(cand), 'history': wc.meta['history'],
                             'checkpoints': [{'id': c['id'], 'history_len': c['history_len']} for c in wc.meta['checkpoints']],
                             'changes': wc.changed_files()})
-                qa = ReleaseQAAgent(self.root, self.settings).evaluate(job, run_browser)
+                qa = ReleaseQAAgent(self.root, self.settings).evaluate(job, run_browser, progress=progress)
             job['qa'] = qa
             job['status'] = {'PASS': 'AWAITING_OWNER_APPROVAL'}.get(qa['decision'], qa['decision'])
             job['corrections'] = correction_lifecycle(read_json(jd / 'baseline_findings.json'), job, qa)
             say(f'Release QA decision: {qa["decision"]} score={qa["score"]}')
+            job['summary'] = repair_summary(job, read_json(jd / 'baseline_findings.json'), time.time() - t0)
+            say(job['summary']['line'])
         except Exception as e:
             log.error(ROLE_ORCH, 'Job failed', exc=e)
             job['status'] = 'ERROR'
@@ -526,7 +594,7 @@ class Orchestrator:
                                             'evidence': r['evidence']} for r in unverified],
                   'browser': st.get('browser'), 'checks': [list(c) for c in st['checks']],
                   'proposed_corrections': len([f for f in findings if f['proposed_correction']]),
-                  'needs_person': len([f for f in findings if not f['proposed_correction'] and f['state'] == 'DETECTED']),
+                  **classify_findings(findings),
                   'image_findings': len([f for f in findings if f.get('image_item')]),
                   'image_review': {rel: {'pages': v['pages'], 'stats': v['stats'], 'engine': v['engine'],
                                          'items': [{k: i.get(k) for k in ('id', 'page', 'status', 'kind', 'statement',
@@ -540,8 +608,7 @@ class Orchestrator:
             report.write_diagnosis_report(self.root, result)
         except Exception as e:
             JobLog(self.root, diag_id).error(ROLE_ORCH, 'diagnosis report failed', exc=e)
-        JobLog(self.root, diag_id).info(ROLE_ORCH, f'Diagnosis of {manifest["name"]}: {len(findings)} findings, '
-                                        f'{result["proposed_corrections"]} correctable automatically')
+        JobLog(self.root, diag_id).info(ROLE_ORCH, f'Diagnosis of {manifest["name"]}: ' + accounting_line(result))
         return result
 
     def _latest_diagnosis(self, pid):
@@ -616,7 +683,7 @@ class ReleaseQAAgent:
         self.settings = dict(settings)
         self.settings['_ocr_cache'] = str(self.root / 'cache' / 'ocr')
 
-    def evaluate(self, job, run_browser=True):
+    def evaluate(self, job, run_browser=True, progress=None):
         jd = self.root / 'jobs' / job['id']
         qa_dir = jd / 'qa'
         rmtree_force(qa_dir)
@@ -668,7 +735,7 @@ class ReleaseQAAgent:
                            f'changes not explained by recorded patches: {silent}' if silent
                            else 'replaying recorded patches on the original reproduces the candidate exactly'))
         state = detect_all(self.settings, fresh, qa_dir / 'evidence', 'qa', run_browser,
-                           decisions=job.get('image_decisions'))
+                           decisions=job.get('image_decisions'), progress=progress)
         checks += state['checks']
         # visual comparison against the original
         visual = {}

@@ -5,7 +5,7 @@ All logic lives in controller.Studio; this file is presentation only.
 Long operations run on a worker thread; owner decisions (API spend, approval)
 are always modal dialogs on the UI thread.
 """
-import gc, json, os, queue, subprocess, sys, threading, traceback
+import gc, json, os, queue, subprocess, sys, threading, time, traceback
 
 if __name__ == '__main__' and '--version' in sys.argv:
     from version import __version__
@@ -130,6 +130,7 @@ class App(tk.Tk):
             messagebox.showinfo('Busy', 'Another operation is running. Please wait.')
             return
         self.busy = True
+        self._bg = {'label': label, 't0': time.time(), 'last': 'started'}
         self.status.set(label + ' ...')
         # Collect Tk garbage on the UI thread NOW. If Python's garbage collector later ran on the worker
         # thread and freed Tk variables (e.g. from a closed editor window), Tk would abort the program.
@@ -148,6 +149,8 @@ class App(tk.Tk):
             while True:
                 kind, label, a, b = self.q.get_nowait()
                 if kind == 'progress':
+                    if getattr(self, '_bg', None):
+                        self._bg['last'] = a
                     self.status.set(a)
                     self.log_line(a)
                     continue
@@ -165,6 +168,9 @@ class App(tk.Tk):
                     self.error(f'{label} failed', a)
         except queue.Empty:
             pass
+        bg = getattr(self, '_bg', None)
+        if self.busy and bg:
+            self.status.set(f'{bg["label"]} - running {int(time.time() - bg["t0"])} s - last step: {bg["last"]}')
         if not getattr(self, '_closing', False):
             self._poll_id = self.after(150, self._poll)
 
@@ -288,8 +294,8 @@ class App(tk.Tk):
             return messagebox.showinfo('Select a product', str(e))
 
         def done(d):
-            self.log_line(f'DIAGNOSIS {d["product_name"]}: {len(d["findings"])} findings, '
-                          f'{d["proposed_corrections"]} correctable automatically, {d["needs_person"]} need a person.')
+            from orchestrator import accounting_line
+            self.log_line(f'DIAGNOSIS {d["product_name"]}: ' + accounting_line(d) + '.')
             self.opener(self.studio.root / 'reports' / d['id'] / 'diagnosis.html')
         self.run_bg('Diagnose', lambda: self.studio.diagnose(pid, progress=self.progress), done)
 
@@ -310,6 +316,9 @@ class App(tk.Tk):
         def done(job):
             qa = job.get('qa') or {}
             self.log_line(f'JOB {job["id"]}: {job["status"]} (QA {qa.get("decision")}, score {qa.get("score")})')
+            sm = job.get('summary')
+            if sm:
+                messagebox.showinfo(f'Repair & verify: {sm["terminal"]}', sm['line'].replace('. NEXT: ', '.\n\nNEXT: '))
             self.nb.select(self.jobs_frame)
             self.refresh_jobs()
             if self.jtree.exists(job['id']):

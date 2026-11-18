@@ -260,12 +260,16 @@ def write_job_report(root, job):
 def write_diagnosis_report(root, d):
     root = Path(root)
     dd = root / 'reports' / d['id']
-    n_auto, n_person = d['proposed_corrections'], d['needs_person']
+    n_auto, n_person = d.get('auto_fixable', d['proposed_corrections']), d['needs_person']
+    n_conf, n_info = d.get('needs_owner_confirmation', 0), d.get('informational', 0)
     cls = 'ok' if not d['findings'] and not d['academic_needs_human'] else ('warn' if not n_person else 'bad')
     nxt = ('No defects found. You can still run "Repair a Copy & Verify" to get a Release QA score.'
            if not d['findings'] else
-           f'{n_auto} problem(s) can be corrected automatically on a COPY. '
-           f'{n_person} need a person. Click "Repair a Copy & Verify" to apply the proposed corrections.')
+           f'{len(d["findings"])} findings = {n_auto} correctable automatically on a COPY + {n_conf} need your '
+           f'confirmation first (read from page images: tab 2 -> Review Image Findings, then Repair Confirmed) + '
+           f'{n_person} need a person + {n_info} informational (no action). '
+           + ('Click "Repair a Copy & Verify" to apply the automatic corrections.' if n_auto else
+              'There is nothing to correct automatically: confirm the image findings first.'))
     b = [f'<h1>Diagnosis (read-only): {E(d["product_name"])}</h1>',
          f'<div class="next {cls}">NEXT STEP: {E(nxt)}</div>',
          f'<p>Type: {E(str(d.get("product_type")))} - nothing was changed - original unchanged: '

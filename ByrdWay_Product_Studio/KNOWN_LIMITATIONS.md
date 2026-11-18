@@ -1,4 +1,4 @@
-# Known limitations, unverified items and unresolved defects (v6.0.0, 2026-11-09)
+# Known limitations, unverified items and unresolved defects (v6.0.1, 2026-11-09)
 
 Labels: **IMPLEMENTED+TESTED** · **IMPLEMENTED, NOT VERIFIED ON TARGET** · **PARTIAL** · **NOT IMPLEMENTED**
 

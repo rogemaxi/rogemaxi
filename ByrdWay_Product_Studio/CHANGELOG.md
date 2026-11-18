@@ -1,5 +1,12 @@
 # Changelog — Byrd Powerhouse AI
 
+## 6.0.1 — 2026-11-18 · Surgical repair: diagnosis accounting + repair progress (incident of 2026-11-18)
+- Every diagnosis finding now has exactly one class (automatic / needs your confirmation / needs a person /
+  informational) and the classes always add up to the total; OCR-read corrections are no longer called "automatic".
+- Repair a Copy & Verify shows Stage 1/4-4/4, page-by-page progress during the baseline read and Release QA, real
+  elapsed seconds, and ends with an explicit result (SUCCESS / PARTIAL / WAITING FOR YOUR CONFIRMATION / NOT VERIFIED /
+  FAILED) and the next step. Files: orchestrator.py, app.py, report.py. Details: INCIDENT_2026-11-18_REPAIR_VISIBILITY.md.
+
 ## 6.0.0 — 2026-11-16 · Marketing Intelligence Upgrade (preservation-first)
 Baseline preserved: v0.5.0 @ commit 71fcf5b (Windows CI run 43426076078: 214/214 tests, exe self-test PASS). Full
 source backup: `ByrdWay_Powerhouse_BASELINE_v0.5.0_71fcf5b_20261116T012413Z.zip` (SHA-256 ca0db6f1…5fe7a, private).
