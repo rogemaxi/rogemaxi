@@ -14,7 +14,7 @@ The seven roles are logical components (not seven paid processes):
 The orchestrator never scores or certifies; only ReleaseQAAgent produces the
 decision, from a fresh extraction of the candidate package.
 """
-import json, shutil, tempfile, time, uuid, zipfile
+import json, re, shutil, tempfile, time, uuid, zipfile
 from collections import Counter
 from pathlib import Path, PurePosixPath
 
@@ -242,15 +242,50 @@ def repair_summary(job, baseline_findings, elapsed_s):
     bl = [dict(f, proposed_correction=f.get('proposed_correction') or (describe_fix(f.get('fix')) if f.get('fix') else f.get('proposal')))
           for f in baseline_findings]
     cls = classify_findings(bl)
-    applied = sum(len(i.get('applied', [])) for i in job['iterations'])
-    failed = sum(len(i.get('rejected', [])) for i in job['iterations'])
+    ok_ids = {a['finding'] for i in job['iterations'] for a in i.get('applied', [])}
+    fail_reason = {}
+    for i in job['iterations']:
+        for r in i.get('rejected', []):
+            if r['finding'] not in ok_ids:
+                fail_reason[r['finding']] = r.get('error', '')
+    applied, failed = len(ok_ids), len(fail_reason)            # each finding counted once, however many rounds
+    reasons = {}
+    for fid, why in fail_reason.items():
+        reasons.setdefault(why.split(' (')[0][:120], []).append(fid)
     qa = job.get('qa') or {}
     remaining = len(qa.get('open_findings') or job.get('final_open_findings') or [])
+    # page-image patches are PREVIEWS: list them for visual approval, and flag other lines on the same page that may
+    # still use the old value (a fixed step can contradict later steps) - owner review only, nothing auto-changed
+    by_id = {f['id']: f for f in bl}
+    patched = [by_id[i] for i in ok_ids if i in by_id and (by_id[i].get('fix') or {}).get('type') == 'image_patch']
+    consistency = []
+    for f in patched:
+        stmt = str(f.get('statement') or '')
+        old_vals = re.findall(r'-?\d+(?:/\d+)?', stmt.split('=')[-1]) if '=' in stmt else []
+        pages = ((qa.get('image_review') or {}).get(f.get('file')) or {}).get('pages') or {}
+        lines = (pages.get(str(f.get('page'))) or {}).get('transcript') or []
+        for v in old_vals:
+            hits = [ln for ln in lines if re.search(rf'(?<![\d.]){re.escape(v)}(?![\d.])', ln) and ln.strip() != stmt.strip()
+                    and re.search(r'[=+\-x*()]', ln)]
+            if hits:
+                consistency.append({'finding': f['id'], 'page': f.get('page'), 'old_value': v, 'lines': hits[:6]})
     dec = qa.get('decision')
+    preview_note = ''
+    if patched:
+        preview_note = (f' {len(patched)} correction(s) were made on page IMAGES (preview quality: lettering may not match '
+                        f'the original); approve them only after looking at the before/after crops, and make the '
+                        f'sale-quality fix in the editable (Canva) source.')
+        if consistency:
+            preview_note += (' CHECK: other lines on the same page may still use the old value: ' +
+                             '; '.join(f'p{c["page"]} "{c["old_value"]}" in {c["lines"]}' for c in consistency[:4]) + '.')
     if dec == 'PASS':
         term, nxt = 'SUCCESS', 'Open tab 2, review the evidence and Approve (or Reject) the repaired copy.'
-    elif applied and remaining:
-        term, nxt = 'PARTIAL', 'Some corrections were applied; the rest need you (tab 2: Review Image Findings / evidence).'
+    elif applied and (remaining or failed):
+        need = '; '.join(f'{len(v)} x "{k}"' for k, v in reasons.items()) or 'see the open items'
+        term = 'PARTIAL'
+        nxt = (f'{applied} correction(s) applied on the copy and re-checked. Still needed from you: {need}. '
+               f'Tab 2 -> Review Image Findings (type the correct word for spelling items), then Repair Confirmed again; '
+               f'attest items the checker cannot verify; then Approve.')
     elif cls['needs_owner_confirmation'] and not job.get('image_decisions'):
         term = 'WAITING FOR YOUR CONFIRMATION'
         nxt = (f'Tab 2 -> "Review Image Findings...": confirm or reject each of the {cls["needs_owner_confirmation"]} '
@@ -259,13 +294,14 @@ def repair_summary(job, baseline_findings, elapsed_s):
     else:
         term, nxt = 'NOT VERIFIED' if dec == 'NOT_VERIFIED' else 'FAILED', 'Open tab 2 for the evidence and the items that need a person.'
     return {'total_findings': len(bl), **cls, 'queued_for_repair': cls['auto_fixable'], 'attempted': applied + failed,
-            'applied': applied, 'failed': failed, 'remaining': remaining, 'verification': dec,
-            'elapsed_s': round(elapsed_s), 'terminal': term, 'next_step': nxt,
+            'applied': applied, 'failed': failed, 'failure_reasons': reasons, 'remaining': remaining, 'verification': dec,
+            'elapsed_s': round(elapsed_s), 'terminal': term, 'next_step': nxt + preview_note,
+            'image_patched': [f['id'] for f in patched], 'consistency_review': consistency,
             'original_unchanged': bool(job.get('original_intact', True)),
             'line': (f'RESULT {term} in {round(elapsed_s)} s: {len(bl)} findings ({cls["auto_fixable"]} automatic, '
                      f'{cls["needs_owner_confirmation"]} need your confirmation, {cls["needs_person"]} need a person, '
                      f'{cls["informational"]} informational); corrections attempted {applied + failed}, applied {applied}, '
-                     f'failed {failed}; still open {remaining}; independent verification: {dec}. NEXT: {nxt}')}
+                     f'failed {failed}; still open {remaining}; independent verification: {dec}. NEXT: {nxt}{preview_note}')}
 
 
 def accounting_line(d):

@@ -43,3 +43,28 @@ while one runs is refused.
 - Install: extract the new release ZIP into a NEW folder (e.g. Documents\ByrdWayStudio_6.0.1) and run it. Your
   workspace (Documents\ByrdWay_Product_Studio), settings and keys are reused untouched.
 - Rollback: close it and start your previous folder's ByrdWayStudio.exe again. Nothing in the workspace format changed.
+
+## Full pipeline on the real product (after the fix)
+Confirm (simulated, labeled "ENGINEERING TEST - NOT owner approval") -> Repair Confirmed on a Copy -> independent Release QA:
+- **Applied 2 of 11** confirmed findings: page 8 "320+400 = 760" -> 720 and "6y=16 -> y = 8" -> 8/3.
+- **9 spelling fixes refused, correctly:** a spelling fix needs the owner to type the right word (no dictionary guesses);
+  the test did not supply words. They wait in tab 2.
+- **Independent verification:** Release QA re-read the repaired copy from scratch: page-8 math verified (reads
+  "320+400 = 720"); only page 8 changed (0.09 % of pixels); 14 -> 14 pages, identical page sizes; all images/assets
+  byte-identical; replaying the recorded patches on the original reproduces the copy exactly. Decision NOT_VERIFIED
+  because 14 statements cannot be machine-verified and need the owner's attestation (correct - never auto-passed).
+- **Original:** SHA-256 be2309cba0421586… before and after; the repaired copy is a separate file (490506de22b3593c…).
+
+### Found by looking at the repaired page (not caught by the automatic checks) - fixed in reporting, not hidden
+- The page-image patches are **preview quality**: "y = 8" became "y 8/3" (the "=" was lost, thinner grey lettering,
+  overlapping the next line) and "= 760 ✓" became "= 720" (check mark erased).
+- The page is **internally inconsistent** after the patch: the next step still reads "3x+2(8)=14", and the problem
+  statement still reads "8a + 5s = 760" (with a = 40, s = 80 the total is 720 - the error is in the problem design).
+- Already enforced before this incident: owner approval of a reconstructed page is refused until the owner marks
+  it visually reviewed. Added now: the repair result names every page-image patch as preview quality, tells the owner
+  to make the sale-quality fix in the editable (Canva) source, and lists other lines on the same page that may still
+  use the old value (it found "3x+2(8)=14" and "8a+5s=760"). Nothing is auto-changed by this check.
+- Counting fixed: a refused correction retried in a second round is counted once (11 attempted, 2 applied, 9 refused).
+
+**Recommendation for this product:** do not sell a page-image patch. Fix page 8 in the Canva source (the problem
+statement's 760 and the y-value chain), re-export the PDF, import it, and run Diagnose again.

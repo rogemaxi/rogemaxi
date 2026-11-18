@@ -138,3 +138,23 @@ class DuplicateDispatch(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class PreviewPatchHonesty(unittest.TestCase):
+    def test_image_patch_needs_visual_approval_and_flags_lines_still_using_old_value(self):
+        bl = [{'id': 'p8-a', 'check': 'image.math_error', 'severity': 'CRITICAL', 'image_item': 'p8-a', 'page': 8,
+               'file': 'X.pdf', 'statement': '320+400 = 760', 'expected': '720', 'proposal': 'use 720',
+               'fix': {'type': 'image_patch'}},
+              {'id': 'p3-t', 'check': 'image.typo', 'severity': 'MINOR', 'image_item': 'p3-t', 'page': 3,
+               'file': 'X.pdf', 'proposal': 'Rating', 'fix': {'type': 'image_patch'}}]
+        job = {'iterations': [{'applied': [{'finding': 'p8-a'}], 'rejected': [{'finding': 'p3-t', 'error': 'spelling: the owner must type the correct word'}]},
+                              {'applied': [], 'rejected': [{'finding': 'p3-t', 'error': 'spelling: the owner must type the correct word'}]}],
+               'qa': {'decision': 'NOT_VERIFIED', 'open_findings': [{'id': 'p3-t'}],
+                      'image_review': {'X.pdf': {'pages': {'8': {'transcript': ['320+400 = 760', '8a+5s=760', 'a+s=120']}}}}}}
+        r = orchestrator.repair_summary(job, bl, 10)
+        self.assertEqual((r['attempted'], r['applied'], r['failed']), (2, 1, 1), 'each finding counted once')
+        self.assertEqual(r['terminal'], 'PARTIAL')
+        self.assertIn('type the correct word', r['next_step'])
+        self.assertIn('preview quality', r['next_step'])
+        self.assertIn('Canva', r['next_step'])
+        self.assertEqual(r['consistency_review'][0]['lines'], ['8a+5s=760'])
