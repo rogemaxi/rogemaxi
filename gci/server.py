@@ -130,7 +130,7 @@ class App:
     def bridge(self, q):
         from .bridge import Bridge
         b = Bridge(self.s)
-        return {"available": b.available_cash(), "proposals": b.proposals(), "rules": b.rules(),
+        return {"available": b.available_cash(), "proposals": b.proposals(), "rules": b.rules(), "ceiling": b.effective_ceiling(),
                 "entries": [dict(r) for r in self.s.conn.execute("SELECT id, ts, kind, amount, external_id, effective_date, memo "
                                                                   "FROM bridge_entries ORDER BY id DESC LIMIT 200")]}
 
@@ -238,6 +238,19 @@ class App:
         if path == "/api/bridge/import":
             from .bridge import Bridge
             return Bridge(self.s).import_byrdway_proceeds(body["csv"], body.get("file", "upload.csv"))
+        if path == "/api/revenue/kdp":
+            from .revenue import import_kdp_payments
+            return import_kdp_payments(self.s, body["csv"], body.get("file", "kdp_payments.csv"))
+        if path == "/api/revenue/stripe-key":
+            from .revenue import check_stripe_key, CRED_NAME
+            from .security import CredentialStore
+            check_stripe_key(body["key"])
+            CredentialStore(Path(self.s.path).parent / "credentials.json").put(CRED_NAME, body["key"])
+            self.s.log("owner", "STRIPE_KEY_SAVED", {"type": body["key"][:8] + "…", "storage": "Windows DPAPI"})
+            return {"ok": True}
+        if path == "/api/revenue/stripe-sync":
+            from .revenue import job_stripe_sync
+            return job_stripe_sync(self.s)
         if path == "/api/bridge/expense":
             from .bridge import Bridge
             return {"id": Bridge(self.s).record_business_expense(body["amount"], body["memo"], body["external_id"], body.get("date"))}

@@ -173,6 +173,35 @@ class Bridge:
                 "status": "AVAILABLE" if available > 0 else ("NO_VERIFIED_REVENUE" if not verified else "NOTHING_AVAILABLE_AFTER_RESERVES"),
                 "rules": r}
 
+    def trailing_net(self, days=30, today=None):
+        """Verified business proceeds minus business expenses whose transaction date falls in the last `days` days."""
+        end = (today or date.today())
+        start = (end - timedelta(days=days)).isoformat()
+        net = ZERO
+        for r in self.s.conn.execute("SELECT kind, amount, effective_date, ts FROM bridge_entries"):
+            d = (r["effective_date"] or r["ts"])[:10]
+            if start < d <= end.isoformat():
+                net += D(r["amount"]) * {"SELLER_PROCEEDS": 1, "BUSINESS_EXPENSE": -1}.get(r["kind"], 0)
+        return net
+
+    def effective_ceiling(self, policy=None, today=None) -> dict:
+        """Monthly ceiling = base (signed) + share of after-tax verified net (signed formula), capped (signed).
+        Nothing rises on unverified, projected or unrealized amounts."""
+        pol = policy or (InvestmentPolicy(self.s).active() or {}).get("policy")
+        if not pol:
+            return {"ceiling": "0.00", "base": "0.00", "business_component": "0.00", "rule": None}
+        base = D(pol["max_monthly_contribution"])
+        rule = pol.get("contribution_rule")
+        if not rule:
+            return {"ceiling": str(cents(base)), "base": str(cents(base)), "business_component": "0.00", "rule": None}
+        net = self.trailing_net(int(rule.get("lookback_days", 30)), today)
+        after_tax = max(net, ZERO) * (1 - D(self.rules()["tax_reserve_rate"]))
+        extra = after_tax * D(rule["share_of_after_tax_net"])
+        ceiling = min(base + extra, D(rule["hard_cap"]))
+        return {"ceiling": str(cents(ceiling)), "base": str(cents(base)), "business_component": str(cents(ceiling - base)),
+                "verified_net_lookback": str(cents(net)), "lookback_days": int(rule.get("lookback_days", 30)),
+                "hard_cap": str(cents(D(rule["hard_cap"]))), "capped": base + extra > D(rule["hard_cap"]), "rule": rule}
+
     # ---- proposals ----------------------------------------------------------
     def month_authorized(self, month: str):
         return sum((D(json.loads(x["record"])["amount"]) for x in self.s.conn.execute(
@@ -185,7 +214,7 @@ class Bridge:
             return {"status": "NO_SIGNED_POLICY", "message": "Sign an Investment Policy before contribution proposals can be made."}
         av = self.available_cash()
         month = date.today().strftime("%Y-%m")
-        ceiling = D(ip["policy"]["max_monthly_contribution"])
+        ceiling = D(self.effective_ceiling(ip["policy"])["ceiling"])
         room = max(ceiling - self.month_authorized(month), ZERO)
         avail = D(av["available_for_investment"])
         want = D(requested) if requested is not None else D(ip["policy"]["recurring"]["amount_per_period"] or 0)
@@ -221,7 +250,7 @@ class Bridge:
                 raise BridgeError("Personal account: record an owner distribution of at least this amount first and reference it.")
         month = date.today().strftime("%Y-%m")
         ip = InvestmentPolicy(self.s).active()
-        if self.month_authorized(month) + D(rec["amount"]) > D(ip["policy"]["max_monthly_contribution"]):
+        if self.month_authorized(month) + D(rec["amount"]) > D(self.effective_ceiling(ip["policy"])["ceiling"]):
             self.ctl.trip("limit_exceeded", f"Authorizing {proposal_id} would exceed the monthly ceiling")
             raise BridgeError("Would exceed the signed monthly ceiling.")
         auth = Ledgers(self.s).authorize("BRIDGE:CONTRIBUTION", rec["amount"], {"proposal": proposal_id}, owner)

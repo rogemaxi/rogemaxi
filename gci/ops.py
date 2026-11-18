@@ -127,7 +127,8 @@ def recurring_status(s, now=None, tolerance_days=4) -> dict:
     for l in lots:
         m = l["acquired_ts"][:7]
         month_spend[m] = month_spend.get(m, ZERO) + D(l["cost_total"])
-    ceiling = D(pol["max_monthly_contribution"])
+    from .bridge import Bridge
+    ceiling = D(Bridge(s).effective_ceiling(pol)["ceiling"])
     over = {m: str(cents(v)) for m, v in month_spend.items() if cents(v) > ceiling}  # fractional-share rounding is not overspend
     nxt = next((r for r in rows if r["status"] == "UPCOMING"), None)
     status = "OVER_CEILING" if over else ("MISSING_PURCHASES" if any(r["status"] == "MISSING" for r in rows) else "ON_TRACK")
@@ -210,7 +211,32 @@ def job_byrdway_sync(s, now):
     return Bridge(s).import_studio_ledger(s.setting("studio_ledger_path"))
 
 
-DAILY = {"byrdway_sync": job_byrdway_sync, "market_data": job_market_data, "valuation_snapshot": job_valuation_snapshot, "risk_monitor": job_risk_monitor,
+def job_stripe_sync(s, now):
+    from .revenue import job_stripe_sync as run
+    return run(s, now)
+
+
+def job_growth_check(s, now):
+    """When verified business profit lifts the ceiling above what Autoinvest buys, tell the owner once (weekly item).
+    GCI cannot change Autoinvest; the owner edits the amount in the Chase app."""
+    from .bridge import Bridge
+    from .ips import plans, BROKER_RULES
+    ip = InvestmentPolicy(s).active()
+    if not ip or not ip["policy"].get("contribution_rule"):
+        return {"status": "NO_GROWTH_RULE"}
+    ec = Bridge(s).effective_ceiling(ip["policy"])
+    planned = sum((D(l["amount"]) * D(BROKER_RULES["frequencies"][r["frequency"]]) / D(12)
+                   for r in plans(ip["policy"]) for l in r.get("legs", [])), ZERO)
+    room = D(ec["ceiling"]) - planned
+    if room >= D("25"):
+        Control(s).raise_exception("growth_available",
+            f"Verified business profit (last {ec['lookback_days']} days: ${ec['verified_net_lookback']}) supports investing up to "
+            f"${ec['ceiling']}/month under your signed rule; Autoinvest currently buys ${cents(planned)}/month. To invest more, raise the "
+            "Autoinvest amounts in the Chase app (GCI cannot change them).", dedupe_key=f"growth:{ec['ceiling']}", severity="WEEKLY")
+    return {"ceiling": ec["ceiling"], "planned_monthly": str(cents(planned)), "room": str(cents(room))}
+
+
+DAILY = {"byrdway_sync": job_byrdway_sync, "stripe_sync": job_stripe_sync, "growth_check": job_growth_check, "market_data": job_market_data, "valuation_snapshot": job_valuation_snapshot, "risk_monitor": job_risk_monitor,
          "recurring_monitor": job_recurring_monitor, "reconciliation_status": job_reconciliation_status,
          "source_integrity": job_source_integrity, "decision_reviews": job_decision_reviews, "security_health": job_security_health}
 

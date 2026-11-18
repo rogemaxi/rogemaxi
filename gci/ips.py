@@ -39,7 +39,9 @@ TEMPLATE = {
     "eligible_instruments": ["VT", "VTI", "VXUS", "SGOV", "BND"],
     "initial_funding": "40",
     "recurring": {"amount_per_period": None, "frequency": "monthly", "funding_source": "internal_bank", "legs": []},
-    "max_monthly_contribution": None,
+    "max_monthly_contribution": None,   # BASE monthly ceiling (e.g. pension-funded $100)
+    "contribution_rule": None,          # optional growth formula, e.g. {"type": "base_plus_share_of_verified_net",
+                                        #   "share_of_after_tax_net": "0.30", "hard_cap": "2000", "lookback_days": 30}
     "target_allocation": {},
     "allocation_bands_pp": 10,
     "reinvest_dividends": True,
@@ -94,8 +96,25 @@ def validate(policy: dict, snapshot: dict = None) -> list:
     if any(r.get("legs") for r in plans(p)):
         if p.get("max_monthly_contribution") is None:
             errs.append("Set a maximum monthly contribution (the ceiling).")
-        elif monthly_total > D(p["max_monthly_contribution"]):
-            errs.append(f"Recurring plans total ≈${monthly_total:.2f}/month, above the authorized ceiling ${p['max_monthly_contribution']}.")
+        else:
+            rule = p.get("contribution_rule")
+            limit = D(rule["hard_cap"]) if rule and rule.get("hard_cap") else D(p["max_monthly_contribution"])
+            if monthly_total > limit:
+                errs.append(f"Recurring plans total ≈${monthly_total:.2f}/month, above the authorized ceiling ${limit}.")
+    rule = p.get("contribution_rule")
+    if rule:
+        if rule.get("type") != "base_plus_share_of_verified_net":
+            errs.append("contribution_rule.type must be 'base_plus_share_of_verified_net'.")
+        try:
+            sh = D(rule.get("share_of_after_tax_net"))
+            if not (ZERO <= sh <= D("1")):
+                errs.append("contribution_rule.share_of_after_tax_net must be between 0 and 1.")
+        except Exception:
+            errs.append("contribution_rule.share_of_after_tax_net must be a number between 0 and 1.")
+        if not rule.get("hard_cap"):
+            errs.append("contribution_rule.hard_cap is required: the most that may ever be invested in one month.")
+        elif p.get("max_monthly_contribution") and D(rule["hard_cap"]) < D(p["max_monthly_contribution"]):
+            errs.append("contribution_rule.hard_cap cannot be below the base monthly ceiling.")
     tgt = p.get("target_allocation", {})
     if tgt:
         s = sum(D(str(v)) for v in tgt.values())

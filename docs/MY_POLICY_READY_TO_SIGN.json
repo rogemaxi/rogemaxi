@@ -76,5 +76,17 @@
       ]
     }
   ],
-  "funding_treatment": "Personal pension money \u2192 owner capital contribution to Genesis 2 & 7, LLC (confirm treatment with your CPA)"
+  "funding_treatment": "Personal pension money \u2192 owner capital contribution to Genesis 2 & 7, LLC (confirm treatment with your CPA)",
+  "contribution_rule": {
+    "type": "base_plus_share_of_verified_net",
+    "share_of_after_tax_net": "0.30",
+    "hard_cap": null,
+    "lookback_days": 30,
+    "note": "Base $100 (pensions) + 30% of after-tax VERIFIED net profit from ByrdWay Studio (TpT), KDP books, Audible audiobooks and Stripe, last 30 days. Choose hard_cap."
+  },
+  "revenue_sources": [
+    "ByrdWay Product Studio sales ledger (daily, read-only)",
+    "KDP Payment Report: books + Audible (paid rows only)",
+    "Stripe paid payouts (restricted read-only key)"
+  ]
 }
