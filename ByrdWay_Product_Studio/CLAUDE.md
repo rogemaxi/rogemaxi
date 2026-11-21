@@ -139,3 +139,9 @@ Fix before commercial use: Jordan logo on the mascot's sneakers; Bentley-like wi
 - The College Statistics recording (median pitch ~291 Hz) is THE approved Lil Dr. Byrd voice (asset `lil_dr_byrd_voice`).
   Geometry (~242 Hz) and Algebra 1 (~145 Hz) recordings do not match it and are blocked by the Reviewer until re-recorded.
 - Video platform: Blotato (owner-paid, API) + Google Flow / Adobe Firefly via shot lists. The Studio does not hand-make ads.
+
+### Owner standing instruction (2026-11-21)
+- Do NOT generate reports, send emails, or make/announce videos unless the owner asks in that session.
+- Stand by between sessions: no background work, scheduled tasks or follow-ups until the owner calls.
+- Next work (when the owner calls): further building on the ByrdWay Power Tool, Genesis Capital Intelligence, and
+  ByrdWay Product Engineering. Preserve everything already built; tweak only what the owner specifies.
